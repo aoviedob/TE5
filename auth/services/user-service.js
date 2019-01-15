@@ -104,7 +104,7 @@ const isAccountLocked = async (dbContext, dbUser) => {
   return true;
 };
 
-const validateCredentialsAndCreateToken = async(dbContext, { email, password }) => {
+const validateCredentialsAndCreateToken = async(dbContext, { email, password, tokenOptions = {} }) => {
   const { user: dbUser, role, userType } = await userRepo.login(dbContext, { email, password: createHash(password) });
 
   if (!dbUser) {
@@ -122,7 +122,7 @@ const validateCredentialsAndCreateToken = async(dbContext, { email, password }) 
     throw error;
   }
 
-  return { token: createToken({ user: sanitizeUser(dbUser), role: mapRepoEntity(role), userType: mapRepoEntity(userType) }) };
+  return { token: createToken({ user: sanitizeUser(dbUser), role: mapRepoEntity(role), userType: mapRepoEntity(userType) }, tokenOptions) };
 };
 
 export const login = async (dbContext, user) => {
@@ -144,7 +144,7 @@ export const externalLogin = async (dbContext, encryptedContent) => {
     throw error;
   }
 
-  return await validateCredentialsAndCreateToken(dbContext, user);
+  return await validateCredentialsAndCreateToken(dbContext, { ...user, tokenOptions: { expiresIn: 120 }});
 };
 
 export const authenticate = req => {
