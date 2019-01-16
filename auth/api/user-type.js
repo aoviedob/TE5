@@ -1,6 +1,7 @@
 import * as userTypeService from '../services/user-type-service';
 import { UnitOfWorkContext } from '../helpers/enums/unit_of_work';
 import { RequiredRole } from '../decorators/authorization-handler';
+import { PredefinedRole } from '../helpers/enums/dal-types';
 
 const { POSTGRES_CONTEXT } = UnitOfWorkContext;
 
@@ -16,40 +17,40 @@ export default class UserTypeApi {
     app.delete('/api/userType/:userTypeId', this.deleteUserType);
   }
 
-  @RequiredRole(['admin'])
+  @RequiredRole([PredefinedRole.ADMIN])
   async getUserTypes(req) { return await userTypeService.getUserTypes(POSTGRES_CONTEXT); }
 
-  @RequiredRole(['admin'])
+  @RequiredRole([PredefinedRole.ADMIN])
   async getUserTypeById(req) {
     const { userTypeId } = req.params || {};
     return await userTypeService.getUserTypeById(POSTGRES_CONTEXT, userTypeId);
   }
 
-  @RequiredRole(['admin'])
+  @RequiredRole([PredefinedRole.ADMIN])
   async getUserTypeByName(req) {
     const { name } = req.params || {};
     return await userTypeService.getUserTypeByName(POSTGRES_CONTEXT, name);
   }
 
-  @RequiredRole(['admin'])
+  @RequiredRole([PredefinedRole.ADMIN])
   async getUserTypesByName(req) {
     const { name } = req.params || {};
     return await userTypeService.getUserTypesByName(POSTGRES_CONTEXT, name);
   }
 
-  @RequiredRole(['admin'])
+  @RequiredRole([PredefinedRole.ADMIN])
   async createUserType(req) {
     const { body = {} } = req;
     return await userTypeService.createUserType(POSTGRES_CONTEXT, body);
   }
 
-  @RequiredRole(['admin'])
+  @RequiredRole([PredefinedRole.ADMIN])
   async updateUserType(req) {
     const { body, params = {} } = req;
     return await userTypeService.updateUserType(POSTGRES_CONTEXT, params.userTypeId, body);
   }
 
-  @RequiredRole(['admin'])
+  @RequiredRole([PredefinedRole.ADMIN])
   async deleteUserType(req) {
     const { userTypeId } = req.params || {};
     return await userTypeService.deleteUserType(POSTGRES_CONTEXT, userTypeId);
