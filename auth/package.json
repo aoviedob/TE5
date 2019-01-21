@@ -6,7 +6,8 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "auth-start": "babel-node server.js",
-    "migrate-test": "babel-node --extensions '.ts,.js,.json' ./node_modules/knex/bin/cli.js migrate:latest --knexfile  ./database/connections/pg_test_knexfile.js"
+    "migrate-test": "babel-node --extensions '.ts,.js,.json' ./node_modules/knex/bin/cli.js migrate:latest --knexfile  ./database/connections/pg_test_knexfile.js",
+    "migrate": "babel-node --extensions '.ts,.js,.json' ./node_modules/knex/bin/cli.js migrate:latest --knexfile  ./database/connections/pg_knexfile.js"
   },
   "resolutions": {
     "babel-core": "7.0.0-bridge.0"

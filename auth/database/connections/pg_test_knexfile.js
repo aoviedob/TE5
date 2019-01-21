@@ -8,7 +8,7 @@ module.exports = {
       database: getEnvVariable('AUTH_DB_TEST', 'auth_test'),
       user: getEnvVariable('AUTH_DB_USER', 'auth_user'),
       port: getEnvVariable('AUTH_DB_PORT', 5432),
-      password: getEnvVariable('AUTH_DB_PASSWORD', 'mb|33_<C<kl&A*df.c8%*'),
+      password: getEnvVariable('AUTH_DB_PASSWORD', 'kl&Agg|53_<C<*df.ff%*'),
       adminUser: getEnvVariable('DB_ADMIN_USER', 'postgres'),
       adminPassword: getEnvVariable('DB_ADMIN_PASSWORD', 'mb|33_<C<kl&A*df.c8%*'),
       role: getEnvVariable('AUTH_DB_ROLE', 'auth_user'),

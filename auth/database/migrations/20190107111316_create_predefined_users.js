@@ -1,5 +1,6 @@
 const { schema, authAdminLoginCredentials, authExternalLoginCredentials } = require('../../config');
 const { PredefinedUserType, PredefinedRole } = require('../../helpers/enums/dal-types');
+import { createHash } from '../../services/crypto-service';
 
 exports.up = async dbConnection => {
   await dbConnection.raw(`
@@ -52,22 +53,22 @@ exports.up = async dbConnection => {
 
   await dbConnection.raw(`
     INSERT INTO :schema:.user(user_type_id, fullname, email, password, login_attempts, created_at, updated_at)
-      VALUES((SELECT id from :schema:.user_type where name = :adminUserType)::UUID, 'Admin', :user, :password, 0, NOW(), NOW());
+      VALUES((SELECT id from :schema:.user_type where name = :adminUserType)::UUID, 'Admin', :user, MD5(:password), 0, NOW(), NOW());
   `,
   { schema, 
     adminUserType: PredefinedUserType.ADMIN,
     user: authAdminLoginCredentials.user,
-    password: authAdminLoginCredentials.password,
+    password: createHash(authAdminLoginCredentials.password),
   });
 
   await dbConnection.raw(`
     INSERT INTO :schema:.user(user_type_id, fullname, email, password, login_attempts, created_at, updated_at)
-      VALUES((SELECT id from :schema:.user_type where name = :externalUserType)::UUID, 'External', :user, :password, 0, NOW(), NOW());
+      VALUES((SELECT id from :schema:.user_type where name = :externalUserType)::UUID, 'External', :user, MD5(:password), 0, NOW(), NOW());
   `,
   { schema, 
     externalUserType: PredefinedUserType.EXTERNAL,
     user: authExternalLoginCredentials.user,
-    password: authExternalLoginCredentials.password,
+    password: createHash(authExternalLoginCredentials.password),
   });
 
   await dbConnection.raw(`

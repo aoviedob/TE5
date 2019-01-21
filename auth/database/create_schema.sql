@@ -7,7 +7,7 @@ BEGIN
       FROM   pg_catalog.pg_roles
       WHERE  rolname = 'auth_user') THEN
 
-      CREATE ROLE auth_user LOGIN PASSWORD 'mb|33_<C<kl&A*df.c8%*';
+      CREATE ROLE auth_user LOGIN PASSWORD 'kl&Agg|53_<C<*df.ff%*';
    END IF;
 
    IF NOT EXISTS (SELECT 1 FROM pg_database WHERE datname = 'auth_test') THEN
