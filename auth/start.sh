@@ -1,3 +1,6 @@
+parent_path=$( cd "$(dirname "${BASH_SOURCE[0]}")" ; pwd -P )
+cd "$parent_path"
+
 docker pull postgres:9.6
 docker volume create pgdb
 
