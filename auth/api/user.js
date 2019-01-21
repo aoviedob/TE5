@@ -1,6 +1,6 @@
 import * as userService from '../services/user-service';
 import { UnitOfWorkContext } from '../helpers/enums/unit_of_work';
-import { RequiredRole, RequiredRight } from '../decorators/authorization-handler';
+import { RequiredRole } from '../decorators/authorization-handler';
 import { PredefinedRole } from '../helpers/enums/dal-types';
 
 const { POSTGRES_CONTEXT } = UnitOfWorkContext;
@@ -59,7 +59,6 @@ export default class UserApi {
     return await userService.deleteUser(POSTGRES_CONTEXT, userId);
   }
 
-  @RequiredRight(['externalLogin'])
   async externalLogin(req) {
     const { body } = req;
     return await userService.externalLogin(POSTGRES_CONTEXT, body); 

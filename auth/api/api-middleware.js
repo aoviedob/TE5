@@ -2,7 +2,8 @@ import { verifyToken } from '../services/crypto-service';
 import { getTokenFromRequest } from '../helpers/request';
 
 const unprotectedApis = [
-  '/api/login'
+  '/api/login',
+  '/api/external/login'
 ];
 
 export const requestHandler = (route, action) =>
@@ -22,7 +23,7 @@ export const requestHandler = (route, action) =>
       res.setHeader('Content-Type', 'application/json');
       res.json(JSON.stringify(result));
     } catch(error) {
-      res.status(error.status).send(error.message);
+      res.status(error.status || 400).send(error.message);
     }
   };
 

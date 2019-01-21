@@ -104,10 +104,9 @@ const isAccountLocked = async (dbContext, dbUser) => {
   return true;
 };
 
-const validateCredentialsAndCreateToken = async(dbContext, { email, password, tokenOptions = {} }) => {
-  const { user: dbUser, role, userType } = await userRepo.login(dbContext, { email, password: createHash(password) });
-
-  if (!dbUser) {
+const validateCredentialsAndCreateToken = async(dbContext, { user, role, userType, email, tokenOptions = {} }) => {
+  
+  if (!user) {
     await updateLoginAttempts(dbContext, email);
     logger.error({ email }, 'Unauthorized Login');
     const error = new Error('UNAUTHORIZED');
@@ -115,36 +114,63 @@ const validateCredentialsAndCreateToken = async(dbContext, { email, password, to
     throw error;
   }
 
-  if((await isAccountLocked(dbContext, dbUser))){
+  if((await isAccountLocked(dbContext, user))){
     logger.error({ email }, 'Account is locked');
     const error = new Error('ACCOUNT_LOCKED');
     error.status = 401;
     throw error;
   }
 
-  return { token: createToken({ user: sanitizeUser(dbUser), role: mapRepoEntity(role), userType: mapRepoEntity(userType) }, tokenOptions) };
+  return { token: createToken({ user: sanitizeUser(user), role: mapRepoEntity(role), userType: mapRepoEntity(userType) }, tokenOptions) };
 };
 
 export const login = async (dbContext, user) => {
   const { email, password } = user || {};
   validatePreconditions(['dbContext', 'email', 'password'], {dbContext, email, password});
- 
-  return await validateCredentialsAndCreateToken(dbContext, { email, password });
-};
-
-export const externalLogin = async (dbContext, encryptedContent) => {
-  validatePreconditions(['dbContext', 'encryptedContent'], {dbContext, encryptedContent });
-  const user = decryptWithSharedPrivateKey(encryptedContent);
-  validatePreconditions(['email', 'password'], user);
-  
-  if (user.email !== authExternalLoginCredentials.user) {
-    logger.error(user, 'External Login Unauthorized');
+  if (user.email === authExternalLoginCredentials.user) {
+    logger.error(sanitizeUser(user), 'External Login Unauthorized');
     const error = new Error('UNAUTHORIZED_EXTERNAL_LOGIN');
     error.status = 401;
     throw error;
   }
 
-  return await validateCredentialsAndCreateToken(dbContext, { ...user, tokenOptions: { expiresIn: 120 }});
+  const { user: dbUser, role, userType } = await userRepo.login(dbContext, { email, password: createHash(password) });
+  return await validateCredentialsAndCreateToken(dbContext, { user: dbUser, role, userType, email });
+};
+
+export const externalLogin = async (dbContext, encryptedContent) => {
+  validatePreconditions(['dbContext', 'encryptedContent'], {dbContext, encryptedContent });
+  
+  let user;
+  try {
+    user = decryptWithSharedPrivateKey(encryptedContent);
+  } catch(err) {
+    logger.error({ encryptedContent, err }, 'Error while decrypting external content');
+    const error = new Error('SERVER_ERROR');
+    error.status = 500;
+    throw error;
+  }
+
+  validatePreconditions(['email', 'password'], user);
+  
+  const { email, password } = user;
+  if ( email !== authExternalLoginCredentials.user) {
+    logger.error(sanitizeUser(user), 'External Login Unauthorized');
+    const error = new Error('UNAUTHORIZED_EXTERNAL_LOGIN');
+    error.status = 401;
+    throw error;
+  }
+  
+  const { user: dbUser, role, userType } = await userRepo.login(dbContext, { email, password: createHash(password) });
+  
+  if (role.rights.includes('externalLogin')) {
+    logger.error(user, 'Not enough rights');
+    const error = new Error('NOT_ENOUGH_RIGHTS');
+    error.status = 401;
+    throw error;
+  }
+  
+  return await validateCredentialsAndCreateToken(dbContext, {  user: dbUser, role, userType, email, tokenOptions: { expiresIn: 120 }});
 };
 
 export const authenticate = req => {

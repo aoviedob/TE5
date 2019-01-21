@@ -51,7 +51,7 @@ export default class RoleApi {
   }
 
   @RequiredRole([PredefinedRole.ADMIN])
-  async deleteUserType(req) {
+  async deleteRole(req) {
     const { roleId } = req.params || {};
     return await roleService.deleteRole(POSTGRES_CONTEXT, roleId);
   }

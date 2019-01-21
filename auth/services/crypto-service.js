@@ -37,7 +37,8 @@ export const createToken = (object, options = {}) => {
   const { tokenKey, tokenExpiresIn, tokenAlgorithm } = cryptoConfig;
   
   const encryptedJSON = encrypt(object);
-  return jwt.sign({ body: encryptedJSON }, tokenKey ,{ expiresIn: tokenExpiresIn, algorithm: tokenAlgorithm, ...options });
+  const tokenOptions = { expiresIn: tokenExpiresIn, algorithm: tokenAlgorithm, ...options };
+  return jwt.sign({ body: encryptedJSON }, tokenKey , tokenOptions);
 };
 
 export const verifyToken = token => {

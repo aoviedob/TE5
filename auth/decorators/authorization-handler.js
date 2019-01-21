@@ -13,7 +13,7 @@ export const RequiredRole = roles => (target, name, descriptor) => {
 
     const message = `Unauthorized Role for ${name}`;
     logger.error({ userId: user.id, role: role.name }, message);
-    const error = new Error('Not enough rights');
+    const error = new Error('NOT_ENOUGH_RIGHTS');
 	  error.status = 403;
 	  throw error;
   };
@@ -33,7 +33,7 @@ export const RequiredRight = rights => (target, name, descriptor) => {
 
     const message = `Unauthorized rights for ${name}`;
     logger.error({ userId: user.id, role: role.name }, message);
-    const error = new Error('Not enough rights');
+    const error = new Error('NOT_ENOUGH_RIGHTS');
     error.status = 403;
     throw error;
   };
