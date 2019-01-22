@@ -1,0 +1,1 @@
+../../node_modules/.bin/babel-node --extensions '.ts,.js,.json' ../../node_modules/knex/bin/cli.js migrate:rollback --knexfile  ../database/connections/pg_knexfile.js
