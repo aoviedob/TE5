@@ -1,21 +1,30 @@
-import { createCustomer, getCustomers, getCustomerById, getCustomersByName, getCustomerByEmail, updateCustomer, deleteCustomer } from '../customer-service';
+import newUuid from 'uuid/v4';
 import { UnitOfWorkContext } from '../../helpers/enums/unit_of_work';
 const { POSTGRES_TEST_CONTEXT } = UnitOfWorkContext;
 
-describe('User Type Service', () => {
-  describe('When "createUserType" function gets called', () => {
-  	describe('And valid params are passed', () => {
-      test('It should save the user type successfully', async() => {
+jest.unmock('../customer-service');
 
-        const name = 'Test User Type';
-      	const result = await createUserType(POSTGRES_TEST_CONTEXT, { name, displayName: name });
-      	expect(result.name).toBe(name);
+const externalService = require('../external-service');
+externalService.createUser = jest.fn(() => newUuid());
+
+const { createCustomer, getCustomers, getCustomerById, getCustomersByName, getCustomerByEmail, updateCustomer, deleteCustomer } = require('../customer-service');
+
+
+describe('Customer Service', () => {
+  describe('When "createCustomer" function gets called', () => {
+  	describe('And valid params are passed', () => {
+      test('It should save the customer successfully', async() => {
+
+        const fullname = 'Test Customer';
+        console.log('createCustomerHola', createCustomer);
+      	const result = await createCustomer(POSTGRES_TEST_CONTEXT, { email: 'test@gmail.com', fullname, password: '12345678' });
+      //	expect(result.fullname).toBe(fullname);
 	  });
   	});
   	describe('And not valid params are passed', () => {
       test('It should throw a SERVICE_PRECONDITION_FAILED error', async() => {
         try {
-          await createUserType(POSTGRES_TEST_CONTEXT, {}); 
+          await createCustomer(POSTGRES_TEST_CONTEXT, {}); 
         } catch(error) {
           expect(error.message).toBe('SERVICE_PRECONDITION_FAILED');
         }
@@ -23,29 +32,29 @@ describe('User Type Service', () => {
   	});
   });
 
-  const userTypes = [
-    'Test User Type',
-    'Test User Type 2'
+  const customers = [
+    'Test Customer',
+    'Test Customer 2'
   ];
 
-  describe('When "getUserTypes" function gets called', () => {
+  describe('When "getCustomers" function gets called', () => {
   	beforeEach(async() => {
-      await createUserType(POSTGRES_TEST_CONTEXT, { name: userTypes[0], displayName: userTypes[0] });
-      await createUserType(POSTGRES_TEST_CONTEXT, { name: userTypes[1], displayName: userTypes[1] });
+      await createCustomer(POSTGRES_TEST_CONTEXT, { email: 'test@gmail.com', fullname: customers[0], password: '12345678' });
+      await createCustomer(POSTGRES_TEST_CONTEXT, { email: 'test2@gmail.com', fullname: customers[1], password: '12345678' });
   	});
 
   	describe('And valid params are passed', () => {
-      test('It should return the list of user types', async() => {
-      	const result = await getUserTypes(POSTGRES_TEST_CONTEXT);
+      test('It should return the list of customers', async() => {
+      	const result = await getCustomers(POSTGRES_TEST_CONTEXT);
 
-        expect(result.length).toBe(userTypes.length);
-        expect(result.map(({ name }) => name)).toEqual(userTypes);
+        expect(result.length).toBe(customers.length);
+        expect(result.map(({ fullname }) => fullname)).toEqual(customers);
 	    });
   	});
   	describe('And not valid params are passed', () => {
       test('It should throw a SERVICE_PRECONDITION_FAILED error', async() => {
         try {
-          await getUserTypes(); 
+          await getCustomers(); 
         } catch(error) {
           expect(error.message).toBe('SERVICE_PRECONDITION_FAILED');
         }
@@ -53,25 +62,25 @@ describe('User Type Service', () => {
   	});
   });
 
-  describe('When "getUserTypeById" function gets called', () => {
+  describe('When "getCustomerById" function gets called', () => {
 
-  	let userTypeId;
+  	let customerId;
   	beforeEach(async() => {
-  	  const result = await createUserType(POSTGRES_TEST_CONTEXT, { name: userTypes[0], displayName: userTypes[0] });
-      userTypeId = result.id;
+  	  const result = await createCustomer(POSTGRES_TEST_CONTEXT, { email: 'test@gmail.com', fullname: customers[0], password: '12345678' });
+      customerId = result.id;
   	});
 
   	describe('And valid params are passed', () => {
-      test('It should return the user type by id', async() => {
-      	const result = await getUserTypeById(POSTGRES_TEST_CONTEXT, userTypeId);
+      test('It should return the customer by id', async() => {
+      	const result = await getCustomerById(POSTGRES_TEST_CONTEXT, customerId);
 
-        expect(result.id).toEqual(userTypeId);
+        expect(result.id).toEqual(customerId);
 	  });
   	});
   	describe('And not valid params are passed', () => {
       test('It should throw a SERVICE_PRECONDITION_FAILED error', async() => {
         try {
-          await getUserTypeById(POSTGRES_TEST_CONTEXT); 
+          await getCustomerById(POSTGRES_TEST_CONTEXT); 
         } catch(error) {
           expect(error.message).toBe('SERVICE_PRECONDITION_FAILED');
         }
@@ -79,25 +88,26 @@ describe('User Type Service', () => {
   	});
   });
 
-  describe('When "getUserTypeByName" function gets called', () => {
+  describe('When "getCustomerByEmail" function gets called', () => {
   	
-    let userTypeId;
+    let customerId;
+    const email = 'test@gmail.com';
     beforeEach(async() => {
-      const result = await createUserType(POSTGRES_TEST_CONTEXT, { name: userTypes[0], displayName: userTypes[0] });
-      userTypeId = result.id;
+      const result = await createCustomer(POSTGRES_TEST_CONTEXT, { email, fullname: customers[0], password: '12345678' });
+      customerId = result.id;
     });
 
   	describe('And valid params are passed', () => {
-      test('It should return the user type by name', async() => {
-      	const result = await getUserTypeByName(POSTGRES_TEST_CONTEXT, userTypes[0]);
+      test('It should return the customer by email', async() => {
+      	const result = await getCustomerByEmail(POSTGRES_TEST_CONTEXT, email);
 
-        expect(result.id).toEqual(userTypeId);
+        expect(result.id).toEqual(customerId);
 	  });
   	});
   	describe('And not valid params are passed', () => {
       test('It should throw a SERVICE_PRECONDITION_FAILED error', async() => {
         try {
-          await getUserTypeByName(POSTGRES_TEST_CONTEXT); 
+          await getCustomerByEmail(POSTGRES_TEST_CONTEXT); 
         } catch(error) {
           expect(error.message).toBe('SERVICE_PRECONDITION_FAILED');
         }
@@ -105,25 +115,25 @@ describe('User Type Service', () => {
   	});
   });
 
-  describe('When "getUserTypesByName" function gets called', () => {
+  describe('When "getCustomersByName" function gets called', () => {
   	
     beforeEach(async() => {
-      await createUserType(POSTGRES_TEST_CONTEXT, { name: userTypes[0], displayName: userTypes[0] });
-      await createUserType(POSTGRES_TEST_CONTEXT, { name: userTypes[1], displayName: userTypes[1] });
+      await createCustomer(POSTGRES_TEST_CONTEXT, { email: 'test@gmail.com', fullname: customers[0], password: '12345678' });
+      await createCustomer(POSTGRES_TEST_CONTEXT, { email: 'test2@gmail.com', fullname: customers[1], password: '12345678' });
     });
 
   	describe('And valid params are passed', () => {
-      test('It should return the list of user types with similar name', async() => {
-      	const result = await getUserTypesByName(POSTGRES_TEST_CONTEXT, 'Test');
+      test('It should return the list of customers with similar name', async() => {
+      	const result = await getCustomersByName(POSTGRES_TEST_CONTEXT, 'Test');
 
-        expect(result.length).toBe(userTypes.length);
-        expect(result.map(({ name }) => name)).toEqual(userTypes);
+        expect(result.length).toBe(customers.length);
+        expect(result.map(({ fullname }) => fullname)).toEqual(customers);
 	  });
   	});
   	describe('And not valid params are passed', () => {
       test('It should throw a SERVICE_PRECONDITION_FAILED error', async() => {
         try {
-          await getUserTypesByName(POSTGRES_TEST_CONTEXT); 
+          await getCustomersByName(POSTGRES_TEST_CONTEXT); 
         } catch(error) {
           expect(error.message).toBe('SERVICE_PRECONDITION_FAILED');
         }
@@ -131,27 +141,27 @@ describe('User Type Service', () => {
   	});
   });
 
-  describe('When "updateUserType" function gets called', () => {
+  describe('When "updateCustomer" function gets called', () => {
   	
-  	let userTypeId;
+  	let customerId;
     beforeEach(async() => {
-      const result = await createUserType(POSTGRES_TEST_CONTEXT, { name: userTypes[0], displayName: userTypes[0] });
-      userTypeId = result.id;
+      const result = await createCustomer(POSTGRES_TEST_CONTEXT, { email: 'test@gmail.com', fullname: customers[0], password: '12345678' });
+      customerId = result.id;
     });
 
     describe('And valid params are passed', () => {
-      test('It should update the user type successfully', async() => {
+      test('It should update the customer successfully', async() => {
         const newName = 'TEST3';
-        await updateUserType(POSTGRES_TEST_CONTEXT, userTypeId, { displayName: newName });
-        const result = await getUserTypeById(POSTGRES_TEST_CONTEXT, userTypeId);
+        await updateCustomer(POSTGRES_TEST_CONTEXT, customerId, { fullname: newName });
+        const result = await getCustomerById(POSTGRES_TEST_CONTEXT, customerId);
 
-        expect(result.displayName).toBe(newName);
+        expect(result.fullname).toBe(newName);
   	  });
     });
     describe('And not valid params are passed', () => {
       test('It should throw a SERVICE_PRECONDITION_FAILED error', async() => {
         try {
-          await updateUserType(POSTGRES_TEST_CONTEXT); 
+          await updateCustomer(POSTGRES_TEST_CONTEXT); 
         } catch(error) {
           expect(error.message).toBe('SERVICE_PRECONDITION_FAILED');
         }
@@ -161,18 +171,18 @@ describe('User Type Service', () => {
 
   });
 
-  describe('When "deleteUserType" function gets called', () => {
+  describe('When "deleteCustomer" function gets called', () => {
     
-    let userTypeId;
+    let customerId;
     beforeEach(async() => {
-      const result = await createUserType(POSTGRES_TEST_CONTEXT, { name: userTypes[0], displayName: userTypes[0] });
-      userTypeId = result.id;
+      const result = await createCustomer(POSTGRES_TEST_CONTEXT, { email: 'test@gmail.com', fullname: customers[0], password: '12345678' });
+      customerId = result.id;
     });
 
     describe('And valid params are passed', () => {
-      test('It should delete the user type successfully', async() => {
-        await deleteUserType(POSTGRES_TEST_CONTEXT, userTypeId);
-        const result = await getUserTypeById(POSTGRES_TEST_CONTEXT, userTypeId);
+      test('It should delete the customer successfully', async() => {
+        await deleteCustomer(POSTGRES_TEST_CONTEXT, customerId);
+        const result = await getCustomerById(POSTGRES_TEST_CONTEXT, customerId);
 
         expect(result).toEqual({});
       });
@@ -180,7 +190,7 @@ describe('User Type Service', () => {
     describe('And not valid params are passed', () => {
       test('It should throw a SERVICE_PRECONDITION_FAILED error', async() => {
         try {
-          await deleteUserType(POSTGRES_TEST_CONTEXT); 
+          await deleteCustomer(POSTGRES_TEST_CONTEXT); 
         } catch(error) {
           expect(error.message).toBe('SERVICE_PRECONDITION_FAILED');
         }

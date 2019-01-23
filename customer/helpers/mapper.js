@@ -3,8 +3,7 @@ export const convertToSnakeCase = str => {
   if (!upperChars) return str;
     
   let snakeCaseStr = upperChars.reduce((acc, upperChar) => {
-  	 console.log('acc', acc);
-     acc = acc.replace(new RegExp(upperChar), `_${upperChar.toLowerCase()}`);
+  	 acc = acc.replace(new RegExp(upperChar), `_${upperChar.toLowerCase()}`);
      return acc;
   }, str);
 

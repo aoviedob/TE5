@@ -3,7 +3,7 @@ import { UnitOfWorkContext } from '../helpers/enums/unit_of_work';
 import { schema } from '../config';
 import moment from 'moment';
 
-export const CUSTOMER_TABLE = 'role';
+export const CUSTOMER_TABLE = 'customer';
 const CUSTOMER_TABLE_COLUMNS = [
   'id',
   'email',
@@ -36,7 +36,7 @@ export const getCustomerByEmail = async (dbContext, email) => {
   return await unitOfWork.getOneWhere(schema, { 
     tableName: CUSTOMER_TABLE, 
     columns: CUSTOMER_TABLE_COLUMNS,
-    where: unitOfWork.dbConnection.raw('id = :email', { email })
+    where: unitOfWork.dbConnection.raw('email = :email', { email })
   });
 };
 
@@ -46,7 +46,7 @@ export const getCustomersByName = async (dbContext, name) => {
   return await unitOfWork.getAllWhere(schema, { 
   	tableName: CUSTOMER_TABLE, 
   	columns: CUSTOMER_TABLE_COLUMNS,
-  	where: unitOfWork.dbConnection.raw('name LIKE :name', { name: `%${name}%` })
+  	where: unitOfWork.dbConnection.raw('fullname LIKE :name', { name: `%${name}%` })
   });
 };
 

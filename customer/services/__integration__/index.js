@@ -38,3 +38,5 @@ afterEach(async() => {
   await truncateTables();
   logger.info('Finished afterEach');
 });
+
+require('./customer-service-test');

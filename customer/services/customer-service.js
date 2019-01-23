@@ -1,9 +1,7 @@
 import * as customerRepo from '../dal/customer-repo';
 import { validatePreconditions } from '../helpers/validator';
 import { mapRepoEntity, mapParams } from '../helpers/mapper';
-import request from 'superagent';
-import { authExternalLoginUrl, authCreateUserUrl, authExternalLoginCredentials } from '../config';
-import { encrypt } from './crypto-service';
+import { createUser } from './external-service';
 
 export const getCustomers = async dbContext => { 
   validatePreconditions(['dbContext'], { dbContext });
@@ -37,20 +35,7 @@ export const updateCustomer = async (dbContext, customerId, customer) => {
 
 export const createCustomer = async (dbContext, customer) => {
   validatePreconditions(['dbContext', 'email', 'fullname', 'password'], { dbContext, ...customer });
-  
-  const { user, password } = authExternalLoginCredentials;
-  const encryptedCredentials = encrypt({ user, password });
-  const { token } = await request
-   .post(authExternalLoginUrl)
-   .send(encryptedCredentials)
-   .set('Accept', 'application/json');
-
-  const { id: externalUserId } = await request
-   .post(authCreateUserUrl)
-   .send({ ...customer, isCustomer: true })
-   .set('Authorization', `Bearer ${token}`)
-   .set('Accept', 'application/json');
-
+  const externalUserId = await createUser(customer);
   const { id: customerId } = await customerRepo.createCustomer(dbContext, mapParams({ ...customer, externalUserId }));
   return await getCustomerById(dbContext, customerId);
 };

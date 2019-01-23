@@ -1,3 +1,6 @@
+import crypto from 'crypto';
+import { crypto as cryptoConfig } from '../config';
+
 export const encrypt = object => { 
   const { algorithmIvSize, algorithm, sharedEncryptionKey, algorithmEncode, algorithmCharset, algorithmKeySize } = cryptoConfig;
   
