@@ -8,26 +8,34 @@ export const RequiredRole = roles => (target, name, descriptor) => {
     const { role = {}, user = {} } = args[0].tokenBody;
 
     if (roles.includes(role.name)) {
-	  return oldValue.apply(this, args);     
+    return oldValue.apply(this, args);     
     }
 
     const message = `Unauthorized Role for ${name}`;
     logger.error({ userId: user.id, role: role.name }, message);
-    const error = new Error('Not enough rights');
-	  error.status = 401;
-	  throw error;
+    const error = new Error('NOT_ENOUGH_RIGHTS');
+    error.status = 403;
+    throw error;
   };
 
   return descriptor;
 };
 
 export const RequiredRight = rights => (target, name, descriptor) => {
-  var oldValue = descriptor.value;
+ var oldValue = descriptor.value;
 
-  descriptor.value = function() {
-    console.log(`Calling "${name}" with`, arguments);
+  descriptor.value = (...args) => {
+    const { role = {}, user = {} } = args[0].tokenBody;
 
-    return oldValue.apply(null, arguments);
+    if (role.rights.some(r => rights.includes(r))) {
+    return oldValue.apply(this, args);     
+    }
+
+    const message = `Unauthorized rights for ${name}`;
+    logger.error({ userId: user.id, role: role.name }, message);
+    const error = new Error('NOT_ENOUGH_RIGHTS');
+    error.status = 403;
+    throw error;
   };
 
   return descriptor;
