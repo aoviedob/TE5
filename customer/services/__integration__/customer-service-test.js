@@ -16,9 +16,8 @@ describe('Customer Service', () => {
       test('It should save the customer successfully', async() => {
 
         const fullname = 'Test Customer';
-        console.log('createCustomerHola', createCustomer);
-      	const result = await createCustomer(POSTGRES_TEST_CONTEXT, { email: 'test@gmail.com', fullname, password: '12345678' });
-      //	expect(result.fullname).toBe(fullname);
+        const result = await createCustomer(POSTGRES_TEST_CONTEXT, { email: 'test@gmail.com', fullname, password: '12345678' });
+      	expect(result.fullname).toBe(fullname);
 	  });
   	});
   	describe('And not valid params are passed', () => {
