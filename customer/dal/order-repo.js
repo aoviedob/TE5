@@ -43,6 +43,25 @@ export const getOrdersByCustomerId = async (dbContext, customerId) => {
   });
 };
 
+export const getOrderLinesByOrderId = async (dbContext, orderId) => { 
+  const unitOfWork = new UnitOfWork(dbContext);
+  return await unitOfWork.getAllWhere(schema, { 
+    tableName: ORDER_TABLE_COLUMNS, 
+    columns: ORDER_LINE_TABLE_COLUMNS,
+    where: unitOfWork.dbConnection.raw('order_id = :orderId', { orderId })
+  });
+};
+
+export const updateOrderLine = async (dbContext, orderId, externalProductId, orderLine) => {
+  const unitOfWork = new UnitOfWork(dbContext);
+  return await unitOfWork.update(schema, { 
+    tableName: ORDER_LINE_TABLE, 
+    columns: ORDER_LINE_TABLE_COLUMNS,
+    entity: orderLine,
+    where: unitOfWork.dbConnection.raw('order_id = : orderId AND external_product_id = :externalProductId', { orderId, externalProductId })
+  });
+};
+
 export const updateOrder = async (dbContext, orderId, order) => { 
   const unitOfWork = new UnitOfWork(dbContext);
   return await unitOfWork.update(schema, { 
@@ -50,6 +69,14 @@ export const updateOrder = async (dbContext, orderId, order) => {
   	columns: ORDER_TABLE_COLUMNS,
   	entity: order,
   	where: unitOfWork.dbConnection.raw('id = :orderId', { orderId })
+  });
+};
+
+export const deleteOrderLine = async (dbContext, orderId, externalProductId) => { 
+  const unitOfWork = new UnitOfWork(dbContext);
+  return await unitOfWork.delete(schema, { 
+    tableName: ORDER_LINE_TABLE, 
+    where: unitOfWork.dbConnection.raw('order_id = : orderId AND external_product_id = :externalProductId', { orderId, externalProductId })
   });
 };
 
@@ -61,7 +88,17 @@ export const deleteOrder = async (dbContext, orderId) => {
   });
 };
 
-export const createOrder= async (dbContext, order) => {
+export const createOrderLine = async (dbContext, orderLine) => {
+  const result = await (new UnitOfWork(dbContext).create(schema, { 
+    tableName: ORDER_LINE_TABLE, 
+    columns: ORDER_LINE_TABLE_COLUMNS,
+    entity: orderLine,
+  }));
+  
+  return (result.length && result[0]) || {};
+};
+
+export const createOrder = async (dbContext, order) => {
   const result = await (new UnitOfWork(dbContext).create(schema, { 
     tableName: ORDER_TABLE, 
     columns: ORDER_TABLE_COLUMNS,
