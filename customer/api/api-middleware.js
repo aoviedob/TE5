@@ -11,6 +11,7 @@ export const requestHandler = (route, action) =>
       try {
         const token = getTokenFromRequest(req);
         req.tokenBody = verifyToken(token);
+        req.token = token;
       } catch(error) {
         res.status(401).send('UNAUTHORIZED');
         return;

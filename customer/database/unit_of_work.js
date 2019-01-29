@@ -56,17 +56,18 @@ export default class UnitOfWork {
       trx
     });
 
-  _getOneWhere = (schema, { tableName, columns, where }) =>
+  _getOneWhere = (schema, { tableName, columns, join, where }) =>
     this.dbConnection.raw(`
       SELECT ${columns.join(',')}
       FROM :schema:.:tableName:
+      ${join}
       WHERE ${where}
       LIMIT 1
     `, { schema, tableName });
 
-  getOneWhere = async (schema, { tableName, columns, where, trx }) => {
+  getOneWhere = async (schema, { tableName, columns, join, where, trx }) => {
     const result = await this.executeTransaction({ 
-      func: () => this._getOneWhere(schema, { tableName, columns, where }),
+      func: () => this._getOneWhere(schema, { tableName, columns, join, where }),
       trx
     });
     return result.length ? result[0] : {};
@@ -147,18 +148,27 @@ export default class UnitOfWork {
       return acc;
     }, []).join(',');
 
-  _create = (schema, { tableName, columns, entity, rawValues, encryptPassword }) =>
+  _create = (schema, { tableName, columns, entity, rawValues, encryptPassword, onConflict }) =>
     this.dbConnection.raw(`
       INSERT INTO :schema:.:tableName: (${this.formatInsertColumns(columns, entity)})
         VALUES (${rawValues || this.formatInsertValues(columns, entity, encryptPassword)})
+      ${onConflict}   
       RETURNING id
     `, { schema, tableName });
 
-  create = async (schema, { tableName, columns, entity, rawValues, encryptPassword, trx }) => {
+  create = async (schema, { tableName, columns, entity, rawValues, encryptPassword, onConflict, trx }) => {
     this.addAuditValues(entity);
     return await this.executeTransaction({ 
-      func: () => this._create(schema, { tableName, columns, entity, rawValues, encryptPassword }),
+      func: () => this._create(schema, { tableName, columns, entity, rawValues, encryptPassword, onConflict }),
       trx
     });
   };
+
+  transact = async procedure =>
+    await (new Promise((resolve, reject) => { 
+      return this.dbConnection.transaction(async trx => {
+        await procedure(trx, resolve, reject);
+      });
+    }));
+
 }
