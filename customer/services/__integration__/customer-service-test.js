@@ -18,7 +18,7 @@ describe('Customer Service', () => {
         const fullname = 'Test Customer';
         const result = await createCustomer(POSTGRES_TEST_CONTEXT, { email: 'test@gmail.com', fullname, password: '12345678' });
       	expect(result.fullname).toBe(fullname);
-	  });
+	    });
   	});
   	describe('And not valid params are passed', () => {
       test('It should throw a SERVICE_PRECONDITION_FAILED error', async() => {
@@ -27,7 +27,7 @@ describe('Customer Service', () => {
         } catch(error) {
           expect(error.message).toBe('SERVICE_PRECONDITION_FAILED');
         }
-	  });
+	    });
   	});
   });
 
@@ -57,7 +57,7 @@ describe('Customer Service', () => {
         } catch(error) {
           expect(error.message).toBe('SERVICE_PRECONDITION_FAILED');
         }
-	  });
+  	  });
   	});
   });
 
@@ -74,7 +74,7 @@ describe('Customer Service', () => {
       	const result = await getCustomerById(POSTGRES_TEST_CONTEXT, customerId);
 
         expect(result.id).toEqual(customerId);
-	  });
+	    });
   	});
   	describe('And not valid params are passed', () => {
       test('It should throw a SERVICE_PRECONDITION_FAILED error', async() => {
@@ -83,7 +83,7 @@ describe('Customer Service', () => {
         } catch(error) {
           expect(error.message).toBe('SERVICE_PRECONDITION_FAILED');
         }
-	  });
+	    });
   	});
   });
 
@@ -101,7 +101,7 @@ describe('Customer Service', () => {
       	const result = await getCustomerByEmail(POSTGRES_TEST_CONTEXT, email);
 
         expect(result.id).toEqual(customerId);
-	  });
+	    });
   	});
   	describe('And not valid params are passed', () => {
       test('It should throw a SERVICE_PRECONDITION_FAILED error', async() => {
@@ -110,7 +110,7 @@ describe('Customer Service', () => {
         } catch(error) {
           expect(error.message).toBe('SERVICE_PRECONDITION_FAILED');
         }
-	  });
+	    });
   	});
   });
 
@@ -127,7 +127,7 @@ describe('Customer Service', () => {
 
         expect(result.length).toBe(customers.length);
         expect(result.map(({ fullname }) => fullname)).toEqual(customers);
-	  });
+	    });
   	});
   	describe('And not valid params are passed', () => {
       test('It should throw a SERVICE_PRECONDITION_FAILED error', async() => {
@@ -136,7 +136,7 @@ describe('Customer Service', () => {
         } catch(error) {
           expect(error.message).toBe('SERVICE_PRECONDITION_FAILED');
         }
-	  });
+	    });
   	});
   });
 

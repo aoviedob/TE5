@@ -64,9 +64,9 @@ export const createOrderLine = async (req, dbContext, orderLine) => {
   validateProductQuantity(req, orderLine);
   
   return await ((new UnitOfWork(dbContext)).transact(async (trx, resolve, reject) => {
-    const dbOrderLine = await orderRepo.createOrderLine(dbContext, { orderLine, trx });
+    const dbOrderLine = await orderRepo.createOrderLine(dbContext, { orderLine: mapParams(orderLine), trx });
     await updateOrderAmount(req, { dbContext, orderId: orderLine.orderId, trx });
-    resolve(dbOrderLine);
+    resolve(mapRepoEntity(dbOrderLine));
   }));
 };
 
@@ -87,22 +87,23 @@ export const updateOrder = async (dbContext, orderId, order) => {
     
     const { orderLines = [] } = order;
     if (orderLines.length){
-      await Promise.all(orderLines.map(async orderLine => await orderRepo.upsertOrderLine(req, { dbContext, orderLine, trx })));
+      await Promise.all(orderLines.map(async orderLine => await orderRepo.upsertOrderLine(req, { dbContext, orderLine: mapParams(orderLine), trx })));
     }
   }));
 };
  
 export const createOrder = async (dbContext, order) => {
-  validatePreconditions(['dbContext', 'customer_id'], { dbContext, ...order });
+  validatePreconditions(['dbContext', 'customerId'], { dbContext, ...order });
 
   return await ((new UnitOfWork(dbContext)).transact(async (trx, resolve, reject) => {
     const mappedOrder = mapParams(order);
-    await orderRepo.createOrder(dbContext, { order: { total_amount: 0, status: DalTypes.OrderStatus.PENDING, ...mappedOrder }, trx });
+    const dbOrder = await orderRepo.createOrder(dbContext, { order: { total_amount: 0, status: DalTypes.OrderStatus.PENDING, ...mappedOrder }, trx });
     
     const { orderLines = [] } = order;
     if (orderLines.length) {
-      await Promise.all(orderLines.map(async orderLine => await orderRepo.createOrderLine(dbContext, { orderLine, trx })));
+      await Promise.all(orderLines.map(async orderLine => await orderRepo.createOrderLine(dbContext, { orderLine: { ...mapParams(orderLine), orderId }, trx })));
     }
+    resolve(mapRepoEntity(dbOrder));
   }));
 };
 

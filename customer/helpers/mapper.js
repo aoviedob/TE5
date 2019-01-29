@@ -24,7 +24,8 @@ export const convertSnakeToCamelCase = str => str.replace(/(\_\w)/g, m => m[1].t
 
 export const mapRepoEntity = entity =>
   Object.keys(entity).reduce((acc, key) => {
-  	const camelCaseKey = convertSnakeToCamelCase(key);
-  	acc[camelCaseKey] = entity[key];
+    const camelCaseKey = convertSnakeToCamelCase(key);
+    const value = entity[key];
+    acc[camelCaseKey] = typeof value === 'object' ? mapRepoEntity(value) : value;
   	return acc;
   }, {});
