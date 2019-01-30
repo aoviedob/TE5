@@ -1,16 +1,22 @@
 import newUuid from 'uuid/v4';
 import { UnitOfWorkContext } from '../../helpers/enums/unit_of_work';
-import DalTypes from '../helpers/enums/dal-types';
+import DalTypes from '../../helpers/enums/dal-types';
 const { POSTGRES_TEST_CONTEXT } = UnitOfWorkContext;
 
 jest.unmock('../order-service');
-
-const externalService = require('../external-service');
+jest.unmock('../customer-service');
 
 const products = [
   { id: newUuid(), name: 'product', price: 5000 },
   { id: newUuid(), name: 'product2', price: 3500 },
 ];
+
+const externalService = require('../external-service');
+externalService.getProduct = jest.fn((ctx, id) => products.find(product => product.id === id));
+externalService.createUser = jest.fn(() => newUuid());
+
+const { createOrder, createOrderLine, getOrdersByCustomerId, getOrderById, updateOrderLine, updateOrder, deleteOrderLine, deleteOrder } = require('../order-service');
+const { createCustomer } = require('../customer-service');
 
 const orderLines = [
  { externalProductName: products[0].name,
@@ -22,13 +28,15 @@ const orderLines = [
   quantity: 1, 
 }];
 
-const customerId = newUuid();
-
-externalService.getProduct = jest.fn(() => ({ id, name, price });
-
-const { createOrder, createOrderLine, getOrdersByCustomerId, getOrderById, updateOrderLine, updateOrder, deleteOrderLine, deleteOrder } = require('../order-service');
+let customerId;
 
 describe('Order Service', () => {
+  
+  beforeEach(async() => {
+    const customer = await createCustomer(POSTGRES_TEST_CONTEXT, { email: 'test@gmail.com', fullname: 'test', password: '12345678' });
+    customerId = customer.id;
+  });
+
   describe('When "createOrder" function gets called', () => {
   	describe('And valid params are passed', () => {
       test('It should save the order successfully', async() => {
@@ -56,19 +64,21 @@ describe('Order Service', () => {
 
     describe('And valid params are passed', () => {
       test('It should return the order by id with the order lines and the correct total amount', async() => {
-        const { id, orderLines: dbOrderLines, totalAmount } = await getOrderById(POSTGRES_TEST_CONTEXT, { orderId });
+        const result = await getOrderById(POSTGRES_TEST_CONTEXT, { orderId });
+        console.log('resultHOla', result);
+        const { id, orderLines: dbOrderLines, totalAmount } = result;
         expect(id).toBe(orderId);
         
         const mapProductIds = orderLines => dbOrderLines.map(ol => ol.externalProductId);
         expect(mapProductIds(dbOrderLines)).toEqual(mapProductIds(orderLines));
 
-        expect(totalAmount).toBe((products[0].price * orderLines[0].quantity) + (products[1].price * orderLines[1].quantity));
+        expect(parseFloat(totalAmount)).toBe((products[0].price * orderLines[0].quantity) + (products[1].price * orderLines[1].quantity));
       });
     });
     describe('And not valid params are passed', () => {
       test('It should throw a SERVICE_PRECONDITION_FAILED error', async() => {
         try {
-          await getOrderById(POSTGRES_TEST_CONTEXT); 
+          await getOrderById(POSTGRES_TEST_CONTEXT, {}); 
         } catch(error) {
           expect(error.message).toBe('SERVICE_PRECONDITION_FAILED');
         }
@@ -86,7 +96,7 @@ describe('Order Service', () => {
     describe('And valid params are passed', () => {
       test('It should return the orders by customer id', async() => {
         const dbOrders = await getOrdersByCustomerId(POSTGRES_TEST_CONTEXT, customerId);
-        expect(dbOrders).toEqual(orders);
+        expect(JSON.stringify(dbOrders)).toEqual(JSON.stringify(orders));
       });
     });
 
@@ -101,7 +111,7 @@ describe('Order Service', () => {
     });
   });
 
-  describe('When "createOrderLine" function gets called', () => {
+  describe.only('When "createOrderLine" function gets called', () => {
     let orderId;
   	beforeEach(async() => {
       const order = await createOrder(POSTGRES_TEST_CONTEXT, { customerId });
@@ -116,7 +126,7 @@ describe('Order Service', () => {
 
         const { orderLines: dbOrderLines, totalAmount } = await getOrderById(POSTGRES_TEST_CONTEXT, { orderId });
         expect(dbOrderLines[0].externalProductId).toBe(orderLine.externalProductId);
-        expect(totalAmount).toBe(products[0].price * orderLine.quantity);
+        expect(parseFloat(totalAmount)).toBe(products[0].price * orderLine.quantity);
       });
   	});
   	describe('And not valid params are passed', () => {
@@ -146,7 +156,7 @@ describe('Order Service', () => {
 
         expect(status).toBe(newStatus);
         expect(dbOrderLines).toEqual(orderLines);
-        expect(totalAmount).toBe((products[0].price * orderLines[0].quantity) + (products[1].price * orderLines[1].quantity));
+        expect(parseFloat(totalAmount)).toBe((products[0].price * orderLines[0].quantity) + (products[1].price * orderLines[1].quantity));
   	  });
     });
     describe('And not valid params are passed', () => {
@@ -173,18 +183,18 @@ describe('Order Service', () => {
     describe('And valid params are passed', () => {
       test('It should update the order line and the order total amount successfully', async() => {
         const quantity = 5;
-        await updateOrderLine({}, { dbContext: POSTGRES_TEST_CONTEXT, orderLine: { orderId,  externalProductId: orderLines[0].externalProductId, quantity });
+        await updateOrderLine({}, { dbContext: POSTGRES_TEST_CONTEXT, orderLine: { orderId,  externalProductId: orderLines[0].externalProductId, quantity }});
         const { status, orderLines: dbOrderLines, totalAmount } = await getOrderById(POSTGRES_TEST_CONTEXT, { orderId });
 
         expect(status).toBe(newStatus);
         expect(dbOrderLines).toEqual(oneOrderLineList);
-        expect(totalAmount).toBe(products[0].price * quantity);
+        expect(parseFloat(totalAmount)).toBe(products[0].price * quantity);
       });
     });
     describe('And not valid params are passed', () => {
       test('It should throw a SERVICE_PRECONDITION_FAILED error', async() => {
         try {
-          await updateOrderLine({}, POSTGRES_TEST_CONTEXT);
+          await updateOrderLine({}, { dbContext: POSTGRES_TEST_CONTEXT });
         } catch(error) {
           expect(error.message).toBe('SERVICE_PRECONDITION_FAILED');
         }
@@ -193,18 +203,18 @@ describe('Order Service', () => {
 
   });
 
-  describe('When "deleteCustomer" function gets called', () => {
+  describe('When "deleteOrder" function gets called', () => {
     
-    let customerId;
+    let orderId;
     beforeEach(async() => {
-      const result = await createCustomer(POSTGRES_TEST_CONTEXT, { email: 'test@gmail.com', fullname: customers[0], password: '12345678' });
-      customerId = result.id;
+      const order = await createOrder(POSTGRES_TEST_CONTEXT, { customerId, orderLines });
+      orderId = order.id;
     });
 
     describe('And valid params are passed', () => {
-      test('It should delete the customer successfully', async() => {
-        await deleteCustomer(POSTGRES_TEST_CONTEXT, customerId);
-        const result = await getCustomerById(POSTGRES_TEST_CONTEXT, customerId);
+      test('It should delete the order and all the its order lines successfully', async() => {
+        await deleteOrder(POSTGRES_TEST_CONTEXT, orderId);
+        const result = await getOrderById(POSTGRES_TEST_CONTEXT, { orderId });
 
         expect(result).toEqual({});
       });
@@ -212,7 +222,34 @@ describe('Order Service', () => {
     describe('And not valid params are passed', () => {
       test('It should throw a SERVICE_PRECONDITION_FAILED error', async() => {
         try {
-          await deleteCustomer(POSTGRES_TEST_CONTEXT); 
+          await deleteOrder(POSTGRES_TEST_CONTEXT); 
+        } catch(error) {
+          expect(error.message).toBe('SERVICE_PRECONDITION_FAILED');
+        }
+      });
+    });
+  });
+
+  describe('When "deleteOrderLine" function gets called', () => {
+    
+    let orderId;
+    beforeEach(async() => {
+      const order = await createOrder(POSTGRES_TEST_CONTEXT, { customerId, orderLines });
+      orderId = order.id;
+    });
+
+    describe('And valid params are passed', () => {
+      test('It should delete order line successfully', async() => {
+        await deleteOrderLine(POSTGRES_TEST_CONTEXT, orderId, orderLines[0].externalProductId);
+        const result = await getOrderById(POSTGRES_TEST_CONTEXT, { orderId });
+
+        expect(result.orderLines).toEqual(orderLines.slice(1, orderLines.length));
+      });
+    });
+    describe('And not valid params are passed', () => {
+      test('It should throw a SERVICE_PRECONDITION_FAILED error', async() => {
+        try {
+          await deleteOrder(POSTGRES_TEST_CONTEXT); 
         } catch(error) {
           expect(error.message).toBe('SERVICE_PRECONDITION_FAILED');
         }

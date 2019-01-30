@@ -89,6 +89,8 @@ export const updateOrder = async (dbContext, orderId, order) => {
     if (orderLines.length){
       await Promise.all(orderLines.map(async orderLine => await orderRepo.upsertOrderLine(req, { dbContext, orderLine: mapParams(orderLine), trx })));
     }
+
+    await updateOrderAmount({}, { dbContext, orderId, trx });
   }));
 };
  
@@ -97,13 +99,15 @@ export const createOrder = async (dbContext, order) => {
 
   return await ((new UnitOfWork(dbContext)).transact(async (trx, resolve, reject) => {
     const mappedOrder = mapParams(order);
-    const dbOrder = await orderRepo.createOrder(dbContext, { order: { total_amount: 0, status: DalTypes.OrderStatus.PENDING, ...mappedOrder }, trx });
+    const { id: orderId } = await orderRepo.createOrder(dbContext, { order: { total_amount: 0, status: DalTypes.OrderStatus.PENDING, ...mappedOrder }, trx });
     
     const { orderLines = [] } = order;
     if (orderLines.length) {
-      await Promise.all(orderLines.map(async orderLine => await orderRepo.createOrderLine(dbContext, { orderLine: { ...mapParams(orderLine), orderId }, trx })));
+      await Promise.all(orderLines.map(async orderLine => await orderRepo.createOrderLine(dbContext, { orderLine: { ...mapParams(orderLine), order_id: orderId }, trx })));
     }
-    resolve(mapRepoEntity(dbOrder));
+    await updateOrderAmount({}, { dbContext, orderId, trx });
+    const dbOrder = await getOrderById(dbContext, { orderId, trx });
+    resolve(dbOrder);
   }));
 };
 

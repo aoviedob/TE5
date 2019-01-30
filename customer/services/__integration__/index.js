@@ -35,8 +35,9 @@ beforeEach(async() => {
 
 afterEach(async() => {
   logger.info('Started afterEach');
-  await truncateTables();
+  // await truncateTables();
   logger.info('Finished afterEach');
 });
 
-require('./customer-service-test');
+//require('./customer-service-test');
+require('./order-service-test');

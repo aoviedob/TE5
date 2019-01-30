@@ -1,1 +1,1 @@
-export const formatDBColumns = (table = '', columns = []) => columns.map(column => `${table}.${column}`);
+export const formatDBColumns = (table = '', columns = []) => columns.map(column => `"${table}"."${column}"`);

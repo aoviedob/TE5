@@ -30,9 +30,10 @@ export const getOrderById = async (dbContext, { orderId, trx }) => {
   const unitOfWork = new UnitOfWork(dbContext);
   return await unitOfWork.getOneWhere(schema, { 
   	tableName: ORDER_TABLE, 
-  	columns: [...formatDBColumns(ORDER_TABLE, ORDER_TABLE_COLUMNS), `json_agg("${ORDER_LINE_TABLE}".*) as "orderLines"`,
-    join: unitOfWork.dbConnection.raw('RIGHT JOIN :ORDER_LINE_TABLE: ON :ORDER_TABLE:.id = :ORDER_LINE_TABLE:.order_id', { ORDER_LINE_TABLE, ORDER_TABLE }),
-  	where: unitOfWork.dbConnection.raw('id = :orderId', { orderId }),
+  	columns: [...formatDBColumns(ORDER_TABLE, ORDER_TABLE_COLUMNS), `json_agg("${ORDER_LINE_TABLE}".*) as "orderLines"`],
+    join: unitOfWork.dbConnection.raw('LEFT JOIN :schema:.:ORDER_LINE_TABLE: ON :ORDER_TABLE:.id = :ORDER_LINE_TABLE:.order_id', { ORDER_LINE_TABLE, ORDER_TABLE, schema }),
+  	where: unitOfWork.dbConnection.raw(':ORDER_TABLE:.id = :orderId', { orderId, ORDER_TABLE }),
+    groupBy: unitOfWork.dbConnection.raw(':ORDER_TABLE:.id', { ORDER_TABLE }),
     trx,
   });
 };
@@ -41,9 +42,10 @@ export const getOrdersByCustomerId = async (dbContext, customerId) => {
   const unitOfWork = new UnitOfWork(dbContext);
   return await unitOfWork.getAllWhere(schema, { 
   	tableName: ORDER_TABLE, 
-  	columns: [...formatDBColumns(ORDER_TABLE, ORDER_TABLE_COLUMNS), `json_agg("${ORDER_LINE_TABLE}".*) as "orderLines"`,
-    join: unitOfWork.dbConnection.raw('RIGHT JOIN :ORDER_LINE_TABLE: ON :ORDER_TABLE:.id = :ORDER_LINE_TABLE:.order_id', { ORDER_LINE_TABLE, ORDER_TABLE }),
-  	where: unitOfWork.dbConnection.raw('customer_id = :customerId', { customerId })
+  	columns: [...formatDBColumns(ORDER_TABLE, ORDER_TABLE_COLUMNS), `json_agg("${ORDER_LINE_TABLE}".*) as "orderLines"`],
+    join: unitOfWork.dbConnection.raw('LEFT JOIN :schema:.:ORDER_LINE_TABLE: ON :ORDER_TABLE:.id = :ORDER_LINE_TABLE:.order_id', { ORDER_LINE_TABLE, ORDER_TABLE, schema }),
+  	where: unitOfWork.dbConnection.raw('customer_id = :customerId', { customerId }),
+    groupBy: unitOfWork.dbConnection.raw(':ORDER_TABLE:.id', { ORDER_TABLE }),
   });
 };
 
@@ -84,7 +86,7 @@ export const deleteOrderLine = async (dbContext, { orderId, externalProductId, t
   const unitOfWork = new UnitOfWork(dbContext);
   return await unitOfWork.delete(schema, { 
     tableName: ORDER_LINE_TABLE, 
-    where: unitOfWork.dbConnection.raw('order_id = : orderId AND external_product_id = :externalProductId', { orderId, externalProductId })
+    where: unitOfWork.dbConnection.raw('order_id = : orderId AND external_product_id = :externalProductId', { orderId, externalProductId }),
     trx,
   });
 };

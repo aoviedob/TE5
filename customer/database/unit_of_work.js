@@ -56,33 +56,36 @@ export default class UnitOfWork {
       trx
     });
 
-  _getOneWhere = (schema, { tableName, columns, join, where }) =>
+  _getOneWhere = (schema, { tableName, columns, join = '', where = '', groupBy = null }) =>
     this.dbConnection.raw(`
       SELECT ${columns.join(',')}
       FROM :schema:.:tableName:
       ${join}
       WHERE ${where}
+      ${(groupBy ? `GROUP BY (${groupBy})`: '')}
       LIMIT 1
     `, { schema, tableName });
 
-  getOneWhere = async (schema, { tableName, columns, join, where, trx }) => {
+  getOneWhere = async (schema, { tableName, columns, join, where, groupBy, trx }) => {
     const result = await this.executeTransaction({ 
-      func: () => this._getOneWhere(schema, { tableName, columns, join, where }),
+      func: () => this._getOneWhere(schema, { tableName, columns, join, where, groupBy }),
       trx
     });
     return result.length ? result[0] : {};
   };
 
-  _getAllWhere = (schema, { tableName, columns, where }) =>
+  _getAllWhere = (schema, { tableName, columns, join = '', where = '', groupBy = null }) =>
     this.dbConnection.raw(`
       SELECT ${columns.join(',')}
       FROM :schema:.:tableName:
+      ${join}
       WHERE ${where}
+      ${(groupBy ? `GROUP BY (${groupBy})`: '')}
     `, { schema, tableName });
 
-  getAllWhere = async (schema, { tableName, columns, where, trx }) => 
+  getAllWhere = async (schema, { tableName, columns, join, where, groupBy, trx }) => 
     await this.executeTransaction({ 
-      func: () => this._getAllWhere(schema, { tableName, columns, where }),
+      func: () => this._getAllWhere(schema, { tableName, columns, join, where, groupBy }),
       trx
     });
   
@@ -102,7 +105,7 @@ export default class UnitOfWork {
       return acc;
     }, []).join(',');
 
-  _update = (schema, { tableName, columns, entity, where }) =>
+  _update = (schema, { tableName, columns, entity, where = '' }) =>
     this.dbConnection.raw(`
       UPDATE :schema:.:tableName: 
         SET ${this.formatSetValues(columns, entity)}
@@ -148,7 +151,7 @@ export default class UnitOfWork {
       return acc;
     }, []).join(',');
 
-  _create = (schema, { tableName, columns, entity, rawValues, encryptPassword, onConflict }) =>
+  _create = (schema, { tableName, columns, entity, rawValues, encryptPassword, onConflict = '' }) =>
     this.dbConnection.raw(`
       INSERT INTO :schema:.:tableName: (${this.formatInsertColumns(columns, entity)})
         VALUES (${rawValues || this.formatInsertValues(columns, entity, encryptPassword)})
