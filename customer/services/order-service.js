@@ -15,7 +15,9 @@ export const getOrdersByCustomerId = async (dbContext, customerId) => {
 
 export const getOrderById = async (dbContext, { orderId, trx }) => {
   validatePreconditions(['dbContext', 'orderId'], { dbContext, orderId });
-  const t = mapRepoEntity((await orderRepo.getOrderById(dbContext, { orderId, trx })));
+  const tt = (await orderRepo.getOrderById(dbContext, { orderId, trx }));
+  console.log('tt', tt);
+  const t = mapRepoEntity(tt);
   console.log('tttt', t);
   return t;
 };
@@ -32,10 +34,11 @@ const validateProductQuantity = (req, orderLine) => {
 
 const updateOrderAmount = async(req, { dbContext, orderId, trx }) => {
   const { orderLines } = await getOrderById(dbContext, { orderId, trx });
+    console.log('entra', orderLines);
   if (!orderLines.length) return;
   
-  const products = await Promise.all(orderLines.map(async ({ external_product_id }) => await getProduct(req, external_product_id)));
-
+  const products = await Promise.all(orderLines.map(async ({ externalProductId }) => await getProduct(req, externalProductId)));
+  console.log('productsHOla', products);
   if (!products || !products.length) {
     logger.error({ ...req.tokenBody, orderId }, 'Empty product list');
     const error = new Error('EMPTY_PRODUCT_LIST');

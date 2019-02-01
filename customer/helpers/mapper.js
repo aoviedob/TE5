@@ -26,9 +26,12 @@ const isObject = value => value !== null && value !== undefined && typeof value 
 
 export const mapRepoEntity = entity =>
   Object.keys(entity).reduce((acc, key) => {
+    console.log('key', key);
     const camelCaseKey = convertSnakeToCamelCase(key);
+    console.log('camelCaseKey', camelCaseKey);
     const value = entity[key];
     if (Array.isArray(value)) {
+      console.log('value', value);
       acc[camelCaseKey] = value.map(item => (isObject(item) ? mapRepoEntity(item) : item ));
     } if (isObject(value)) {
       acc[camelCaseKey] = mapRepoEntity(value);
