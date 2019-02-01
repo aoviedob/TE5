@@ -28,7 +28,7 @@ const ORDER_LINE_TABLE_COLUMNS = [
 
 export const getOrderById = async (dbContext, { orderId, trx }) => { 
   const unitOfWork = new UnitOfWork(dbContext);
-  return await unitOfWork.getOneWhere(schema, { 
+  const order = await unitOfWork.getOneWhere(schema, { 
   	tableName: ORDER_TABLE, 
   	columns: [...formatDBColumns(ORDER_TABLE, ORDER_TABLE_COLUMNS), `json_agg("${ORDER_LINE_TABLE}".*) as "orderLines"`],
     join: unitOfWork.dbConnection.raw('LEFT JOIN :schema:.:ORDER_LINE_TABLE: ON :ORDER_TABLE:.id = :ORDER_LINE_TABLE:.order_id', { ORDER_LINE_TABLE, ORDER_TABLE, schema }),
@@ -36,17 +36,19 @@ export const getOrderById = async (dbContext, { orderId, trx }) => {
     groupBy: unitOfWork.dbConnection.raw(':ORDER_TABLE:.id', { ORDER_TABLE }),
     trx,
   });
+  
+  return { ...order, orderLines: order.orderLines.filter(ol => ol) };
 };
 
 export const getOrdersByCustomerId = async (dbContext, customerId) => { 
   const unitOfWork = new UnitOfWork(dbContext);
-  return await unitOfWork.getAllWhere(schema, { 
+  return (await unitOfWork.getAllWhere(schema, { 
   	tableName: ORDER_TABLE, 
   	columns: [...formatDBColumns(ORDER_TABLE, ORDER_TABLE_COLUMNS), `json_agg("${ORDER_LINE_TABLE}".*) as "orderLines"`],
     join: unitOfWork.dbConnection.raw('LEFT JOIN :schema:.:ORDER_LINE_TABLE: ON :ORDER_TABLE:.id = :ORDER_LINE_TABLE:.order_id', { ORDER_LINE_TABLE, ORDER_TABLE, schema }),
   	where: unitOfWork.dbConnection.raw('customer_id = :customerId', { customerId }),
     groupBy: unitOfWork.dbConnection.raw(':ORDER_TABLE:.id', { ORDER_TABLE }),
-  });
+  })).map(order => ({ ...order, orderLines: order.orderLines.filter(ol => ol) }));
 };
 
 export const updateOrderLine = async (dbContext, { orderId, externalProductId, orderLine, trx }) => {

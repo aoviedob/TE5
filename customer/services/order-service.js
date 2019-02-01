@@ -15,7 +15,9 @@ export const getOrdersByCustomerId = async (dbContext, customerId) => {
 
 export const getOrderById = async (dbContext, { orderId, trx }) => {
   validatePreconditions(['dbContext', 'orderId'], { dbContext, orderId });
-  return mapRepoEntity((await orderRepo.getOrderById(dbContext, { orderId, trx })));
+  const t = mapRepoEntity((await orderRepo.getOrderById(dbContext, { orderId, trx })));
+  console.log('tttt', t);
+  return t;
 };
 
 const validateProductQuantity = (req, orderLine) => {
@@ -30,6 +32,8 @@ const validateProductQuantity = (req, orderLine) => {
 
 const updateOrderAmount = async(req, { dbContext, orderId, trx }) => {
   const { orderLines } = await getOrderById(dbContext, { orderId, trx });
+  if (!orderLines.length) return;
+  
   const products = await Promise.all(orderLines.map(async ({ external_product_id }) => await getProduct(req, external_product_id)));
 
   if (!products || !products.length) {
