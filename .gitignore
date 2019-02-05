@@ -2,3 +2,7 @@ auth/.yarn-cache/
 auth/yarn-error.log
 auth/node_modules/
 auth/logs/
+customer/.yarn-cache/
+customer/yarn-error.log
+customer/node_modules/
+customer/logs/
