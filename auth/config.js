@@ -24,4 +24,8 @@ module.exports = {
     user: getEnvVariable('AUTH_EXTERNAL_LOGIN_USER', 'andres+external@gmail.com'),
     password: getEnvVariable('AUTH_EXTERNAL_LOGIN_PASSWORD', 'secret'),
   },
+  authSystemLoginCredentials: {
+    user: getEnvVariable('AUTH_SYSTEM_LOGIN_USER', 'andres+system@gmail.com'),
+    password: getEnvVariable('AUTH_SYSTEM_LOGIN_PASSWORD', 'secret'),
+  },
 };
