@@ -9,12 +9,12 @@ export default class UserTypeApi {
 
   constructor(app) {
     app.get('/api/userTypes', this.getUserTypes);
-    app.get('/api/userType/:userTypeId', this.getUserTypeById);
-    app.get('/api/userType/byName/:name', this.getUserTypeByName);
-    app.get('/api/userTypes/byName/:name', this.getUserTypesByName);
-    app.post('/api/userType', this.createUserType);
-    app.put('/api/userType/:userTypeId', this.updateUserType);
-    app.delete('/api/userType/:userTypeId', this.deleteUserType);
+    app.get('/api/userTypes/:userTypeId', this.getUserTypeById);
+    app.get('/api/userTypes/byName/:name', this.getUserTypeByName);
+    app.get('/api/userTypes/likeName/:name', this.getUserTypesByName);
+    app.post('/api/userTypes', this.createUserType);
+    app.put('/api/userTypes/:userTypeId', this.updateUserType);
+    app.delete('/api/userTypes/:userTypeId', this.deleteUserType);
   }
 
   @RequiredRole([PredefinedRole.ADMIN])

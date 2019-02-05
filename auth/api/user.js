@@ -9,12 +9,12 @@ export default class UserApi {
 
   constructor(app) {
     app.get('/api/users', this.getUsers);
-    app.get('/api/user/:userId', this.getUserById);
-    app.get('/api/user/byEmail/:email', this.getUserByEmail);
-    app.get('/api/users/byEmail/:email', this.getUsersByEmail);
-    app.post('/api/user', this.createUser);
-    app.put('/api/user/:userId', this.updateUser);
-    app.delete('/api/user/:userId', this.deleteUser);
+    app.get('/api/users/:userId', this.getUserById);
+    app.get('/api/users/byEmail/:email', this.getUserByEmail);
+    app.get('/api/users/likeEmail/:email', this.getUsersByEmail);
+    app.post('/api/users', this.createUser);
+    app.put('/api/users/:userId', this.updateUser);
+    app.delete('/api/users/:userId', this.deleteUser);
     app.post('/api/login', this.login);
     app.post('/api/authenticate', this.authenticate);
     app.post('/api/external/login', this.externalLogin);
