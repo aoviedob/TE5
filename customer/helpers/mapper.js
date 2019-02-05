@@ -22,20 +22,18 @@ export const mapParams = paramsObj =>
 
 export const convertSnakeToCamelCase = str => str.replace(/(\_\w)/g, m => m[1].toUpperCase());
 
-const isObject = value => value !== null && value !== undefined && typeof value === 'object';
+const isObject = value => value !== null && value !== undefined && !(value instanceof Date) && !Array.isArray(value) && typeof value === 'object';
 
 export const mapRepoEntity = entity =>
   Object.keys(entity).reduce((acc, key) => {
-    console.log('key', key);
     const camelCaseKey = convertSnakeToCamelCase(key);
-    console.log('camelCaseKey', camelCaseKey);
     const value = entity[key];
     if (Array.isArray(value)) {
-      console.log('value', value);
-      acc[camelCaseKey] = value.map(item => (isObject(item) ? mapRepoEntity(item) : item ));
+      const mappedArray = value.map(item => (isObject(item) ? mapRepoEntity(item) : item ));
+      acc[camelCaseKey] = mappedArray;
     } if (isObject(value)) {
       acc[camelCaseKey] = mapRepoEntity(value);
-    } else {
+    } else if(!isObject(value) && !Array.isArray(value)) {
       acc[camelCaseKey] = value;
     }
   	return acc;

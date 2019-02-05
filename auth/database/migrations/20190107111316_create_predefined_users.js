@@ -7,7 +7,7 @@ exports.up = async dbConnection => {
     INSERT INTO :schema:.user_type(name, display_name, created_at, updated_at)
       VALUES(:adminUserType, 'Admin', NOW(), NOW());
   `,
-  { schema, 
+  { schema,
   	adminUserType: PredefinedUserType.ADMIN, 
   });
 

@@ -39,6 +39,8 @@ afterEach(async() => {
   logger.info('Finished afterEach');
 });
 
+jest.setTimeout(60000);
+
 require('./user-type-service-test');
 require('./user-service-test');
 require('./role-service-test');

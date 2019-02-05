@@ -5,17 +5,17 @@ import { PredefinedRole } from '../helpers/enums/dal-types';
 
 const { POSTGRES_CONTEXT } = UnitOfWorkContext;
 
-export default class UserApi {
+export default class CustomerApi {
 
   constructor(app) {
     app.get('/api/customers', this.getCustomers);
-    app.get('/api/customer/:customerId', this.getCustomerById);
-    app.get('/api/customers/byName/:name', this.getCustomersByName);
-    app.get('/api/customers/byEmail/:email', this.getCustomersByEmail);
-    app.get('/api/customer/byEmail/:email', this.getCustomerByEmail);
-    app.post('/api/customer', this.createCustomer);
-    app.put('/api/customer/:customerId', this.updateCustomer);
-    app.delete('/api/user/:customerId', this.deleteCustomer);
+    app.get('/api/customers/:customerId', this.getCustomerById);
+    app.get('/api/customers/likeName/:name', this.getCustomersByName);
+    app.get('/api/customers/likeEmail/:email', this.getCustomersByEmail);
+    app.get('/api/customers/byEmail/:email', this.getCustomerByEmail);
+    app.post('/api/customers', this.createCustomer);
+    app.put('/api/customers/:customerId', this.updateCustomer);
+    app.delete('/api/customers/:customerId', this.deleteCustomer);
   }
 
   @RequiredRole([PredefinedRole.ADMIN])
@@ -54,12 +54,12 @@ export default class UserApi {
   @RequiredRole([PredefinedRole.ADMIN, PredefinedRole.SYSTEM])
   async updateCustomer(req) {
     const { body, params = {} } = req;
-    return await customerService.updateCustomer(POSTGRES_CONTEXT, params.userId, body);
+    return await customerService.updateCustomer(POSTGRES_CONTEXT, params.customerId, body);
   }
 
   @RequiredRole([PredefinedRole.ADMIN])
   async deleteCustomer(req) {
-    const { userId } = req.params || {};
-    return await customerService.deleteCustomer(POSTGRES_CONTEXT, userId);
+    const { customerId } = req.params || {};
+    return await customerService.deleteCustomer(POSTGRES_CONTEXT, customerId);
   }
 }

@@ -9,12 +9,12 @@ export default class RoleApi {
 
   constructor(app) {
     app.get('/api/roles', this.getRoles);
-    app.get('/api/role/:roleId', this.getRoleById);
-    app.get('/api/role/byName/:name', this.getRoleByName);
-    app.get('/api/roles/byName/:name', this.getRolesByName);
-    app.post('/api/role', this.createRole);
-    app.put('/api/role/:roleId', this.updateRole);
-    app.delete('/api/role/:roleId', this.deleteRole);
+    app.get('/api/roles/:roleId', this.getRoleById);
+    app.get('/api/roles/byName/:name', this.getRoleByName);
+    app.get('/api/roles/likeName/:name', this.getRolesByName);
+    app.post('/api/roles', this.createRole);
+    app.put('/api/roles/:roleId', this.updateRole);
+    app.delete('/api/roles/:roleId', this.deleteRole);
   }
 
   @RequiredRole([PredefinedRole.ADMIN])

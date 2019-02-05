@@ -35,9 +35,10 @@ beforeEach(async() => {
 
 afterEach(async() => {
   logger.info('Started afterEach');
-  // await truncateTables();
+  await truncateTables();
   logger.info('Finished afterEach');
 });
 
-//require('./customer-service-test');
+jest.setTimeout(60000);
+require('./customer-service-test');
 require('./order-service-test');

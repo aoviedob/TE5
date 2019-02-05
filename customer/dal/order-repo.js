@@ -36,8 +36,10 @@ export const getOrderById = async (dbContext, { orderId, trx }) => {
     groupBy: unitOfWork.dbConnection.raw(':ORDER_TABLE:.id', { ORDER_TABLE }),
     trx,
   });
-  
-  return { ...order, orderLines: order.orderLines.filter(ol => ol) };
+  const { orderLines, id } = order;
+  if(!id) return {};
+
+  return { ...order, orderLines: (orderLines ? orderLines.filter(ol => ol) : []) };
 };
 
 export const getOrdersByCustomerId = async (dbContext, customerId) => { 
@@ -57,7 +59,7 @@ export const updateOrderLine = async (dbContext, { orderId, externalProductId, o
     tableName: ORDER_LINE_TABLE, 
     columns: ORDER_LINE_TABLE_COLUMNS,
     entity: orderLine,
-    where: unitOfWork.dbConnection.raw('order_id = : orderId AND external_product_id = :externalProductId', { orderId, externalProductId }),
+    where: unitOfWork.dbConnection.raw('order_id = :orderId AND external_product_id = :externalProductId', { orderId, externalProductId }),
     trx,
   });
 };
@@ -68,7 +70,7 @@ export const upsertOrderLine = async (dbContext, { orderId, externalProductId, o
     tableName: ORDER_LINE_TABLE, 
     columns: ORDER_LINE_TABLE_COLUMNS,
     entity: orderLine,
-    onConflict: unitOfWork.dbConnection.raw(`ON CONFLICT order_line_id_product_id DO UPDATE ${unitOfWork.formatSetValues(columns, entity)}`),
+    onConflict: unitOfWork.dbConnection.raw(`ON CONFLICT (order_id, external_product_Id) DO UPDATE SET ${unitOfWork.formatSetValues(ORDER_LINE_TABLE_COLUMNS, orderLine)}`),
     trx,
   });
 };
@@ -88,7 +90,7 @@ export const deleteOrderLine = async (dbContext, { orderId, externalProductId, t
   const unitOfWork = new UnitOfWork(dbContext);
   return await unitOfWork.delete(schema, { 
     tableName: ORDER_LINE_TABLE, 
-    where: unitOfWork.dbConnection.raw('order_id = : orderId AND external_product_id = :externalProductId', { orderId, externalProductId }),
+    where: unitOfWork.dbConnection.raw('order_id = :orderId AND external_product_id = :externalProductId', { orderId, externalProductId }),
     trx,
   });
 };
@@ -97,7 +99,8 @@ export const deleteOrder = async (dbContext, { orderId, trx }) => {
   const unitOfWork = new UnitOfWork(dbContext);
   return await unitOfWork.delete(schema, { 
   	tableName: ORDER_TABLE, 
-  	where: unitOfWork.dbConnection.raw('id = :orderId', { orderId })
+  	where: unitOfWork.dbConnection.raw('id = :orderId', { orderId }),
+    trx
   });
 };
 
