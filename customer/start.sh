@@ -10,7 +10,7 @@ if [ ! "$(docker ps -q -f name=customer)" ]; then
   
   docker rmi customer
   docker build --tag=customer .
-  docker run -d --name customer -p 3030:3030 --net="host" customer
+  docker run -d --name customer -p 3030 --net="host" customer
 fi
 
 ./scripts/create_schema.sh;
