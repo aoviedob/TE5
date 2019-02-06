@@ -1,32 +1,43 @@
 import UnitOfWork from '../database/unit_of_work.js';
 import { UnitOfWorkContext } from '../helpers/enums/unit_of_work';
 import { schema } from '../config';
-import moment from 'moment';
 
-export const CUSTOMER_TABLE = 'customer';
-const CUSTOMER_TABLE_COLUMNS = [
+export const EVENT_TABLE = 'event';
+const EVENT_TABLE_COLUMNS = [
   'id',
-  'email',
-  'phone',
-  'external_user_id',
-  'fullname',
-  'alias',
-  'preferences',
+  'event_category_id',
+  'event_organizer_id',
+  'name',
+  'tags',
+  'web_url',
+  'cover_image_url',
+  'metadata',
+  'settings',
+  'start_date',
+  'end_date',
+  'status',
+  'country',
+  'addressLine1',
+  'addressLine2',
+  'latitude',
+  'longitude',
+  'updated_by',
+  'created_by',
   'created_at',
   'updated_at'
 ];
 
-export const getCustomers = async dbContext => 
+export const getEvents = async dbContext => 
   await(new UnitOfWork(dbContext).getAll(schema, { 
-  	tableName: CUSTOMER_TABLE, 
-  	columns: CUSTOMER_TABLE_COLUMNS 
+  	tableName: EVENT_TABLE, 
+  	columns: EVENT_TABLE_COLUMNS 
   }));
 
 export const getCustomerById = async (dbContext, customerId) => { 
   const unitOfWork = new UnitOfWork(dbContext);
   return await unitOfWork.getOneWhere(schema, { 
-  	tableName: CUSTOMER_TABLE, 
-  	columns: CUSTOMER_TABLE_COLUMNS,
+  	tableName: EVENT_TABLE, 
+  	columns: EVENT_TABLE_COLUMNS,
   	where: unitOfWork.dbConnection.raw('id = :customerId', { customerId })
   });
 };
@@ -34,8 +45,8 @@ export const getCustomerById = async (dbContext, customerId) => {
 export const getCustomerByEmail = async (dbContext, email) => { 
   const unitOfWork = new UnitOfWork(dbContext);
   return await unitOfWork.getOneWhere(schema, { 
-    tableName: CUSTOMER_TABLE, 
-    columns: CUSTOMER_TABLE_COLUMNS,
+    tableName: EVENT_TABLE, 
+    columns: EVENT_TABLE_COLUMNS,
     where: unitOfWork.dbConnection.raw('email = :email', { email })
   });
 };
@@ -44,8 +55,8 @@ export const getCustomerByEmail = async (dbContext, email) => {
 export const getCustomersByName = async (dbContext, name) => { 
   const unitOfWork = new UnitOfWork(dbContext);
   return await unitOfWork.getAllWhere(schema, { 
-  	tableName: CUSTOMER_TABLE, 
-  	columns: CUSTOMER_TABLE_COLUMNS,
+  	tableName: EVENT_TABLE, 
+  	columns: EVENT_TABLE_COLUMNS,
   	where: unitOfWork.dbConnection.raw('fullname LIKE :name', { name: `%${name}%` })
   });
 };
@@ -53,8 +64,8 @@ export const getCustomersByName = async (dbContext, name) => {
 export const getCustomersByEmail = async (dbContext, email) => { 
   const unitOfWork = new UnitOfWork(dbContext);
   return await unitOfWork.getAllWhere(schema, { 
-    tableName: CUSTOMER_TABLE, 
-    columns: CUSTOMER_TABLE_COLUMNS,
+    tableName: EVENT_TABLE, 
+    columns: EVENT_TABLE_COLUMNS,
     where: unitOfWork.dbConnection.raw('email LIKE :email', { email: `%${email}%` })
   });
 };
@@ -63,8 +74,8 @@ export const getCustomersByEmail = async (dbContext, email) => {
 export const updateCustomer = async (dbContext, customerId, customer) => { 
   const unitOfWork = new UnitOfWork(dbContext);
   return await unitOfWork.update(schema, { 
-  	tableName: CUSTOMER_TABLE, 
-  	columns: CUSTOMER_TABLE_COLUMNS,
+  	tableName: EVENT_TABLE, 
+  	columns: EVENT_TABLE_COLUMNS,
   	entity: customer,
   	where: unitOfWork.dbConnection.raw('id = :customerId', { customerId })
   });
@@ -73,15 +84,15 @@ export const updateCustomer = async (dbContext, customerId, customer) => {
 export const deleteCustomer = async (dbContext, customerId) => { 
   const unitOfWork = new UnitOfWork(dbContext);
   return await unitOfWork.delete(schema, { 
-  	tableName: CUSTOMER_TABLE, 
+  	tableName: EVENT_TABLE, 
   	where: unitOfWork.dbConnection.raw('id = :customerId', { customerId })
   });
 };
 
 export const createCustomer = async (dbContext, customer) => {
   const result = await (new UnitOfWork(dbContext).create(schema, { 
-    tableName: CUSTOMER_TABLE, 
-    columns: CUSTOMER_TABLE_COLUMNS,
+    tableName: EVENT_TABLE, 
+    columns: EVENT_TABLE_COLUMNS,
     entity: customer,
   }));
   
