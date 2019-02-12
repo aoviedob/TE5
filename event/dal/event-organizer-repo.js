@@ -1,127 +1,130 @@
 import UnitOfWork from '../database/unit_of_work.js';
 import { UnitOfWorkContext } from '../helpers/enums/unit_of_work';
 import { schema } from '../config';
-import moment from 'moment';
-import { formatDBColumns } from '../helpers/formatter';
 
-export const ORDER_TABLE = 'order';
-export const ORDER_LINE_TABLE = 'order_line';
+export const EVENT_ORGANIZER_TABLE = 'event_organizer';
+export const USERS_BY_ORGANIZER_TABLE = 'users_by_organizer';
 
-const ORDER_TABLE_COLUMNS = [
+const EVENT_ORGANIZER_TABLE_COLUMNS = [
   'id',
-  'customer_id',
-  'total_amount',
-  'status',
+  'name',
+  'identification',
+  'type',
+  'email',
+  'phone',
+  'image_url',
+  'web_url',
+  'country',
+  'addressLine1',
+  'addressLine2',
+  'metadata',
+  'settings',
+  'updated_by',
+  'created_by',
   'created_at',
   'updated_at'
 ];
 
-const ORDER_LINE_TABLE_COLUMNS = [
+const USERS_BY_ORGANIZER_TABLE_COLUMNS = [
   'id',
-  'order_id',
-  'external_product_name',
-  'external_product_id',
-  'quantity',
+  'external_user_id',
+  'event_organizer_id',
+  'updated_by',
+  'created_by',
   'created_at',
   'updated_at'
 ];
 
-export const getOrderById = async (dbContext, { orderId, trx }) => { 
+export const getEventOrganizerById = async (dbContext, organizerId) => { 
   const unitOfWork = new UnitOfWork(dbContext);
-  const order = await unitOfWork.getOneWhere(schema, { 
-  	tableName: ORDER_TABLE, 
-  	columns: [...formatDBColumns(ORDER_TABLE, ORDER_TABLE_COLUMNS), `json_agg("${ORDER_LINE_TABLE}".*) as "orderLines"`],
-    join: unitOfWork.dbConnection.raw('LEFT JOIN :schema:.:ORDER_LINE_TABLE: ON :ORDER_TABLE:.id = :ORDER_LINE_TABLE:.order_id', { ORDER_LINE_TABLE, ORDER_TABLE, schema }),
-  	where: unitOfWork.dbConnection.raw(':ORDER_TABLE:.id = :orderId', { orderId, ORDER_TABLE }),
-    groupBy: unitOfWork.dbConnection.raw(':ORDER_TABLE:.id', { ORDER_TABLE }),
-    trx,
+  return await unitOfWork.getOneWhere(schema, { 
+    tableName: EVENT_ORGANIZER_TABLE, 
+    columns: EVENT_ORGANIZER_TABLE_COLUMNS,
+    where: unitOfWork.dbConnection.raw('id = :organizerId', { organizerId })
   });
-  const { orderLines, id } = order;
-  if(!id) return {};
-
-  return { ...order, orderLines: (orderLines ? orderLines.filter(ol => ol) : []) };
 };
 
-export const getOrdersByCustomerId = async (dbContext, customerId) => { 
+export const getEventOrganizers = async dbContext => 
+  await(new UnitOfWork(dbContext).getAll(schema, { 
+    tableName: EVENT_ORGANIZER_TABLE, 
+    columns: EVENT_ORGANIZER_TABLE_COLUMNS 
+  }));
+
+
+export const getEventOrganizersByIdentification = async (dbContext, identification) => { 
   const unitOfWork = new UnitOfWork(dbContext);
-  return (await unitOfWork.getAllWhere(schema, { 
-  	tableName: ORDER_TABLE, 
-  	columns: [...formatDBColumns(ORDER_TABLE, ORDER_TABLE_COLUMNS), `json_agg("${ORDER_LINE_TABLE}".*) as "orderLines"`],
-    join: unitOfWork.dbConnection.raw('LEFT JOIN :schema:.:ORDER_LINE_TABLE: ON :ORDER_TABLE:.id = :ORDER_LINE_TABLE:.order_id', { ORDER_LINE_TABLE, ORDER_TABLE, schema }),
-  	where: unitOfWork.dbConnection.raw('customer_id = :customerId', { customerId }),
-    groupBy: unitOfWork.dbConnection.raw(':ORDER_TABLE:.id', { ORDER_TABLE }),
-  })).map(order => ({ ...order, orderLines: order.orderLines.filter(ol => ol) }));
+  return await unitOfWork.getAllWhere(schema, { 
+    tableName: EVENT_ORGANIZER_TABLE, 
+    columns: EVENT_ORGANIZER_TABLE_COLUMNS,
+    where: unitOfWork.dbConnection.raw('identification LIKE :identification', { identification: `%${identification}%` })
+  });
 };
 
-export const updateOrderLine = async (dbContext, { orderId, externalProductId, orderLine, trx }) => {
+export const getEventOrganizersByName = async (dbContext, name) => { 
+  const unitOfWork = new UnitOfWork(dbContext);
+  return await unitOfWork.getAllWhere(schema, { 
+    tableName: EVENT_ORGANIZER_TABLE, 
+    columns: EVENT_ORGANIZER_TABLE_COLUMNS,
+    where: unitOfWork.dbConnection.raw('name LIKE :name', { name: `%${name}%` })
+  });
+};
+
+
+export const updateEventOrganizer = async (dbContext, organizerId, organizer) => {
   const unitOfWork = new UnitOfWork(dbContext);
   return await unitOfWork.update(schema, { 
-    tableName: ORDER_LINE_TABLE, 
-    columns: ORDER_LINE_TABLE_COLUMNS,
-    entity: orderLine,
-    where: unitOfWork.dbConnection.raw('order_id = :orderId AND external_product_id = :externalProductId', { orderId, externalProductId }),
-    trx,
+    tableName: EVENT_ORGANIZER_TABLE, 
+    columns: EVENT_ORGANIZER_TABLE_COLUMNS,
+    entity: organizer,
+    where: unitOfWork.dbConnection.raw('id = :organizerId', { organizerId })
   });
 };
 
-export const upsertOrderLine = async (dbContext, { orderId, externalProductId, orderLine, trx }) => {
-  const unitOfWork = new UnitOfWork(dbContext);
-  return await unitOfWork.create(schema, { 
-    tableName: ORDER_LINE_TABLE, 
-    columns: ORDER_LINE_TABLE_COLUMNS,
-    entity: orderLine,
-    onConflict: unitOfWork.dbConnection.raw(`ON CONFLICT (order_id, external_product_Id) DO UPDATE SET ${unitOfWork.formatSetValues(ORDER_LINE_TABLE_COLUMNS, orderLine)}`),
-    trx,
-  });
-};
-
-export const updateOrder = async (dbContext, { orderId, order, trx }) => { 
-  const unitOfWork = new UnitOfWork(dbContext);
-  return await unitOfWork.update(schema, { 
-  	tableName: ORDER_TABLE, 
-  	columns: ORDER_TABLE_COLUMNS,
-  	entity: order,
-  	where: unitOfWork.dbConnection.raw('id = :orderId', { orderId }),
-    trx,
-  });
-};
-
-export const deleteOrderLine = async (dbContext, { orderId, externalProductId, trx }) => { 
+export const deleteEventOrganizer = async (dbContext, organizerId) => { 
   const unitOfWork = new UnitOfWork(dbContext);
   return await unitOfWork.delete(schema, { 
-    tableName: ORDER_LINE_TABLE, 
-    where: unitOfWork.dbConnection.raw('order_id = :orderId AND external_product_id = :externalProductId', { orderId, externalProductId }),
-    trx,
-  });
-};
-
-export const deleteOrder = async (dbContext, { orderId, trx }) => { 
-  const unitOfWork = new UnitOfWork(dbContext);
-  return await unitOfWork.delete(schema, { 
-  	tableName: ORDER_TABLE, 
-  	where: unitOfWork.dbConnection.raw('id = :orderId', { orderId }),
+  	tableName: EVENT_ORGANIZER_TABLE, 
+  	where: unitOfWork.dbConnection.raw('id = :organizerId', { organizerId }),
     trx
   });
 };
 
-export const createOrderLine = async (dbContext, { orderLine, trx }) => {
+export const createEventOrganizer = async (dbContext, organizer) => {
   const result = await (new UnitOfWork(dbContext).create(schema, { 
-    tableName: ORDER_LINE_TABLE, 
-    columns: ORDER_LINE_TABLE_COLUMNS,
-    entity: orderLine,
-    trx,
+    tableName: EVENT_ORGANIZER_TABLE, 
+    columns: EVENT_ORGANIZER_TABLE_COLUMNS,
+    entity: organizer,
   }));
   
   return (result.length && result[0]) || {};
 };
 
-export const createOrder = async (dbContext, { order, trx }) => {
-  const result = await (new UnitOfWork(dbContext).create(schema, { 
-    tableName: ORDER_TABLE, 
-    columns: ORDER_TABLE_COLUMNS,
-    entity: order,
+export const upsertUsersByOrganizer = async (dbContext, { usersByOrganizer, trx }) => {
+  const unitOfWork = new UnitOfWork(dbContext);
+  return await unitOfWork.create(schema, { 
+    tableName: USERS_BY_ORGANIZER_TABLE, 
+    columns: USERS_BY_ORGANIZER_TABLE_COLUMNS,
+    entity: usersByOrganizer,
+    onConflict: unitOfWork.dbConnection.raw(`ON CONFLICT (event_organizer_id, external_user_id) DO UPDATE SET ${unitOfWork.formatSetValues(USERS_BY_ORGANIZER_TABLE_COLUMNS, usersByOrganizer)}`),
     trx,
-  }));
-  
-  return (result.length && result[0]) || {};
+  });
 };
+
+export const deleteUsersByOrganizerByOrganizerId = async (dbContext, { organizerId, trx }) => { 
+  const unitOfWork = new UnitOfWork(dbContext);
+  return await unitOfWork.delete(schema, { 
+    tableName: USERS_BY_ORGANIZER_TABLE, 
+    where: unitOfWork.dbConnection.raw('event_organizer_id = :organizerId', { organizerId }),
+    trx
+  });
+};
+
+export const getUsersByOrganizerId = async (dbContext, organizerId) => { 
+  const unitOfWork = new UnitOfWork(dbContext);
+  return await unitOfWork.getOneWhere(schema, { 
+    tableName: USERS_BY_ORGANIZER_TABLE, 
+    columns: USERS_BY_ORGANIZER_TABLE_COLUMNS,
+    where: unitOfWork.dbConnection.raw('event_organizer_id = :organizerId', { organizerId })
+  });
+};
+

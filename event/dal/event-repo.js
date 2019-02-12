@@ -81,7 +81,6 @@ export const getEventsByName = async (dbContext, name) => {
   });
 };
 
-
 export const updateEvent = async (dbContext, eventId, event) => { 
   const unitOfWork = new UnitOfWork(dbContext);
   return await unitOfWork.update(schema, { 
@@ -110,7 +109,7 @@ export const createEvent = async (dbContext, event, trx) => {
   return (result.length && result[0]) || {};
 };
 
-export const upsertSalesTarget = async (dbContext, { eventId, salesTarget, trx }) => {
+export const upsertSalesTarget = async (dbContext, { salesTarget, trx }) => {
   const unitOfWork = new UnitOfWork(dbContext);
   return await unitOfWork.create(schema, { 
     tableName: SALES_TARGET_TABLE, 
@@ -121,11 +120,12 @@ export const upsertSalesTarget = async (dbContext, { eventId, salesTarget, trx }
   });
 };
 
-export const deleteSalesTargetByEventId = async (dbContext, eventId) => { 
+export const deleteSalesTargetByEventId = async (dbContext, { eventId, trx }) => { 
   const unitOfWork = new UnitOfWork(dbContext);
   return await unitOfWork.delete(schema, { 
     tableName: SALES_TARGET_TABLE, 
-    where: unitOfWork.dbConnection.raw('event_id = :eventId', { eventId })
+    where: unitOfWork.dbConnection.raw('event_id = :eventId', { eventId }),
+    trx,
   });
 };
 

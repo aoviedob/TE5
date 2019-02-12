@@ -1,126 +1,67 @@
 import UnitOfWork from '../database/unit_of_work.js';
 import { UnitOfWorkContext } from '../helpers/enums/unit_of_work';
 import { schema } from '../config';
-import moment from 'moment';
-import { formatDBColumns } from '../helpers/formatter';
 
-export const ORDER_TABLE = 'order';
-export const ORDER_LINE_TABLE = 'order_line';
+export const EVENT_CATEGORY_TABLE = 'event_category';
 
-const ORDER_TABLE_COLUMNS = [
+const EVENT_CATEGORY_TABLE_COLUMNS = [
   'id',
-  'customer_id',
-  'total_amount',
-  'status',
+  'name',
+  'metadata',
+  'settings',
+  'updated_by',
+  'created_by',
   'created_at',
-  'updated_at'
+  'updated_at',
 ];
 
-const ORDER_LINE_TABLE_COLUMNS = [
-  'id',
-  'order_id',
-  'external_product_name',
-  'external_product_id',
-  'quantity',
-  'created_at',
-  'updated_at'
-];
+export const getEventCategories = async dbContext => 
+  await(new UnitOfWork(dbContext).getAll(schema, { 
+    tableName: EVENT_CATEGORY_TABLE, 
+    columns: EVENT_CATEGORY_TABLE_COLUMNS 
+  }));
 
-export const getOrderById = async (dbContext, { orderId, trx }) => { 
+export const getEventCategoryById = async (dbContext, categoryId) => { 
   const unitOfWork = new UnitOfWork(dbContext);
-  const order = await unitOfWork.getOneWhere(schema, { 
-  	tableName: ORDER_TABLE, 
-  	columns: [...formatDBColumns(ORDER_TABLE, ORDER_TABLE_COLUMNS), `json_agg("${ORDER_LINE_TABLE}".*) as "orderLines"`],
-    join: unitOfWork.dbConnection.raw('LEFT JOIN :schema:.:ORDER_LINE_TABLE: ON :ORDER_TABLE:.id = :ORDER_LINE_TABLE:.order_id', { ORDER_LINE_TABLE, ORDER_TABLE, schema }),
-  	where: unitOfWork.dbConnection.raw(':ORDER_TABLE:.id = :orderId', { orderId, ORDER_TABLE }),
-    groupBy: unitOfWork.dbConnection.raw(':ORDER_TABLE:.id', { ORDER_TABLE }),
-    trx,
+  return await unitOfWork.getOneWhere(schema, { 
+    tableName: EVENT_CATEGORY_TABLE, 
+    columns: EVENT_CATEGORY_TABLE_COLUMNS,
+    where: unitOfWork.dbConnection.raw('id = :categoryId', { categoryId })
   });
-  const { orderLines, id } = order;
-  if(!id) return {};
-
-  return { ...order, orderLines: (orderLines ? orderLines.filter(ol => ol) : []) };
 };
 
-export const getOrdersByCustomerId = async (dbContext, customerId) => { 
+export const getEventCategoriesByName = async (dbContext, name) => { 
   const unitOfWork = new UnitOfWork(dbContext);
-  return (await unitOfWork.getAllWhere(schema, { 
-  	tableName: ORDER_TABLE, 
-  	columns: [...formatDBColumns(ORDER_TABLE, ORDER_TABLE_COLUMNS), `json_agg("${ORDER_LINE_TABLE}".*) as "orderLines"`],
-    join: unitOfWork.dbConnection.raw('LEFT JOIN :schema:.:ORDER_LINE_TABLE: ON :ORDER_TABLE:.id = :ORDER_LINE_TABLE:.order_id', { ORDER_LINE_TABLE, ORDER_TABLE, schema }),
-  	where: unitOfWork.dbConnection.raw('customer_id = :customerId', { customerId }),
-    groupBy: unitOfWork.dbConnection.raw(':ORDER_TABLE:.id', { ORDER_TABLE }),
-  })).map(order => ({ ...order, orderLines: order.orderLines.filter(ol => ol) }));
+  return await unitOfWork.getAllWhere(schema, { 
+    tableName: EVENT_CATEGORY_TABLE, 
+    columns: EVENT_CATEGORY_TABLE_COLUMNS,
+    where: unitOfWork.dbConnection.raw('name LIKE :name', { name: `%${name}%` })
+  });
 };
-
-export const updateOrderLine = async (dbContext, { orderId, externalProductId, orderLine, trx }) => {
+export const updateEventCategory = async (dbContext, categoryId, category) => {
   const unitOfWork = new UnitOfWork(dbContext);
   return await unitOfWork.update(schema, { 
-    tableName: ORDER_LINE_TABLE, 
-    columns: ORDER_LINE_TABLE_COLUMNS,
-    entity: orderLine,
-    where: unitOfWork.dbConnection.raw('order_id = :orderId AND external_product_id = :externalProductId', { orderId, externalProductId }),
-    trx,
+    tableName: EVENT_CATEGORY_TABLE, 
+    columns: EVENT_CATEGORY_TABLE_COLUMNS,
+    entity: category,
+    where: unitOfWork.dbConnection.raw('id = :categoryId', { categoryId })
   });
 };
 
-export const upsertOrderLine = async (dbContext, { orderId, externalProductId, orderLine, trx }) => {
-  const unitOfWork = new UnitOfWork(dbContext);
-  return await unitOfWork.create(schema, { 
-    tableName: ORDER_LINE_TABLE, 
-    columns: ORDER_LINE_TABLE_COLUMNS,
-    entity: orderLine,
-    onConflict: unitOfWork.dbConnection.raw(`ON CONFLICT (order_id, external_product_Id) DO UPDATE SET ${unitOfWork.formatSetValues(ORDER_LINE_TABLE_COLUMNS, orderLine)}`),
-    trx,
-  });
-};
-
-export const updateOrder = async (dbContext, { orderId, order, trx }) => { 
-  const unitOfWork = new UnitOfWork(dbContext);
-  return await unitOfWork.update(schema, { 
-  	tableName: ORDER_TABLE, 
-  	columns: ORDER_TABLE_COLUMNS,
-  	entity: order,
-  	where: unitOfWork.dbConnection.raw('id = :orderId', { orderId }),
-    trx,
-  });
-};
-
-export const deleteOrderLine = async (dbContext, { orderId, externalProductId, trx }) => { 
+export const deleteEventCategory = async (dbContext, categoryId) => { 
   const unitOfWork = new UnitOfWork(dbContext);
   return await unitOfWork.delete(schema, { 
-    tableName: ORDER_LINE_TABLE, 
-    where: unitOfWork.dbConnection.raw('order_id = :orderId AND external_product_id = :externalProductId', { orderId, externalProductId }),
-    trx,
-  });
-};
-
-export const deleteOrder = async (dbContext, { orderId, trx }) => { 
-  const unitOfWork = new UnitOfWork(dbContext);
-  return await unitOfWork.delete(schema, { 
-  	tableName: ORDER_TABLE, 
-  	where: unitOfWork.dbConnection.raw('id = :orderId', { orderId }),
+    tableName: EVENT_CATEGORY_TABLE, 
+    where: unitOfWork.dbConnection.raw('id = :categoryId', { categoryId }),
     trx
   });
 };
 
-export const createOrderLine = async (dbContext, { orderLine, trx }) => {
+export const createEventCategory = async (dbContext, category) => {
   const result = await (new UnitOfWork(dbContext).create(schema, { 
-    tableName: ORDER_LINE_TABLE, 
-    columns: ORDER_LINE_TABLE_COLUMNS,
-    entity: orderLine,
-    trx,
-  }));
-  
-  return (result.length && result[0]) || {};
-};
-
-export const createOrder = async (dbContext, { order, trx }) => {
-  const result = await (new UnitOfWork(dbContext).create(schema, { 
-    tableName: ORDER_TABLE, 
-    columns: ORDER_TABLE_COLUMNS,
-    entity: order,
-    trx,
+    tableName: EVENT_CATEGORY_TABLE, 
+    columns: EVENT_CATEGORY_TABLE_COLUMNS,
+    entity: category,
   }));
   
   return (result.length && result[0]) || {};
