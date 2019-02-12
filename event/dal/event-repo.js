@@ -3,6 +3,7 @@ import { UnitOfWorkContext } from '../helpers/enums/unit_of_work';
 import { schema } from '../config';
 
 export const EVENT_TABLE = 'event';
+export const SALES_TARGET_TABLE = 'sales_target';
 const EVENT_TABLE_COLUMNS = [
   'id',
   'event_category_id',
@@ -27,74 +28,113 @@ const EVENT_TABLE_COLUMNS = [
   'updated_at'
 ];
 
+const SALES_TARGET_TABLE_COLUMNS = [
+  'id',
+  'event_id',
+  'tickets_target',
+  'earnings_target',
+  'updated_by',
+  'created_by',
+  'created_at',
+  'updated_at'
+];
+
 export const getEvents = async dbContext => 
   await(new UnitOfWork(dbContext).getAll(schema, { 
   	tableName: EVENT_TABLE, 
   	columns: EVENT_TABLE_COLUMNS 
   }));
 
-export const getCustomerById = async (dbContext, customerId) => { 
+export const getEventById = async (dbContext, eventId) => { 
   const unitOfWork = new UnitOfWork(dbContext);
   return await unitOfWork.getOneWhere(schema, { 
   	tableName: EVENT_TABLE, 
   	columns: EVENT_TABLE_COLUMNS,
-  	where: unitOfWork.dbConnection.raw('id = :customerId', { customerId })
+  	where: unitOfWork.dbConnection.raw('id = :eventId', { eventId })
   });
 };
 
-export const getCustomerByEmail = async (dbContext, email) => { 
-  const unitOfWork = new UnitOfWork(dbContext);
-  return await unitOfWork.getOneWhere(schema, { 
-    tableName: EVENT_TABLE, 
-    columns: EVENT_TABLE_COLUMNS,
-    where: unitOfWork.dbConnection.raw('email = :email', { email })
-  });
-};
-
-
-export const getCustomersByName = async (dbContext, name) => { 
+export const getEventsByCategoryId = async (dbContext, categoryId) => { 
   const unitOfWork = new UnitOfWork(dbContext);
   return await unitOfWork.getAllWhere(schema, { 
-  	tableName: EVENT_TABLE, 
+  	tableName: EVENT_TABLE_i 
   	columns: EVENT_TABLE_COLUMNS,
-  	where: unitOfWork.dbConnection.raw('fullname LIKE :name', { name: `%${name}%` })
+  	where: unitOfWork.dbConnection.raw('event_category_id = :categoryId', { categoryId })
   });
 };
 
-export const getCustomersByEmail = async (dbContext, email) => { 
+export const getEventsByOrganizerId = async (dbContext, organizerId) => { 
+  const unitOfWork = new UnitOfWork(dbContext);
+  return await unitOfWork.getAllWhere(schema, { 
+    tableName: EVENT_TABLE_i 
+    columns: EVENT_TABLE_COLUMNS,
+    where: unitOfWork.dbConnection.raw('event_organizer_id = :organizerId', { organizerId })
+  });
+};
+
+export const getEventsByName = async (dbContext, name) => { 
   const unitOfWork = new UnitOfWork(dbContext);
   return await unitOfWork.getAllWhere(schema, { 
     tableName: EVENT_TABLE, 
     columns: EVENT_TABLE_COLUMNS,
-    where: unitOfWork.dbConnection.raw('email LIKE :email', { email: `%${email}%` })
+    where: unitOfWork.dbConnection.raw('name LIKE :name', { name: `%${name}%` })
   });
 };
 
 
-export const updateCustomer = async (dbContext, customerId, customer) => { 
+export const updateEvent = async (dbContext, eventId, event) => { 
   const unitOfWork = new UnitOfWork(dbContext);
   return await unitOfWork.update(schema, { 
   	tableName: EVENT_TABLE, 
   	columns: EVENT_TABLE_COLUMNS,
-  	entity: customer,
-  	where: unitOfWork.dbConnection.raw('id = :customerId', { customerId })
+  	entity: event,
+  	where: unitOfWork.dbConnection.raw('id = :eventId', { eventId })
   });
 };
 
-export const deleteCustomer = async (dbContext, customerId) => { 
+export const deleteEvent = async (dbContext, eventId) => { 
   const unitOfWork = new UnitOfWork(dbContext);
   return await unitOfWork.delete(schema, { 
   	tableName: EVENT_TABLE, 
-  	where: unitOfWork.dbConnection.raw('id = :customerId', { customerId })
+  	where: unitOfWork.dbConnection.raw('id = :eventId', { eventId })
   });
 };
 
-export const createCustomer = async (dbContext, customer) => {
+export const createEvent = async (dbContext, event, trx) => {
   const result = await (new UnitOfWork(dbContext).create(schema, { 
     tableName: EVENT_TABLE, 
     columns: EVENT_TABLE_COLUMNS,
-    entity: customer,
+    entity: event,
   }));
   
   return (result.length && result[0]) || {};
 };
+
+export const upsertSalesTarget = async (dbContext, { eventId, salesTarget, trx }) => {
+  const unitOfWork = new UnitOfWork(dbContext);
+  return await unitOfWork.create(schema, { 
+    tableName: SALES_TARGET_TABLE, 
+    columns: SALES_TARGET_TABLE_COLUMNS,
+    entity: salesTarget,
+    onConflict: unitOfWork.dbConnection.raw(`ON CONFLICT (event_id) DO UPDATE SET ${unitOfWork.formatSetValues(SALES_TARGET_TABLE_COLUMNS, salesTarget)}`),
+    trx,
+  });
+};
+
+export const deleteSalesTargetByEventId = async (dbContext, eventId) => { 
+  const unitOfWork = new UnitOfWork(dbContext);
+  return await unitOfWork.delete(schema, { 
+    tableName: SALES_TARGET_TABLE, 
+    where: unitOfWork.dbConnection.raw('event_id = :eventId', { eventId })
+  });
+};
+
+export const getSalesTargetByEventId = async (dbContext, eventId) => { 
+  const unitOfWork = new UnitOfWork(dbContext);
+  return await unitOfWork.getOneWhere(schema, { 
+    tableName: SALES_TARGET_TABLE, 
+    columns: SALES_TARGET_TABLE_COLUMNS,
+    where: unitOfWork.dbConnection.raw('event_id = :eventId', { eventId })
+  });
+};
+
