@@ -1,46 +1,88 @@
-import * as customerRepo from '../dal/customer-repo';
+import * as eventRepo from '../dal/event-repo';
 import { validatePreconditions } from '../helpers/validator';
 import { mapRepoEntity, mapParams } from '../helpers/mapper';
-import { createUser } from './external-service';
+import UnitOfWork from '../database/unit_of_work.js';
 
-export const getCustomers = async dbContext => { 
+export const getEvents = async dbContext => { 
   validatePreconditions(['dbContext'], { dbContext });
-  return (await customerRepo.getCustomers(dbContext)).map(customer => mapRepoEntity(customer));
+  return (await eventRepo.getEvents(dbContext)).map(event => mapRepoEntity(event));
 };
 
-export const getCustomerById = async (dbContext, customerId) => {
-  validatePreconditions(['dbContext', 'customerId'], { dbContext, customerId });
-  return mapRepoEntity((await customerRepo.getCustomerById(dbContext, customerId)));
+export const getEventById = async (dbContext, eventId) => {
+  validatePreconditions(['dbContext', 'eventId'], { dbContext, eventId });
+  return mapRepoEntity((await eventRepo.getEventById(dbContext, eventId)));
 };
 
-export const getCustomersByName = async (dbContext, name) => {
+export const getEventsByCategoryId = async (dbContext, categoryId) => {
+  validatePreconditions(['dbContext', 'categoryId'], { dbContext, categoryId });
+  return (await eventRepo.getEventsByCategoryId(dbContext, categoryId)).map(event => mapRepoEntity(event));
+};
+
+export const getEventsByOrganizerId = async (dbContext, organizerId) => {
+  validatePreconditions(['dbContext', 'organizerId'], { dbContext, organizerId });
+  return (await eventRepo.getEventsByOrganizerId(dbContext, organizerId)).map(event => mapRepoEntity(event));
+};
+
+export const getEventsByName = async (dbContext, name) => {
   validatePreconditions(['dbContext', 'name'], { dbContext, name });
-  return (await customerRepo.getCustomersByName(dbContext, name)).map(customer => mapRepoEntity(customer));
+  return (await eventRepo.getEventsByName(dbContext, name)).map(event => mapRepoEntity(event));
 };
 
-export const getCustomersByEmail = async (dbContext, email) => {
-  validatePreconditions(['dbContext', 'email'], { dbContext, email });
-  return (await customerRepo.getCustomersByEmail(dbContext, email)).map(customer => mapRepoEntity(customer));
+export const updateEvent = async (dbContext, eventId, event, userId) => { 
+  validatePreconditions(['dbContext', 'eventId', 'event', 'userId'], { dbContext, eventId, event, userId });
+
+  await ((new UnitOfWork(dbContext)).transact(async (trx, resolve, reject) => {
+    try {
+
+      const auditColumns = { updatedBy: userId };
+      await eventRepo.updateEvent(dbContext,{ eventId, event: mapParams({ ...event, ...auditColumns }), trx });
+      const { salesTarget } = event;
+      if (salesTarget) {
+        await eventRepo.upsertSalesTarget(dbContext, { salesTarget: mapParams({ ...salesTarget, eventId, ...auditColumns }), trx });
+      }
+      resolve(true);
+    } catch (error) {
+      reject(error);
+    }
+  }));
 };
 
-export const getCustomerByEmail = async (dbContext, email) => {
-  validatePreconditions(['dbContext', 'email'], { dbContext, email });
-  return mapRepoEntity(await customerRepo.getCustomerByEmail(dbContext, email));
+export const createEvent = async (dbContext, event, userId) => {
+  validatePreconditions(['dbContext', 'eventCategoryId', 'eventOrganizerId', 'name', 'tags', 'coverImageUrl', 'startDate', 'endDate', 'status', 'country', 'addressLine1', 'addressLine2', 'latitude', 'longitude', 'userId' ], { dbContext, ...event, userId });
+ 
+  await ((new UnitOfWork(dbContext)).transact(async (trx, resolve, reject) => {
+    try {
+
+      const auditColumns = { updatedBy: userId, createdBy: userId };
+      const { id: eventId } = await eventRepo.createEvent(dbContext, { event: mapParams({ ...event, ...auditColumns }), trx });
+      const { salesTarget } = event;
+      if (salesTarget) {
+        await eventRepo.upsertSalesTarget(dbContext, { salesTarget: mapParams({ ...salesTarget, eventId, ...auditColumns }), trx });
+      }
+      resolve(await getEventById(dbContext, eventId));
+    } catch (error) {
+      reject(error);
+    }
+  }));
 };
 
-export const updateCustomer = async (dbContext, customerId, customer) => { 
-  validatePreconditions(['dbContext', 'customerId', 'customer'], { dbContext, customerId, customer });
-  return await customerRepo.updateCustomer(dbContext, customerId, mapParams(customer));
+export const deleteEvent = async (dbContext, eventId) => {
+  validatePreconditions(['dbContext', 'eventId'], { dbContext, eventId });
+  
+  await ((new UnitOfWork(dbContext)).transact(async (trx, resolve, reject) => {
+    try {
+      await eventRepo.deleteEvent(dbContext, { eventId, trx });
+      
+      await eventRepo.deleteSalesTargetByEventId(dbContext, { eventId, trx })<
+      
+      resolve(true);
+    } catch (error) {
+      reject(error);
+    }
+  }));
 };
 
-export const createCustomer = async (dbContext, customer) => {
-  validatePreconditions(['dbContext', 'email', 'fullname', 'password'], { dbContext, ...customer });
-  const externalUserId = await createUser(customer);
-  const { id: customerId } = await customerRepo.createCustomer(dbContext, mapParams({ ...customer, externalUserId }));
-  return await getCustomerById(dbContext, customerId);
-};
-
-export const deleteCustomer = async (dbContext, customerId) => {
-  validatePreconditions(['dbContext', 'customerId'], { dbContext, customerId });
-  await customerRepo.deleteCustomer(dbContext, customerId);
+export const getSalesTargetByEventId = async (dbContext, eventId) => {
+  validatePreconditions(['dbContext', 'eventId'], { dbContext, eventId });
+  return mapRepoEntity((await eventRepo.getSalesTargetByEventId(dbContext, eventId)));
 };

@@ -70,17 +70,18 @@ export const getEventOrganizersByName = async (dbContext, name) => {
 };
 
 
-export const updateEventOrganizer = async (dbContext, organizerId, organizer) => {
+export const updateEventOrganizer = async (dbContext, { organizerId, organizer, trx }) => {
   const unitOfWork = new UnitOfWork(dbContext);
   return await unitOfWork.update(schema, { 
     tableName: EVENT_ORGANIZER_TABLE, 
     columns: EVENT_ORGANIZER_TABLE_COLUMNS,
     entity: organizer,
-    where: unitOfWork.dbConnection.raw('id = :organizerId', { organizerId })
+    where: unitOfWork.dbConnection.raw('id = :organizerId', { organizerId }),
+    trx
   });
 };
 
-export const deleteEventOrganizer = async (dbContext, organizerId) => { 
+export const deleteEventOrganizer = async (dbContext, { organizerId, trx }) => { 
   const unitOfWork = new UnitOfWork(dbContext);
   return await unitOfWork.delete(schema, { 
   	tableName: EVENT_ORGANIZER_TABLE, 
@@ -89,11 +90,12 @@ export const deleteEventOrganizer = async (dbContext, organizerId) => {
   });
 };
 
-export const createEventOrganizer = async (dbContext, organizer) => {
+export const createEventOrganizer = async (dbContext, { organizer, trx }) => {
   const result = await (new UnitOfWork(dbContext).create(schema, { 
     tableName: EVENT_ORGANIZER_TABLE, 
     columns: EVENT_ORGANIZER_TABLE_COLUMNS,
     entity: organizer,
+    trx
   }));
   
   return (result.length && result[0]) || {};

@@ -81,29 +81,32 @@ export const getEventsByName = async (dbContext, name) => {
   });
 };
 
-export const updateEvent = async (dbContext, eventId, event) => { 
+export const updateEvent = async (dbContext, { eventId, event, trx }) => { 
   const unitOfWork = new UnitOfWork(dbContext);
   return await unitOfWork.update(schema, { 
   	tableName: EVENT_TABLE, 
   	columns: EVENT_TABLE_COLUMNS,
   	entity: event,
-  	where: unitOfWork.dbConnection.raw('id = :eventId', { eventId })
+  	where: unitOfWork.dbConnection.raw('id = :eventId', { eventId }),
+    trx
   });
 };
 
-export const deleteEvent = async (dbContext, eventId) => { 
+export const deleteEvent = async (dbContext, { eventId, trx }) => { 
   const unitOfWork = new UnitOfWork(dbContext);
   return await unitOfWork.delete(schema, { 
   	tableName: EVENT_TABLE, 
-  	where: unitOfWork.dbConnection.raw('id = :eventId', { eventId })
+  	where: unitOfWork.dbConnection.raw('id = :eventId', { eventId }),
+    trx
   });
 };
 
-export const createEvent = async (dbContext, event, trx) => {
+export const createEvent = async (dbContext, { event, trx }) => {
   const result = await (new UnitOfWork(dbContext).create(schema, { 
     tableName: EVENT_TABLE, 
     columns: EVENT_TABLE_COLUMNS,
     entity: event,
+    trx
   }));
   
   return (result.length && result[0]) || {};
