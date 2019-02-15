@@ -23,17 +23,17 @@ export const getEventOrganizersByName = async (dbContext, name) => {
   return (await eventOrganizerRepo.getEventOrganizersByName(dbContext, name)).map(organizer => mapRepoEntity(organizer));
 };
 
-export const updateEventOrganizer = async (dbContext, eventId, event, userId) => { 
-  validatePreconditions(['dbContext', 'eventId', 'event', 'userId'], { dbContext, eventId, event, userId });
+export const updateEventOrganizer = async (dbContext, organizerId, organizer, userId) => { 
+  validatePreconditions(['dbContext', 'organizerId', 'organizer', 'userId'], { dbContext, organizerId, organizer, userId });
 
   await ((new UnitOfWork(dbContext)).transact(async (trx, resolve, reject) => {
     try {
 
       const auditColumns = { updatedBy: userId };
-      await eventOrganizerRepo.updateEventOrganizer(dbContext,{ eventId, event: mapParams({ ...event, ...auditColumns }), trx });
-      const { salesTarget } = event;
-      if (salesTarget) {
-        await eventOrganizerRepo.upsertSalesTarget(dbContext, { salesTarget: mapParams({ ...salesTarget, eventId }), trx });
+      await eventOrganizerRepo.updateEventOrganizer(dbContext, { organizerId, organizer: mapParams({ ...organizer, ...auditColumns }), trx });
+      const { usersByOrganizer = [] } = organizer;
+      if (usersByOrganizer.length) {
+        await Promise.all(usersByOrganizer.map(async user => await eventOrganizerRepo.upsertUsersByOrganizer(dbContext, { usersByOrganizer: mapParams({ ...user, organizerId, ...auditColumns }), trx });
       }
       resolve(true);
     } catch (error) {
@@ -42,32 +42,33 @@ export const updateEventOrganizer = async (dbContext, eventId, event, userId) =>
   }));
 };
 
-export const createEvent = async (dbContext, event, userId) => {
-  validatePreconditions(['dbContext', 'eventCategoryId', 'eventOrganizerId', 'name', 'tags', 'coverImageUrl', 'startDate', 'endDate', 'status', 'country', 'addressLine1', 'addressLine2', 'latitude', 'longitude', 'userId' ], { dbContext, ...event, userId });
+export const createEventOrganizer = async (dbContext, organizer, userId) => {
+  validatePreconditions(['dbContext', 'name', 'identification', 'type', 'email', 'phone', 'userId' ], { dbContext, ...organizer, userId });
  
   await ((new UnitOfWork(dbContext)).transact(async (trx, resolve, reject) => {
     try {
 
-      const { id: eventId } = await eventOrganizerRepo.createEvent(dbContext, { event: mapParams({ ...event, updatedBy: userId, createdBy: userId }), trx });
-      const { salesTarget } = event;
-      if (salesTarget) {
-        await eventOrganizerRepo.upsertSalesTarget(dbContext, { salesTarget: mapParams({ ...salesTarget, eventId }), trx });
+      const auditColumns = { updatedBy: userId, createdBy: userId };
+      const { id: organizerId } = await eventOrganizerRepo.createEventOrganizer(dbContext, { organizer: mapParams({ ...organizer, ...auditColumns }), trx });
+      const { usersByOrganizer = [] } = organizer;
+      if (usersByOrganizer.length) {
+        await Promise.all(usersByOrganizer.map(async user => await eventOrganizerRepo.upsertUsersByOrganizer(dbContext, { usersByOrganizer: mapParams({ ...user, organizerId, ...auditColumns }), trx });
       }
-      resolve(await getEventById(dbContext, eventId));
+      resolve(await getEventOrganizerById(dbContext, organizerId));
     } catch (error) {
       reject(error);
     }
   }));
 };
 
-export const deleteEvent = async (dbContext, eventId) => {
-  validatePreconditions(['dbContext', 'eventId'], { dbContext, eventId });
+export const deleteEventOrganizer = async (dbContext, organizerId) => {
+  validatePreconditions(['dbContext', 'organizerId'], { dbContext, organizerId });
   
   await ((new UnitOfWork(dbContext)).transact(async (trx, resolve, reject) => {
     try {
-      await eventOrganizerRepo.deleteEvent(dbContext, { eventId, trx });
+      await eventOrganizerRepo.deleteEventOrganizer(dbContext, { organizerId, trx });
       
-      await eventOrganizerRepo.deleteSalesTargetByEventId(dbContext, { eventId, trx })<
+      await eventOrganizerRepo.deleteUsersByOrganizerByOrganizerId(dbContext, { organizerId, trx })<
       
       resolve(true);
     } catch (error) {
@@ -76,7 +77,7 @@ export const deleteEvent = async (dbContext, eventId) => {
   }));
 };
 
-export const getSalesTargetByEventId = async (dbContext, eventId) => {
-  validatePreconditions(['dbContext', 'eventId'], { dbContext, eventId });
-  return mapRepoEntity((await eventOrganizerRepo.getSalesTargetByEventId(dbContext, eventId)));
+export const getUsersByOrganizerId = async (dbContext, organizerId) => {
+  validatePreconditions(['dbContext', 'organizerId'], { dbContext, organizerId });
+  return mapRepoEntity((await eventOrganizerRepo.getUsersByOrganizerId(dbContext, organizerId)));
 };
