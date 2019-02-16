@@ -1,6 +1,6 @@
 import * as customerService from '../services/customer-service';
 import { UnitOfWorkContext } from '../helpers/enums/unit_of_work';
-import { RequiredRole } from '../decorators/authorization-handler';
+import { RequiredRole, authenticate } from '../decorators/authorization-handler';
 import { PredefinedRole } from '../helpers/enums/dal-types';
 
 const { POSTGRES_CONTEXT } = UnitOfWorkContext;
@@ -8,14 +8,14 @@ const { POSTGRES_CONTEXT } = UnitOfWorkContext;
 export default class CustomerApi {
 
   constructor(app) {
-    app.get('/api/customers', this.getCustomers);
-    app.get('/api/customers/:customerId', this.getCustomerById);
-    app.get('/api/customers/likeName/:name', this.getCustomersByName);
-    app.get('/api/customers/likeEmail/:email', this.getCustomersByEmail);
-    app.get('/api/customers/byEmail/:email', this.getCustomerByEmail);
-    app.post('/api/customers', this.createCustomer);
-    app.put('/api/customers/:customerId', this.updateCustomer);
-    app.delete('/api/customers/:customerId', this.deleteCustomer);
+    app.get('/api/customers', authenticate, this.getCustomers);
+    app.get('/api/customers/:customerId', authenticate, this.getCustomerById);
+    app.get('/api/customers/likeName/:name', authenticate, this.getCustomersByName);
+    app.get('/api/customers/likeEmail/:email', authenticate, this.getCustomersByEmail);
+    app.get('/api/customers/byEmail/:email', authenticate, this.getCustomerByEmail);
+    app.post('/api/customers', authenticate, this.createCustomer);
+    app.put('/api/customers/:customerId', authenticate, this.updateCustomer);
+    app.delete('/api/customers/:customerId', authenticate, this.deleteCustomer);
   }
 
   @RequiredRole([PredefinedRole.ADMIN])

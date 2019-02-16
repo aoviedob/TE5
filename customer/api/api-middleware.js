@@ -1,4 +1,3 @@
-import { verifyToken } from '../services/crypto-service';
 import { getTokenFromRequest } from '../helpers/request';
 
 const unprotectedApis = [
@@ -10,7 +9,6 @@ export const requestHandler = (route, action) =>
     if (!unprotectedApis.includes(route)) {
       try {
         const token = getTokenFromRequest(req);
-        req.tokenBody = verifyToken(token);
         req.token = token;
       } catch(error) {
         res.status(401).send('UNAUTHORIZED');

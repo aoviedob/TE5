@@ -1,65 +1,72 @@
 import * as eventService from '../services/event-service';
 import { UnitOfWorkContext } from '../helpers/enums/unit_of_work';
-import { RequiredRole } from '../decorators/authorization-handler';
+import { RequiredRole, authenticate } from '../decorators/authorization-handler';
 import { PredefinedRole } from '../helpers/enums/dal-types';
 
 const { POSTGRES_CONTEXT } = UnitOfWorkContext;
 
-export default class UserApi {
+export default class EventApi {
 
   constructor(app) {
-    app.get('/api/events', this.getEvents);
-    app.get('/api/events/:eventId', this.getEventById);
-    app.get('/api/events/:categoryId', this.getCustomersByName);
-    app.get('/api/customers/byEmail/:email', this.getCustomersByEmail);
-    app.get('/api/customer/byEmail/:email', this.getCustomerByEmail);
-    app.post('/api/customer', this.createCustomer);
-    app.put('/api/customer/:customerId', this.updateCustomer);
-    app.delete('/api/user/:customerId', this.deleteCustomer);
+    app.get('/api/events', authenticate, this.getEvents);
+    app.get('/api/events/:eventId', authenticate, this.getEventById);
+    app.get('/api/events/byCategory/:categoryId', authenticate, this.getEventsByCategoryId);
+    app.get('/api/events/byOrganizer/:organizerId', authenticate, this.getEventsByOrganizerId);
+    app.get('/api/events/byName/:name', authenticate, this.getEventsByName);
+    app.get('/api/events/salesTargets/:eventId', authenticate, this.getSalesTargetByEventId);
+    app.post('/api/events', authenticate, this.createEvent);
+    app.put('/api/events/:eventId', authenticate, this.updateEvent);
+    app.delete('/api/events/:eventId', authenticate, this.deleteEvent);
   }
 
-  @RequiredRole(['admin'])
-  async getEvents(req) { return await eventService.getCustomers(POSTGRES_CONTEXT); }
+  @RequiredRole([PredefinedRole.ADMIN, PredefinedRole.SYSTEM])
+  async getEvents(req) { return await eventService.getEvents(POSTGRES_CONTEXT); }
 
-  @RequiredRole(['admin'])
+  @RequiredRole([PredefinedRole.ADMIN, PredefinedRole.SYSTEM])
   async getEventById(req) {
     const { eventId } = req.params || {};
     return await eventService.getEventById(POSTGRES_CONTEXT, eventId);
   }
 
-  @RequiredRole(['admin'])
-  async getCustomersByName(req) {
+  @RequiredRole([PredefinedRole.ADMIN, PredefinedRole.SYSTEM])
+  async getEventsByCategoryId(req) {
+    const { categoryId } = req.params || {};
+    return await eventService.getEventsByCategoryId(POSTGRES_CONTEXT, categoryId);
+  }
+
+  @RequiredRole([PredefinedRole.ADMIN, PredefinedRole.SYSTEM])
+  async getEventsByOrganizerId(req) {
+    const { organizerId } = req.params || {};
+    return await eventService.getEventsByOrganizerId(POSTGRES_CONTEXT, organizerId);
+  }
+
+  @RequiredRole([PredefinedRole.ADMIN, PredefinedRole.SYSTEM])
+  async getEventsByName(req) {
     const { name } = req.params || {};
-    return await eventService.getCustomersByName(POSTGRES_CONTEXT, name);
+    return await eventService.getEventsByName(POSTGRES_CONTEXT, name);
   }
 
-  @RequiredRole(['admin'])
-  async getCustomersByEmail(req) {
-    const { email } = req.params || {};
-    return await eventService.getCustomersByEmail(POSTGRES_CONTEXT, email);
+  @RequiredRole([PredefinedRole.ADMIN])
+  async createEvent(req) {
+    const { body, tokenBody: { user: { id: userId }} } = req;
+    return await eventService.createEvent(POSTGRES_CONTEXT, body, userId);
   }
 
-  @RequiredRole(['admin'])
-  async getCustomerByEmail(req) {
-    const { email } = req.params || {};
-    return await eventService.getCustomerByEmail(POSTGRES_CONTEXT, email);
+  @RequiredRole([PredefinedRole.ADMIN])
+  async updateEvent(req) {
+    const { body, params, tokenBody: { user: { id: userId }} } = req;
+    return await eventService.updateEvent(POSTGRES_CONTEXT, params.eventId, body, userId);
   }
 
-  @RequiredRole(['admin'])
-  async createCustomer(req) {
-    const { body } = req;
-    return await eventService.createCustomer(POSTGRES_CONTEXT, body);
+  @RequiredRole([PredefinedRole.ADMIN])
+  async deleteEvent(req) {
+    const { eventId } = req.params || {};
+    return await eventService.deleteEvent(POSTGRES_CONTEXT, eventId);
   }
 
-  @RequiredRole(['admin'])
-  async updateCustomer(req) {
-    const { body, params = {} } = req;
-    return await eventService.updateCustomer(POSTGRES_CONTEXT, params.userId, body);
-  }
-
-  @RequiredRole(['admin'])
-  async deleteCustomer(req) {
-    const { userId } = req.params || {};
-    return await eventService.deleteCustomer(POSTGRES_CONTEXT, userId);
+  @RequiredRole([PredefinedRole.ADMIN])
+  async getSalesTargetByEventId(req) {
+    const { eventId } = req.params || {};
+    return await eventService.getSalesTargetByEventId(POSTGRES_CONTEXT, eventId);
   }
 }

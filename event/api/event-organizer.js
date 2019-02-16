@@ -1,69 +1,65 @@
-import * as orderService from '../services/order-service';
+import * as eventOrganizerService from '../services/event-organizer-service';
 import { UnitOfWorkContext } from '../helpers/enums/unit_of_work';
-import { RequiredRole } from '../decorators/authorization-handler';
+import { RequiredRole, authenticate } from '../decorators/authorization-handler';
 import { PredefinedRole } from '../helpers/enums/dal-types';
 
 const { POSTGRES_CONTEXT } = UnitOfWorkContext;
 
-export default class CustomerApi {
+export default class EventOrganizerApi {
 
   constructor(app) {
-    app.get('/api/orders/byCustomer/:customerId', this.getOrdersByCustomerId);
-    app.get('/api/orders/:orderId', this.getOrderById);
-    app.post('/api/orders', this.createOrder);
-    app.post('/api/orders/lines', this.createOrderLine);
-    app.put('/api/orders/:orderId', this.updateOrder);
-    app.put('/api/orders/lines/:orderId/:productId', this.updateOrderLine);
-    app.delete('/api/orders/:orderId', this.deleteOrder);
-    app.delete('/api/orders/lines/:orderId/:productId', this.deleteOrderLine);
+    app.get('/api/organizers', authenticate, this.getEventOrganizers);
+    app.get('/api/organizers/:organizerId', authenticate, this.getEventOrganizerById);
+    app.get('/api/organizers/byIdentification/:identification', authenticate, this.getEventOrganizersByIdentification);
+    app.get('/api/organizers/byName/:name', authenticate, this.getEventOrganizersByName);
+    app.get('/api/organizers/users/:organizerId', authenticate, this.getUsersByOrganizerId);
+    app.post('/api/organizers', authenticate, this.createEventOrganizer);
+    app.put('/api/organizers/:organizerId', authenticate, this.updateEventOrganizer);
+    app.delete('/api/organizers/:organizerId', authenticate, this.deleteEventOrganizer);
   }
 
-  @RequiredRole([PredefinedRole.ADMIN, PredefinedRole.CUSTOMER])
-  async getOrdersByCustomerId(req) { 
-    const { customerId } = req.params || {};
-    return await orderService.getOrdersByCustomerId(POSTGRES_CONTEXT, customerId); 
+  @RequiredRole([PredefinedRole.ADMIN, PredefinedRole.SYSTEM])
+  async getEventOrganizers(req) { return await eventOrganizerService.getEventOrganizers(POSTGRES_CONTEXT); }
+
+  @RequiredRole([PredefinedRole.ADMIN, PredefinedRole.SYSTEM])
+  async getEventOrganizerById(req) {
+    const { organizerId } = req.params || {};
+    return await eventOrganizerService.getEventOrganizerById(POSTGRES_CONTEXT, organizerId);
   }
 
-  @RequiredRole([PredefinedRole.ADMIN, PredefinedRole.CUSTOMER])
-  async getOrderById(req) {
-    const { orderId } = req.params || {};
-    return await orderService.getOrderById(POSTGRES_CONTEXT, { orderId });
+  @RequiredRole([PredefinedRole.ADMIN, PredefinedRole.SYSTEM])
+  async getEventOrganizersByIdentification(req) {
+    const { identification } = req.params || {};
+    return await eventOrganizerService.getEventOrganizersByIdentification(POSTGRES_CONTEXT, identification);
   }
 
-  @RequiredRole([PredefinedRole.ADMIN, PredefinedRole.CUSTOMER])
-  async createOrder(req) {
-    const { body } = req;
-    return await orderService.createOrder(req, { dbContext: POSTGRES_CONTEXT, order: body });
+  @RequiredRole([PredefinedRole.ADMIN, PredefinedRole.SYSTEM])
+  async getEventOrganizersByName(req) {
+    const { name } = req.params || {};
+    return await eventOrganizerService.getEventOrganizersByName(POSTGRES_CONTEXT, name);
   }
 
-  @RequiredRole([PredefinedRole.ADMIN, PredefinedRole.CUSTOMER])
-  async createOrderLine(req) {
-    const { body } = req;
-    return await orderService.createOrderLine(req, { dbContext: POSTGRES_CONTEXT, orderLine: body });
+  @RequiredRole([PredefinedRole.ADMIN])
+  async createEventOrganizer(req) {
+    const { body, tokenBody: { user: { id: userId }} } = req;
+    return await eventOrganizerService.createEventOrganizer(POSTGRES_CONTEXT, body, userId);
   }
 
-  @RequiredRole([PredefinedRole.ADMIN, PredefinedRole.CUSTOMER])
-  async updateOrder(req) {
-    const { body, params = {} } = req;
-    return await orderService.updateOrder(req, { dbContext: POSTGRES_CONTEXT, orderId: params.orderId, order: body });
+  @RequiredRole([PredefinedRole.ADMIN])
+  async updateEventOrganizer(req) {
+    const { body, params, tokenBody: { user: { id: userId }} } = req;
+    return await eventOrganizerService.updateEventOrganizer(POSTGRES_CONTEXT, params.organizerId, body, userId);
   }
 
-  @RequiredRole([PredefinedRole.ADMIN, PredefinedRole.CUSTOMER])
-  async updateOrderLine(req) {
-    const { body, params = {} } = req;
-    const { orderId, productId } = params; 
-    return await orderService.updateOrderLine(req, { dbContext: POSTGRES_CONTEXT, orderLine: { body, orderId, externalProductId: productId } });
+  @RequiredRole([PredefinedRole.ADMIN])
+  async deleteEventOrganizer(req) {
+    const { organizerId } = req.params || {};
+    return await eventOrganizerService.deleteEventOrganizer(POSTGRES_CONTEXT, organizerId);
   }
 
-  @RequiredRole([PredefinedRole.ADMIN, PredefinedRole.CUSTOMER])
-  async deleteOrder(req) {
-    const { orderId } = req.params || {};
-    return await orderService.deleteOrder(POSTGRES_CONTEXT, orderId);
-  }
-
-  @RequiredRole([PredefinedRole.ADMIN, PredefinedRole.CUSTOMER])
-  async deleteOrderLine(req) {
-    const { orderId, productId } = req.params || {};
-    return await orderService.deleteOrderLine(req, { dbContext: POSTGRES_CONTEXT, orderId, externalProductId: productId });
+  @RequiredRole([PredefinedRole.ADMIN])
+  async getUsersByOrganizerId(req) {
+    const { organizerId } = req.params || {};
+    return await eventOrganizerService.getUsersByOrganizerId(POSTGRES_CONTEXT, organizerId);
   }
 }

@@ -33,7 +33,7 @@ export const updateEventOrganizer = async (dbContext, organizerId, organizer, us
       await eventOrganizerRepo.updateEventOrganizer(dbContext, { organizerId, organizer: mapParams({ ...organizer, ...auditColumns }), trx });
       const { usersByOrganizer = [] } = organizer;
       if (usersByOrganizer.length) {
-        await Promise.all(usersByOrganizer.map(async user => await eventOrganizerRepo.upsertUsersByOrganizer(dbContext, { usersByOrganizer: mapParams({ ...user, organizerId, ...auditColumns }), trx });
+        await Promise.all(usersByOrganizer.map(async user => await eventOrganizerRepo.upsertUsersByOrganizer(dbContext, { usersByOrganizer: mapParams({ ...user, organizerId, ...auditColumns }), trx })));
       }
       resolve(true);
     } catch (error) {
@@ -52,7 +52,7 @@ export const createEventOrganizer = async (dbContext, organizer, userId) => {
       const { id: organizerId } = await eventOrganizerRepo.createEventOrganizer(dbContext, { organizer: mapParams({ ...organizer, ...auditColumns }), trx });
       const { usersByOrganizer = [] } = organizer;
       if (usersByOrganizer.length) {
-        await Promise.all(usersByOrganizer.map(async user => await eventOrganizerRepo.upsertUsersByOrganizer(dbContext, { usersByOrganizer: mapParams({ ...user, organizerId, ...auditColumns }), trx });
+        await Promise.all(usersByOrganizer.map(async user => await eventOrganizerRepo.upsertUsersByOrganizer(dbContext, { usersByOrganizer: mapParams({ ...user, organizerId, ...auditColumns }), trx })));
       }
       resolve(await getEventOrganizerById(dbContext, organizerId));
     } catch (error) {

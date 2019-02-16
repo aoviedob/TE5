@@ -57,7 +57,7 @@ export const getEventById = async (dbContext, eventId) => {
 export const getEventsByCategoryId = async (dbContext, categoryId) => { 
   const unitOfWork = new UnitOfWork(dbContext);
   return await unitOfWork.getAllWhere(schema, { 
-  	tableName: EVENT_TABLE_i 
+  	tableName: EVENT_TABLE,
   	columns: EVENT_TABLE_COLUMNS,
   	where: unitOfWork.dbConnection.raw('event_category_id = :categoryId', { categoryId })
   });
@@ -66,7 +66,7 @@ export const getEventsByCategoryId = async (dbContext, categoryId) => {
 export const getEventsByOrganizerId = async (dbContext, organizerId) => { 
   const unitOfWork = new UnitOfWork(dbContext);
   return await unitOfWork.getAllWhere(schema, { 
-    tableName: EVENT_TABLE_i 
+    tableName: EVENT_TABLE, 
     columns: EVENT_TABLE_COLUMNS,
     where: unitOfWork.dbConnection.raw('event_organizer_id = :organizerId', { organizerId })
   });

@@ -20,3 +20,4 @@ docker exec -it postgres psql -h localhost -p 5432 -U postgres -c "ALTER USER po
 
 ./auth/start.sh;
 ./customer/start.sh;
+./event/start.sh;
