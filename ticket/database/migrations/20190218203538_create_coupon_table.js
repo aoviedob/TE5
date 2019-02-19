@@ -15,7 +15,7 @@ exports.up = async dbConnection =>
       end_date timestamp,
       external_customer_id uuid,
       external_organizer_id uuid not null,
-      external_event_id,
+      external_event_id uuid,
       created_by uuid not null,
       updated_by uuid not null,
       created_at timestamp not null,

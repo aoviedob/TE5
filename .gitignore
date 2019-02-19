@@ -6,3 +6,11 @@ customer/.yarn-cache/
 customer/yarn-error.log
 customer/node_modules/
 customer/logs/
+event/.yarn-cache/
+event/yarn-error.log
+event/node_modules/
+event/logs/
+ticket/.yarn-cache/
+ticket/yarn-error.log
+ticket/node_modules/
+ticket/logs/

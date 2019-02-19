@@ -2,50 +2,56 @@ import UnitOfWork from '../database/unit_of_work.js';
 import { UnitOfWorkContext } from '../helpers/enums/unit_of_work';
 import { schema } from '../config';
 
-export const TICKET_CATEGORY_TABLE = 'ticket';
-const TICKET_CATEGORY_TABLE_COLUMNS = [
+export const COUPON_TABLE = 'coupon';
+const COUPON_TABLE_COLUMNS = [
   'id',
+  'code',
   'name',
-  'external_event_id',
   'quantity',
   'available',
-  'price',
-  'settings',
+  'discount',
+  'is_percentage',
+  'state',
+  'start_date',
+  'end_date',
+  'external_customer_id',
+  'external_organizer_id',
+  'external_event_id',
   'created_by',
   'updated_by',
   'created_at',
   'updated_at'
 ];
 
-export const getTicketCategories = async dbContext => 
+export const getCoupons = async dbContext => 
   await(new UnitOfWork(dbContext).getAll(schema, { 
-  	tableName: TICKET_CATEGORY_TABLE, 
-  	columns: TICKET_CATEGORY_TABLE_COLUMNS 
+    tableName: COUPON_TABLE, 
+    columns: COUPON_TABLE_COLUMNS 
   }));
 
 export const getTicketCategoryById = async (dbContext, categoryId) => { 
   const unitOfWork = new UnitOfWork(dbContext);
   return await unitOfWork.getOneWhere(schema, { 
-  	tableName: TICKET_CATEGORY_TABLE, 
-  	columns: TICKET_CATEGORY_TABLE_COLUMNS,
-  	where: unitOfWork.dbConnection.raw('id = :categoryId', { categoryId })
+    tableName: COUPON_TABLE, 
+    columns: COUPON_TABLE_COLUMNS,
+    where: unitOfWork.dbConnection.raw('id = :categoryId', { categoryId })
   });
 };
 
 export const getTicketCategoriesByEventId = async (dbContext, eventId) => { 
   const unitOfWork = new UnitOfWork(dbContext);
   return await unitOfWork.getAllWhere(schema, { 
-  	tableName: TICKET_CATEGORY_TABLE, 
-  	columns: TICKET_CATEGORY_TABLE_COLUMNS,
-  	where: unitOfWork.dbConnection.raw('event_id LIKE :eventId', { eventId })
+    tableName: COUPON_TABLE, 
+    columns: COUPON_TABLE_COLUMNS,
+    where: unitOfWork.dbConnection.raw('event_id LIKE :eventId', { eventId })
   });
 };
 
 export const getTicketCategoriesByName = async (dbContext, name) => { 
   const unitOfWork = new UnitOfWork(dbContext);
   return await unitOfWork.getAllWhere(schema, { 
-    tableName: TICKET_CATEGORY_TABLE, 
-    columns: TICKET_CATEGORY_TABLE_COLUMNS,
+    tableName: COUPON_TABLE, 
+    columns: COUPON_TABLE_COLUMNS,
     where: unitOfWork.dbConnection.raw('name LIKE :name', { name: `%${name}%` })
   });
 };
@@ -53,8 +59,8 @@ export const getTicketCategoriesByName = async (dbContext, name) => {
 export const getTicketCategoriesByOrganizerId = async (dbContext, organizerId) => { 
   const unitOfWork = new UnitOfWork(dbContext);
   return await unitOfWork.getAllWhere(schema, { 
-    tableName: TICKET_CATEGORY_TABLE, 
-    columns: TICKET_CATEGORY_TABLE_COLUMNS,
+    tableName: COUPON_TABLE, 
+    columns: COUPON_TABLE_COLUMNS,
     where: unitOfWork.dbConnection.raw('organizer_id = :organizerId', { organizerId })
   });
 };
@@ -62,25 +68,25 @@ export const getTicketCategoriesByOrganizerId = async (dbContext, organizerId) =
 export const updateTicketCategory = async (dbContext, categoryId, category) => { 
   const unitOfWork = new UnitOfWork(dbContext);
   return await unitOfWork.update(schema, { 
-  	tableName: TICKET_CATEGORY_TABLE, 
-  	columns: TICKET_CATEGORY_TABLE_COLUMNS,
-  	entity: category,
-  	where: unitOfWork.dbConnection.raw('id = :categoryId', { categoryId })
+    tableName: COUPON_TABLE, 
+    columns: COUPON_TABLE_COLUMNS,
+    entity: category,
+    where: unitOfWork.dbConnection.raw('id = :categoryId', { categoryId })
   });
 };
 
 export const deleteTicketCategory = async (dbContext, categoryId) => { 
   const unitOfWork = new UnitOfWork(dbContext);
   return await unitOfWork.delete(schema, { 
-  	tableName: TICKET_CATEGORY_TABLE, 
-  	where: unitOfWork.dbConnection.raw('id = :categoryId', { categoryId })
+    tableName: COUPON_TABLE, 
+    where: unitOfWork.dbConnection.raw('id = :categoryId', { categoryId })
   });
 };
 
 export const createTicketCategory = async (dbContext, category) => {
   const result = await (new UnitOfWork(dbContext).create(schema, { 
-    tableName: TICKET_CATEGORY_TABLE, 
-    columns: TICKET_CATEGORY_TABLE_COLUMNS,
+    tableName: COUPON_TABLE, 
+    columns: COUPON_TABLE_COLUMNS,
     entity: category,
   }));
   
