@@ -2,7 +2,7 @@ import UnitOfWork from '../database/unit_of_work.js';
 import { UnitOfWorkContext } from '../helpers/enums/unit_of_work';
 import { schema } from '../config';
 
-export const TICKET_CATEGORY_TABLE = 'ticket';
+export const TICKET_CATEGORY_TABLE = 'ticket_category';
 const TICKET_CATEGORY_TABLE_COLUMNS = [
   'id',
   'name',

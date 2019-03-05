@@ -29,65 +29,74 @@ export const getCoupons = async dbContext =>
     columns: COUPON_TABLE_COLUMNS 
   }));
 
-export const getTicketCategoryById = async (dbContext, categoryId) => { 
+export const getCouponById = async (dbContext, couponId) => { 
   const unitOfWork = new UnitOfWork(dbContext);
   return await unitOfWork.getOneWhere(schema, { 
     tableName: COUPON_TABLE, 
     columns: COUPON_TABLE_COLUMNS,
-    where: unitOfWork.dbConnection.raw('id = :categoryId', { categoryId })
+    where: unitOfWork.dbConnection.raw('id = :couponId', { couponId })
   });
 };
 
-export const getTicketCategoriesByEventId = async (dbContext, eventId) => { 
+export const getCouponByCode = async (dbContext, code) => { 
+  const unitOfWork = new UnitOfWork(dbContext);
+  return await unitOfWork.getOneWhere(schema, { 
+    tableName: COUPON_TABLE, 
+    columns: COUPON_TABLE_COLUMNS,
+    where: unitOfWork.dbConnection.raw('code = :code', { code })
+  });
+};
+
+export const getCouponsByCode = async (dbContext, code) => { 
   const unitOfWork = new UnitOfWork(dbContext);
   return await unitOfWork.getAllWhere(schema, { 
     tableName: COUPON_TABLE, 
     columns: COUPON_TABLE_COLUMNS,
-    where: unitOfWork.dbConnection.raw('event_id LIKE :eventId', { eventId })
+    where: unitOfWork.dbConnection.raw('code LIKE :code', { code })
   });
 };
 
-export const getTicketCategoriesByName = async (dbContext, name) => { 
+export const getCouponsByCustomerId = async (dbContext, customerId) => { 
   const unitOfWork = new UnitOfWork(dbContext);
   return await unitOfWork.getAllWhere(schema, { 
     tableName: COUPON_TABLE, 
     columns: COUPON_TABLE_COLUMNS,
-    where: unitOfWork.dbConnection.raw('name LIKE :name', { name: `%${name}%` })
+    where: unitOfWork.dbConnection.raw('external_customer_id = :customerId', { customerId })
   });
 };
 
-export const getTicketCategoriesByOrganizerId = async (dbContext, organizerId) => { 
+export const getCouponsByOrganizerId = async (dbContext, organizerId) => { 
   const unitOfWork = new UnitOfWork(dbContext);
   return await unitOfWork.getAllWhere(schema, { 
     tableName: COUPON_TABLE, 
     columns: COUPON_TABLE_COLUMNS,
-    where: unitOfWork.dbConnection.raw('organizer_id = :organizerId', { organizerId })
+    where: unitOfWork.dbConnection.raw('external_organizer_id = :organizerId', { organizerId })
   });
 };
 
-export const updateTicketCategory = async (dbContext, categoryId, category) => { 
+export const updateCoupon = async (dbContext, couponId, coupon) => { 
   const unitOfWork = new UnitOfWork(dbContext);
   return await unitOfWork.update(schema, { 
     tableName: COUPON_TABLE, 
     columns: COUPON_TABLE_COLUMNS,
-    entity: category,
-    where: unitOfWork.dbConnection.raw('id = :categoryId', { categoryId })
+    entity: coupon,
+    where: unitOfWork.dbConnection.raw('id = :couponId', { couponId })
   });
 };
 
-export const deleteTicketCategory = async (dbContext, categoryId) => { 
+export const deleteCoupon = async (dbContext, couponId) => { 
   const unitOfWork = new UnitOfWork(dbContext);
   return await unitOfWork.delete(schema, { 
     tableName: COUPON_TABLE, 
-    where: unitOfWork.dbConnection.raw('id = :categoryId', { categoryId })
+    where: unitOfWork.dbConnection.raw('id = :couponId', { couponId })
   });
 };
 
-export const createTicketCategory = async (dbContext, category) => {
+export const createCoupon = async (dbContext, coupon) => {
   const result = await (new UnitOfWork(dbContext).create(schema, { 
     tableName: COUPON_TABLE, 
     columns: COUPON_TABLE_COLUMNS,
-    entity: category,
+    entity: coupon,
   }));
   
   return (result.length && result[0]) || {};
