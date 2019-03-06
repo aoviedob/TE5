@@ -1,6 +1,9 @@
 import * as couponRepo from '../dal/coupon-repo';
 import { validatePreconditions } from '../helpers/validator';
 import { mapRepoEntity, mapParams } from '../helpers/mapper';
+import { getTicketsByCouponId } from './ticket-service';
+import bunyan from 'bunyan';
+const logger = bunyan.createLogger({ name: 'CouponService'});
 
 export const getCoupons = async dbContext => { 
   validatePreconditions(['dbContext'], { dbContext });
@@ -32,19 +35,46 @@ export const getCouponsByOrganizerId = async (dbContext, organizerId) => {
   return mapRepoEntity(await couponRepo.getCouponsByOrganizerId(dbContext, organizerId));
 };
 
-export const updateCoupon = async (dbContext, couponId, coupon) => { 
-  validatePreconditions(['dbContext', 'couponId', 'coupon'], { dbContext, couponId, coupon });
-  return await couponRepo.updateCoupon(dbContext, couponId, mapParams(coupon));
+const isCouponInUse = async (dbContext, couponId) => !!(await getTicketsByCouponId(dbContext, couponId).length);
+
+const canUpdateCoupon = async (dbContext, couponId, coupon = {}) => {
+  if(!(await isCouponInUse(dbContext, couponId))) return true;
+
+  const { code, quantity, discount, isPercentage } = coupon;
+  if (code || quantity || quantity === 0 || discount === 0 || discount || isPercentage !== null) return false;
 };
 
-export const createCoupon = async (dbContext, coupon) => {
-  validatePreconditions(['dbContext', 'email', 'fullname', 'password'], { dbContext, ...coupon });
-  const externalUserId = await createUser(coupon);
-  const { id: couponId } = await couponRepo.createCoupon(dbContext, mapParams({ ...coupon, externalUserId }));
+export const updateCoupon = async (dbContext, couponId, coupon, userId) => { 
+  validatePreconditions(['dbContext', 'couponId', 'coupon', 'userId'], { dbContext, couponId, coupon, userId });
+  
+  if (!(await canUpdateCoupon(dbContext, couponId, coupon))) {
+    const message = 'COUPON_IS_ALREADY_IN_USE';
+    logger.error({ couponId, coupon }, message);
+    const error = new Error(message);
+    error.status = 412;
+    throw error;
+  }
+
+  return await couponRepo.updateCoupon(dbContext, couponId, mapParams({ ...coupon, updatedBy: userId }));
+};
+
+export const createCoupon = async (dbContext, coupon, userId) => {
+  validatePreconditions(['dbContext', 'code', 'name', 'quantity', 'discount', 'isPercentage', 'externalOrganizerId', 'userId'], { dbContext, ...coupon, userId });
+
+  const auditColumns = { updatedBy: userId, createdBy: userId };
+  const { id: couponId } = await couponRepo.createCoupon(dbContext, mapParams({ ...coupon, ...auditColumns, available: coupon.quantity }));
   return await getCouponById(dbContext, couponId);
 };
 
 export const deleteCoupon = async (dbContext, couponId) => {
+  if((await isCouponInUse(dbContext, couponId))) {
+    const message = 'COUPON_IS_ALREADY_IN_USE';
+    logger.error({ couponId }, message);
+    const error = new Error(message);
+    error.status = 412;
+    throw error;
+  }
+
   validatePreconditions(['dbContext', 'couponId'], { dbContext, couponId });
   await couponRepo.deleteCoupon(dbContext, couponId);
 };

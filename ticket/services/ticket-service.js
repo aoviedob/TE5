@@ -1,157 +1,75 @@
-import * as orderRepo from '../dal/order-repo';
+import * as ticketCategoryRepo from '../dal/ticket-category-repo';
 import { validatePreconditions } from '../helpers/validator';
 import { mapRepoEntity, mapParams } from '../helpers/mapper';
-import { getProduct } from './external-service';
-import { maxAllowedProductQuantity } from '../config';
-import UnitOfWork from '../database/unit_of_work.js';
-import DalTypes from '../helpers/enums/dal-types';
+import { getTicketsByCategoryId } from './ticket-service';
 import bunyan from 'bunyan';
-const logger = bunyan.createLogger({ name: 'OrderService'});
+const logger = bunyan.createLogger({ name: 'TicketCategoryService'});
 
-export const getOrdersByCustomerId = async (dbContext, customerId) => { 
-  validatePreconditions(['dbContext', 'customerId'], { dbContext, customerId });
-  return (await orderRepo.getOrdersByCustomerId(dbContext, customerId)).map(order => mapRepoEntity(order));
+export const getTicketCategories = async dbContext => { 
+  validatePreconditions(['dbContext'], { dbContext });
+  return (await ticketCategoryRepo.getTicketCategories(dbContext)).map(ticketCategory => mapRepoEntity(ticketCategory));
 };
 
-export const getOrderById = async (dbContext, { orderId, trx }) => {
-  validatePreconditions(['dbContext', 'orderId'], { dbContext, orderId });
-  return mapRepoEntity((await orderRepo.getOrderById(dbContext, { orderId, trx })));
+export const getTicketCategoryById = async (dbContext, ticketCategoryId) => {
+  validatePreconditions(['dbContext', 'ticketCategoryId'], { dbContext, ticketCategoryId });
+  return mapRepoEntity((await ticketCategoryRepo.getTicketCategoryById(dbContext, ticketCategoryId)));
 };
 
-const validateProductQuantity = (req, orderLine) => {
-  const { quantity } = orderLine;
-  if (quantity > maxAllowedProductQuantity) {
-    logger.error({ ...req.tokenBody, ...orderLine }, 'Quantity exceeds the max');
-    const error = new Error('QUANTITY_EXCEEDS_THE_MAX');
+export const getTicketCategoriesByEventId = async (dbContext, eventId) => {
+  validatePreconditions(['dbContext', 'eventId'], { dbContext, eventId });
+  return (await ticketCategoryRepo.getTicketCategoriesByEventId(dbContext, eventId)).map(ticketCategory => mapRepoEntity(ticketCategory));
+};
+
+export const getTicketCategoriesByName = async (dbContext, name) => {
+  validatePreconditions(['dbContext', 'name'], { dbContext, customerId });
+  return (await ticketCategoryRepo.getTicketCategoriesByName(dbContext, name)).map(ticketCategory => mapRepoEntity(ticketCategory));
+};
+
+export const getTicketCategoriesByOrganizerId = async (dbContext, organizerId) => {
+  validatePreconditions(['dbContext', 'organizerId'], { dbContext, organizerId });
+  return mapRepoEntity(await ticketCategoryRepo.getTicketCategoriesByOrganizerId(dbContext, organizerId));
+};
+
+const isTicketCategoryInUse = async (dbContext, categoryId) => !!(await getTicketsByCategoryId(dbContext, categoryId).length);
+
+const canUpdateTicketCategory = async (dbContext, categoryId, category = {}) => {
+  if(!(await isTicketCategoryInUse(dbContext, categoryId))) return true;
+
+  const { quantity, price, externalEventId } = category;
+  if (price || price === 0 || quantity === 0 || externalEventId) return false;
+};
+
+export const updateTicketCategory = async (dbContext, categoryId, category, userId) => { 
+  validatePreconditions(['dbContext', 'categoryId', 'category', 'userId'], { dbContext, categoryId, category, userId });
+  
+  if (!(await canUpdateTicketCategory(dbContext, categoryId, category))) {
+    const message = 'CATEGORY_IS_ALREADY_IN_USE';
+    logger.error({ categoryId, category }, message);
+    const error = new Error(message);
     error.status = 412;
     throw error;
   }
+
+  return await ticketCategoryRepo.updateTicketCategory(dbContext, categoryId, mapParams({ ...category, updatedBy: userId }));
 };
 
-const updateOrderAmount = async(req, { dbContext, orderId, trx }) => {
-  const { orderLines = [] } = await getOrderById(dbContext, { orderId, trx });
-  if (!orderLines.length) return;
-  
-  const products = await Promise.all(orderLines.map(async ({ externalProductId }) => await getProduct(req, externalProductId)));
-  if (!products || !products.length) {
-    logger.error({ ...req.tokenBody, orderId }, 'Empty product list');
-    const error = new Error('EMPTY_PRODUCT_LIST');
-    error.status = 500;
+export const createTicketCategory = async (dbContext, category, userId) => {
+  validatePreconditions(['dbContext', 'name', 'externalEventId', 'quantity', 'price', 'userId'], { dbContext, ...category, userId });
+
+  const auditColumns = { updatedBy: userId, createdBy: userId };
+  const { id: categoryId } = await ticketCategoryRepo.createTicketCategory(dbContext, mapParams({ ...category, ...auditColumns, available: category.quantity }));
+  return await getTicketCategoryById(dbContext, categoryId);
+};
+
+export const deleteTicketCategory = async (dbContext, categoryId) => {
+  if((await isTicketCategoryInUse(dbContext, categoryId))) {
+    const message = 'CATEGORY_IS_ALREADY_IN_USE';
+    logger.error({ categoryId }, message);
+    const error = new Error(message);
+    error.status = 412;
     throw error;
   }
 
-  const total_amount = products.reduce((acc, product) => {
-    const { quantity } = orderLines.find(ol => ol.externalProductId === product.id);
-    acc = acc + (product.price * quantity);
-    return acc;
-  }, 0);
-
-  await orderRepo.updateOrder(dbContext, { orderId, order: { total_amount }, trx });
-};
-
-export const updateOrderLine = async (req, { dbContext, orderLine, trx }) => { 
-  validatePreconditions(['dbContext', 'orderId', 'externalProductId'], { dbContext, ...orderLine });
-  validateProductQuantity(req, orderLine);
- 
-  await ((new UnitOfWork(dbContext)).transact(async (trx, resolve, reject) => {
-    try {
-      const { orderId, externalProductId } = orderLine;
-      await orderRepo.updateOrderLine(dbContext, { orderId, externalProductId, orderLine: mapParams(orderLine), trx });
-      await updateOrderAmount(req, { dbContext, orderId, trx });
-    } catch (error) {
-      reject(error);
-    }
-
-    resolve(true);
-  }));
-};
-
-export const createOrderLine = async (req, { dbContext, orderLine }) => {
-  validatePreconditions(['dbContext', 'orderId', 'externalProductName', 'externalProductId', 'quantity'], { dbContext, ...orderLine });
-  validateProductQuantity(req, orderLine);
-  
-  return await ((new UnitOfWork(dbContext)).transact(async (trx, resolve, reject) => {
-    try {  
-      const dbOrderLine = await orderRepo.createOrderLine(dbContext, { orderLine: mapParams(orderLine), trx });
-      await updateOrderAmount(req, { dbContext, orderId: orderLine.orderId, trx });
-      resolve(mapRepoEntity(dbOrderLine));
-    } catch (error) {
-      reject(error);
-    }
-  }));
-};
-
-export const deleteOrderLine = async (req, { dbContext, orderId, externalProductId }) => {
-  validatePreconditions(['dbContext', 'orderId', 'externalProductId'], { dbContext, orderId, externalProductId });
-  
-  return await ((new UnitOfWork(dbContext)).transact(async (trx, resolve, reject) => {
-    try {
-      await orderRepo.deleteOrderLine(dbContext, { orderId, externalProductId, trx });
-      await updateOrderAmount(req, { dbContext, orderId, trx });
-      resolve(true);
-    } catch (error) {
-      reject(error);
-    }
-  }));
-};
-
-export const updateOrder = async (req, { dbContext, orderId, order }) => { 
-  validatePreconditions(['dbContext', 'orderId', 'order'], { dbContext, orderId, order });
-
-  return await ((new UnitOfWork(dbContext)).transact(async (trx, resolve, reject) => {
-    try {  
-      await orderRepo.updateOrder(dbContext, { orderId, order: mapParams(order), trx });
-    
-      const { orderLines = [] } = order;
-      if (orderLines.length){
-        await Promise.all(orderLines.map(async orderLine => await orderRepo.upsertOrderLine(dbContext, { orderId, externalProductId: orderLine.externalProductId, orderLine: mapParams({ ...orderLine, orderId }), trx })));
-      }
-
-      await updateOrderAmount(req, { dbContext, orderId, trx });
-      resolve(true);
-    } catch (error) {
-      reject(error);
-    }
-  }));
-};
- 
-export const createOrder = async (req, { dbContext, order }) => {
-  validatePreconditions(['dbContext', 'customerId'], { dbContext, ...order });
-
-  return await ((new UnitOfWork(dbContext)).transact(async (trx, resolve, reject) => {
-    try {
-      const mappedOrder = mapParams(order);
-      const { id: orderId } = await orderRepo.createOrder(dbContext, { order: { total_amount: 0, status: DalTypes.OrderStatus.PENDING, ...mappedOrder }, trx });
-    
-      const { orderLines = [] } = order;
-      if (orderLines.length) {
-        await Promise.all(orderLines.map(async orderLine => await orderRepo.createOrderLine(dbContext, { orderLine: { ...mapParams(orderLine), order_id: orderId }, trx })));
-      }
-      await updateOrderAmount(req, { dbContext, orderId, trx });
-      const dbOrder = await getOrderById(dbContext, { orderId, trx });
-      resolve(dbOrder);
-    } catch (error) {
-      reject(error);
-    }
-  }));
-};
-
-export const deleteOrder = async (dbContext, orderId) => {
-  validatePreconditions(['dbContext', 'orderId'], { dbContext, orderId });
-
-  await ((new UnitOfWork(dbContext)).transact(async (trx, resolve, reject) => {
-    try {
-      const { orderLines } = await getOrderById(dbContext, { orderId, trx });
-
-      if (orderLines.length) {
-        await Promise.all(orderLines.map(async ({ externalProductId }) => await orderRepo.deleteOrderLine(dbContext, { orderId, externalProductId, trx })));
-      }
-
-      await orderRepo.deleteOrder(dbContext, { orderId, trx });
-
-      resolve(true);
-    } catch (error) {
-      reject(error);
-    }
-  }));
+  validatePreconditions(['dbContext', 'categoryId'], { dbContext, categoryId });
+  await ticketCategoryRepo.deleteTicketCategory(dbContext, categoryId);
 };
