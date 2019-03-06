@@ -1,75 +1,47 @@
-import * as ticketCategoryRepo from '../dal/ticket-category-repo';
+import * as ticketRepo from '../dal/ticket-repo';
 import { validatePreconditions } from '../helpers/validator';
 import { mapRepoEntity, mapParams } from '../helpers/mapper';
-import { getTicketsByCategoryId } from './ticket-service';
+import { connectToQueue } from '../workers/queue';
+import { queue } from '../config';
 import bunyan from 'bunyan';
-const logger = bunyan.createLogger({ name: 'TicketCategoryService'});
+const logger = bunyan.createLogger({ name: 'TicketService'});
 
-export const getTicketCategories = async dbContext => { 
+export const getTickets = async dbContext => { 
   validatePreconditions(['dbContext'], { dbContext });
-  return (await ticketCategoryRepo.getTicketCategories(dbContext)).map(ticketCategory => mapRepoEntity(ticketCategory));
+  return (await ticketsRepo.getTickets(dbContext)).map(ticket => mapRepoEntity(ticket));
 };
 
-export const getTicketCategoryById = async (dbContext, ticketCategoryId) => {
-  validatePreconditions(['dbContext', 'ticketCategoryId'], { dbContext, ticketCategoryId });
-  return mapRepoEntity((await ticketCategoryRepo.getTicketCategoryById(dbContext, ticketCategoryId)));
+export const getTicketById = async (dbContext, ticketId) => {
+  validatePreconditions(['dbContext', 'ticketId'], { dbContext, ticketId });
+  return mapRepoEntity((await ticketsRepo.getTicketById(dbContext, ticketId)));
 };
 
-export const getTicketCategoriesByEventId = async (dbContext, eventId) => {
-  validatePreconditions(['dbContext', 'eventId'], { dbContext, eventId });
-  return (await ticketCategoryRepo.getTicketCategoriesByEventId(dbContext, eventId)).map(ticketCategory => mapRepoEntity(ticketCategory));
+export const getTicketByInvoiceId = async (dbContext, invoiceId) => {
+  validatePreconditions(['dbContext', 'invoiceId'], { dbContext, invoiceId });
+  return mapRepoEntity((await ticketsRepo.getTicketByInvoiceId(dbContext, invoiceId)));
 };
 
-export const getTicketCategoriesByName = async (dbContext, name) => {
-  validatePreconditions(['dbContext', 'name'], { dbContext, customerId });
-  return (await ticketCategoryRepo.getTicketCategoriesByName(dbContext, name)).map(ticketCategory => mapRepoEntity(ticketCategory));
+export const getTicketsByCategoryId = async (dbContext, categoryId) => {
+  validatePreconditions(['dbContext', 'categoryId'], { dbContext, categoryId });
+  return (await ticketsRepo.getTicketsByCategoryId(dbContext, categoryId)).map(ticket => mapRepoEntity(ticket));
 };
 
-export const getTicketCategoriesByOrganizerId = async (dbContext, organizerId) => {
-  validatePreconditions(['dbContext', 'organizerId'], { dbContext, organizerId });
-  return mapRepoEntity(await ticketCategoryRepo.getTicketCategoriesByOrganizerId(dbContext, organizerId));
+export const getTicketsByCouponId = async (dbContext, couponId) => {
+  validatePreconditions(['dbContext', 'couponId'], { dbContext, couponId });
+  return (await ticketsRepo.getTicketsByCouponId(dbContext, couponId)).map(ticket => mapRepoEntity(ticket));
 };
 
-const isTicketCategoryInUse = async (dbContext, categoryId) => !!(await getTicketsByCategoryId(dbContext, categoryId).length);
-
-const canUpdateTicketCategory = async (dbContext, categoryId, category = {}) => {
-  if(!(await isTicketCategoryInUse(dbContext, categoryId))) return true;
-
-  const { quantity, price, externalEventId } = category;
-  if (price || price === 0 || quantity === 0 || externalEventId) return false;
+export const reserveTicket = () => {
+  const { channel } = await connectToQueue();
+  const { exchange, name } = queue;
+  channel.assertExchange(exchange, 'topic', { durable: true });
+  await channel.publish(name, msg.type , new Buffer(JSON.stringify(msg)), { persistent: true });
 };
 
-export const updateTicketCategory = async (dbContext, categoryId, category, userId) => { 
-  validatePreconditions(['dbContext', 'categoryId', 'category', 'userId'], { dbContext, categoryId, category, userId });
-  
-  if (!(await canUpdateTicketCategory(dbContext, categoryId, category))) {
-    const message = 'CATEGORY_IS_ALREADY_IN_USE';
-    logger.error({ categoryId, category }, message);
-    const error = new Error(message);
-    error.status = 412;
-    throw error;
-  }
-
-  return await ticketCategoryRepo.updateTicketCategory(dbContext, categoryId, mapParams({ ...category, updatedBy: userId }));
-};
-
-export const createTicketCategory = async (dbContext, category, userId) => {
+export const createTicket = async (dbContext, category, userId) => {
   validatePreconditions(['dbContext', 'name', 'externalEventId', 'quantity', 'price', 'userId'], { dbContext, ...category, userId });
 
   const auditColumns = { updatedBy: userId, createdBy: userId };
-  const { id: categoryId } = await ticketCategoryRepo.createTicketCategory(dbContext, mapParams({ ...category, ...auditColumns, available: category.quantity }));
-  return await getTicketCategoryById(dbContext, categoryId);
-};
-
-export const deleteTicketCategory = async (dbContext, categoryId) => {
-  if((await isTicketCategoryInUse(dbContext, categoryId))) {
-    const message = 'CATEGORY_IS_ALREADY_IN_USE';
-    logger.error({ categoryId }, message);
-    const error = new Error(message);
-    error.status = 412;
-    throw error;
-  }
-
-  validatePreconditions(['dbContext', 'categoryId'], { dbContext, categoryId });
-  await ticketCategoryRepo.deleteTicketCategory(dbContext, categoryId);
+  const { id: categoryId } = await ticketsRepo.createTicket(dbContext, mapParams({ ...category, ...auditColumns, available: category.quantity }));
+  return await getTicketById(dbContext, categoryId);
 };
