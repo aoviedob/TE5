@@ -5,6 +5,7 @@ import bunyan from 'bunyan';
 import expressLogger from 'express-bunyan-logger';
 import { initApis } from './api/api';
 import { routerMiddleware } from './api/api-middleware';
+import { createSocketServer } from './socketIO';
 
 const logger = bunyan.createLogger({ name: 'TicketServer'});
 
@@ -29,3 +30,5 @@ initApis(app);
 app.listen(3060, () => {
   logger.info('Ticket Server started successfully on port 3060');
 });
+
+await createSocketServer(app);

@@ -10,4 +10,8 @@ module.exports = {
     PROCESSED: 'processed',
     CANCELLED: 'cancelled',
   },
+  CouponState: {
+    ACTIVE: 'active',
+    INACTIVE: 'inactive',
+  },
 };

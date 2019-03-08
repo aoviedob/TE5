@@ -1,3 +1,3 @@
 module.exports = { 
-  ReserveTicket: 'ReserveTicket',
+  RESERVE_TICKET: 'ReserveTicket',
 };
