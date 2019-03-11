@@ -39,7 +39,7 @@ const canUpdateTicketCategory = async (dbContext, categoryId, category = {}) => 
   if (price || price === 0 || quantity === 0 || externalEventId) return false;
 };
 
-export const updateTicketCategory = async (dbContext, categoryId, category, userId) => { 
+export const updateTicketCategory = async (dbContext, { categoryId, category, userId, trx }) => { 
   validatePreconditions(['dbContext', 'categoryId', 'category', 'userId'], { dbContext, categoryId, category, userId });
   
   if (!(await canUpdateTicketCategory(dbContext, categoryId, category))) {
@@ -50,7 +50,7 @@ export const updateTicketCategory = async (dbContext, categoryId, category, user
     throw error;
   }
 
-  return await ticketCategoryRepo.updateTicketCategory(dbContext, categoryId, mapParams({ ...category, updatedBy: userId }));
+  return await ticketCategoryRepo.updateTicketCategory(dbContext, categoryId, mapParams({ ...category, updatedBy: userId }), trx);
 };
 
 export const createTicketCategory = async (dbContext, category, userId) => {

@@ -74,13 +74,14 @@ export const getCouponsByOrganizerId = async (dbContext, organizerId) => {
   });
 };
 
-export const updateCoupon = async (dbContext, couponId, coupon) => { 
+export const updateCoupon = async (dbContext, couponId, coupon, trx) => { 
   const unitOfWork = new UnitOfWork(dbContext);
   return await unitOfWork.update(schema, { 
     tableName: COUPON_TABLE, 
     columns: COUPON_TABLE_COLUMNS,
     entity: coupon,
-    where: unitOfWork.dbConnection.raw('id = :couponId', { couponId })
+    where: unitOfWork.dbConnection.raw('id = :couponId', { couponId }),
+    trx,
   });
 };
 

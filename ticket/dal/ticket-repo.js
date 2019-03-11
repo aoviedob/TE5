@@ -42,6 +42,15 @@ export const getTicketById = async (dbContext, ticketId) => {
   });
 };
 
+export const getCanceledTicketById = async (dbContext, ticketId) => { 
+  const unitOfWork = new UnitOfWork(dbContext);
+  return await unitOfWork.getOneWhere(schema, { 
+    tableName: CANCELED_TICKET_TABLE, 
+    columns: CANCELED_TICKET_TABLE_COLUMNS,
+    where: unitOfWork.dbConnection.raw('ticket_id = :ticketId', { ticketId })
+  });
+};
+
 export const getTicketByInvoiceId = async (dbContext, invoiceId) => { 
   const unitOfWork = new UnitOfWork(dbContext);
   return await unitOfWork.getOneWhere(schema, { 
@@ -76,11 +85,12 @@ export const cancelTicket = async (dbContext, ticket) =>
     entity: ticket,
   }));
 
-export const createTicket = async (dbContext, ticket) => {
+export const createTicket = async (dbContext, ticket, trx) => {
   const result = await (new UnitOfWork(dbContext).create(schema, { 
     tableName: TICKET_TABLE, 
     columns: TICKET_TABLE_COLUMNS,
     entity: ticket,
+    trx,
   }));
   
   return (result.length && result[0]) || {};

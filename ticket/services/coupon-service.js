@@ -44,7 +44,7 @@ const canUpdateCoupon = async (dbContext, couponId, coupon = {}) => {
   if (code || quantity || quantity === 0 || discount === 0 || discount || isPercentage !== null) return false;
 };
 
-export const updateCoupon = async (dbContext, couponId, coupon, userId) => { 
+export const updateCoupon = async (dbContext, { couponId, coupon, userId, trx }) => { 
   validatePreconditions(['dbContext', 'couponId', 'coupon', 'userId'], { dbContext, couponId, coupon, userId });
   
   if (!(await canUpdateCoupon(dbContext, couponId, coupon))) {
@@ -55,11 +55,11 @@ export const updateCoupon = async (dbContext, couponId, coupon, userId) => {
     throw error;
   }
 
-  return await couponRepo.updateCoupon(dbContext, couponId, mapParams({ ...coupon, updatedBy: userId }));
+  return await couponRepo.updateCoupon(dbContext, couponId, mapParams({ ...coupon, updatedBy: userId }), trx);
 };
 
 export const createCoupon = async (dbContext, coupon, userId) => {
-  validatePreconditions(['dbContext', 'code', 'name', 'quantity', 'discount', 'isPercentage', 'externalOrganizerId', 'userId'], { dbContext, ...coupon, userId });
+  validatePreconditions(['dbContext', 'code', 'name', 'quantity', 'discount', 'isPercentage', 'externalOrganizerId', 'userId', 'state'], { dbContext, ...coupon, userId });
 
   const auditColumns = { updatedBy: userId, createdBy: userId };
   const { id: couponId } = await couponRepo.createCoupon(dbContext, mapParams({ ...coupon, ...auditColumns, available: coupon.quantity }));

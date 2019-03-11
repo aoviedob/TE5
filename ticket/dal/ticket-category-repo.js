@@ -59,13 +59,14 @@ export const getTicketCategoriesByOrganizerId = async (dbContext, organizerId) =
   });
 };
 
-export const updateTicketCategory = async (dbContext, categoryId, category) => { 
+export const updateTicketCategory = async (dbContext, categoryId, category, trx) => { 
   const unitOfWork = new UnitOfWork(dbContext);
   return await unitOfWork.update(schema, { 
   	tableName: TICKET_CATEGORY_TABLE, 
   	columns: TICKET_CATEGORY_TABLE_COLUMNS,
   	entity: category,
-  	where: unitOfWork.dbConnection.raw('id = :categoryId', { categoryId })
+  	where: unitOfWork.dbConnection.raw('id = :categoryId', { categoryId }),
+    trx,
   });
 };
 
