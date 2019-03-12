@@ -11,6 +11,7 @@ import { getCouponById, updateCoupon } from './coupon-service';
 import DALTypes from '../helpers/enums/dal-types';
 import Moment from 'moment';
 import { extendMoment } from 'moment-range';
+import { createToken, decodeToken } from './crypto-service';
 
 const moment = extendMoment(Moment);
 const logger = bunyan.createLogger({ name: 'TicketService'});
@@ -46,12 +47,18 @@ export const reserveTicket = (dbContext, ticket) => {
 
   const category = await getTicketCategoryById(dbContext, ticketCategoryId);
   if (!category) {
-
+    logger.error(msg, 'Category does not exist');
+    const error = new Error('CATEGORY_DOES_NOT_EXIST');
+    error.status = 412;
+    throw error;
   }
 
   const coupon = await getCouponById(dbContext, couponId);
   if (!coupon) {
-
+    logger.error(msg, 'Coupon does not exist');
+    const error = new Error('COUPON_DOES_NOT_EXIST');
+    error.status = 412;
+    throw error;
   }
 
   
@@ -68,7 +75,7 @@ const notifyReserveTicketError = async (error, msg, data) => {
   return await notify({
     type: SocketTypes.RESERVE_TICKET_ERROR,
     msg,
-  }):
+  });
 };
 
 export const createTicket = async (dbContext, { category, userId, trx }) => {
@@ -146,16 +153,27 @@ export const reserveTicketHandler = msgData => {
     resolve(true);
   }));
 
-  const notifyType = reserved ? SocketTypes.TICKET_RESERVED : SocketTypes.TICKET_RESERVED_ERROR;
-
-  return await notify({
-    type: notifyType,
+  const notification = reserved ? {
+    type: SocketTypes.TICKET_RESERVED,
+    msg: { token: createToken(msgData, { expiresIn: 300 }) },
+  } : { 
+    type: SocketTypes.TICKET_RESERVED_ERROR, 
     msg: msgData,
-  }):
+  };
+
+  return await notify(notification);
 };
 
-export const confirmTicket = (dbContext, ticket) => {
-  const msg = { ...ticket, dbContext };
+export const confirmTicket = (req, dbContext) => {
+  const decodedToken = decodeToken(req.token);
+  if (decodeToken.error) {
+    logger.error({ ...decodeToken, dbContext }, 'Token is invalid');
+    const error = new Error('TOKEN_IS_INVALID');
+    error.status = 412;
+    throw error;
+  }
+
+  const msg = { ...decodeToken.body, dbContext };
   validatePreconditions(['dbContext', 'ticketCategoryId', 'externalCustomerId', 'quantity', 'userId'], msg);
   
   logger.info(msg, 'About to confirm ticket');
@@ -168,33 +186,59 @@ export const confirmTicket = (dbContext, ticket) => {
 export const confirmTicketHandler = msgData => {
   validatePreconditions(['dbContext', 'ticketCategoryId', 'externalCustomerId', 'quantity', 'userId'], msgData);
   const { dbContext, ticketCategoryId,  quantity, couponId, userId } = msgData;
-  const { price } = await getTicketCategoryById(dbContext, categoryId);
+  const category = await getTicketCategoryById(dbContext, categoryId);
+  const { price } = category;
   let finalPrice = price;
+  let availableCoupons = null;
 
   if (couponId) {
-    const { discount, isPercentage } = await getCouponById(dbContext, couponId);
+    const { discount, isPercentage, available } = await getCouponById(dbContext, couponId);
     finalPrice = isPercentage ? price - (price * discount) : price - discount;
+    availableCoupons = available; 
   }
 
   if (finalPrice < 0) {
     finalPrice = 0;
   }
 
-  return await ((new UnitOfWork(dbContext)).transact(async (trx, resolve, reject) => {
+  const results = await ((new UnitOfWork(dbContext)).transact(async (trx, resolve, reject) => {
     try {
-      await updateTicketCategory(dbContext, { categoryId, category: { available: available - quantity }, userId, trx });
-
-      if (couponId) {
-
-        await updateCoupon(dbContext, { couponId, coupon: { available: availableCoupons - quantity }, userId, trx });
+      if (couponId && availableCoupons === 0) {
+        await updateCoupon(dbContext, { couponId, coupon: { state: DALTypes.CouponState.INACTIVE }, userId, trx });
       }
 
+      let tickets = [];
+      for (let i = 0; i < quantity; i++) {
+        tickets.push(await createTicket(dbContext, { category, userId, trx }));
+      }
     } catch (error) {
       reject(error);
     }
 
-    resolve(true);
+    resolve(tickets);
   }));
+
+  const notifyType = results.length ? SocketTypes.TICKET_CONFIRMED : SocketTypes.TICKET_CONFIRMED_ERROR;
+
+  return await notify({
+    type: notifyType,
+    msg: { msgData, tickets: results },
+  });
 };
 
-await createTicket(dbContext, { category, userId, trx });
+export const releaseTicket = async(req, dbContext) => {
+  const decodedToken = decodeToken(req.token);
+  if (decodeToken.error) {
+    logger.error({ ...decodeToken, dbContext }, 'Token is invalid');
+    const error = new Error('TOKEN_IS_INVALID');
+    error.status = 412;
+    throw error;
+  }
+};
+
+export const cancelTicket = async(dbContext, ticketId, userId) => {
+  validatePreconditions(['dbContext', 'ticketId', 'userId'], { userId, ticketId });
+
+  const auditColumns = { updatedBy: userId, createdBy: userId };
+  await ticketsRepo.cancelTicket(dbContext, mapParams({ ticketId, ...auditColumns }));
+};
