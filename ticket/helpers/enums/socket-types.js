@@ -4,4 +4,5 @@ module.exports = {
   TICKET_RESERVED_ERROR: 'TicketReservedError',
   TICKET_CONFIRMED: 'TicketConfirmed',
   TICKET_CONFIRMED_ERROR: 'TicketConfirmedError',
+  TICKET_RELEASED: 'TicketReleased',
 };

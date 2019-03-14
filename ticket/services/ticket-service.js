@@ -12,6 +12,7 @@ import DALTypes from '../helpers/enums/dal-types';
 import Moment from 'moment';
 import { extendMoment } from 'moment-range';
 import { createToken, decodeToken } from './crypto-service';
+import TokenErrors from '../helpers/enums/token-errors';
 
 const moment = extendMoment(Moment);
 const logger = bunyan.createLogger({ name: 'TicketService'});
@@ -147,6 +148,7 @@ export const reserveTicketHandler = msgData => {
       }
 
     } catch (error) {
+      logger.error(tokenBody, 'An error has occurred in reserve handler');
       reject(error);
     }
 
@@ -164,16 +166,79 @@ export const reserveTicketHandler = msgData => {
   return await notify(notification);
 };
 
-export const confirmTicket = (req, dbContext) => {
+export const releaseTicket = async req => {
   const decodedToken = decodeToken(req.token);
-  if (decodeToken.error) {
-    logger.error({ ...decodeToken, dbContext }, 'Token is invalid');
-    const error = new Error('TOKEN_IS_INVALID');
+  const { error, body: tokenBody } = decodedToken;
+  validatePreconditions(['dbContext', 'ticketCategoryId', 'externalCustomerId', 'quantity', 'userId'], tokenBody);
+
+  if (error && error.name === TokenErrors.JSON_WEB_TOKEN_ERROR) {
+    logger.error({ ...decodeToken }, 'Token is invalid');
+    const error = new Error('INCONSISTENCY_DETECTED');
     error.status = 412;
     throw error;
   }
 
-  const msg = { ...decodeToken.body, dbContext };
+  const released = await ((new UnitOfWork(dbContext)).transact(async (trx, resolve, reject) => {
+    try {
+      const { dbContext, ticketCategoryId, quantity: ticketQuantity, couponId, userId } = tokenBody;
+      const { available, quantity: categoryQuantity } = await getTicketCategoryById(dbContext, ticketCategoryId);
+      
+      if (available + ticketQuantity > categoryQuantity) {
+        logger.error({ ...tokenBody, categoryQuantity, available }, 'The available tickets is higher than the original quantity');
+        const error = new Error('INCONSISTENCY_DETECTED');
+        error.status = 412;
+        throw error;
+      }
+
+      await updateTicketCategory(dbContext, { categoryId: ticketCategoryId, category: { available: available + ticketQuantity }, userId, trx });
+
+      if (couponId) {
+        const { available: availableCoupons, quantity: couponQuantity } = await getCouponById(dbContext, couponId);
+
+        if (availableCoupons + ticketQuantity > couponQuantity) {
+          logger.error({ ...tokenBody, categoryQuantity, available }, 'The available coupons is higher than the original quantity');
+          const error = new Error('INCONSISTENCY_DETECTED');
+          error.status = 412;
+          throw error;
+        }
+
+        await updateCoupon(dbContext, { couponId, coupon: { available: availableCoupons + ticketQuantity }, userId, trx });
+      }
+
+    } catch (error) {
+      logger.error(tokenBody, 'An error has occurred while releasing ticket');
+      reject(error);
+    }
+
+    resolve(true);
+  }));
+  
+  return await notify({
+    type: SocketTypes.TICKET_RELEASED,
+    msg: tokenBody,
+  });
+};
+
+const handleTokenError = async(req, { body, error }) => {
+  if (!error) return;
+  const logData = { ...req, ...body, error };
+  if (error.name === TokenErrors.TOKEN_EXPIRED_ERROR) {
+    logger.error(logData, 'Token has expired');
+    return await releaseTicket(req);
+  }
+
+  logger.error(logData, 'Token is invalid');
+  const error = new Error('INCONSISTENCY_DETECTED');
+  error.status = 412;
+  throw error;
+}
+
+export const confirmTicket = (req) => {
+  const decodedToken = decodeToken(req.token);
+  await handleTokenError(req, decodedToken);
+
+  const { body: msgData } = decodedToken;
+  const msg = { ...msgData };
   validatePreconditions(['dbContext', 'ticketCategoryId', 'externalCustomerId', 'quantity', 'userId'], msg);
   
   logger.info(msg, 'About to confirm ticket');
@@ -186,7 +251,8 @@ export const confirmTicket = (req, dbContext) => {
 export const confirmTicketHandler = msgData => {
   validatePreconditions(['dbContext', 'ticketCategoryId', 'externalCustomerId', 'quantity', 'userId'], msgData);
   const { dbContext, ticketCategoryId,  quantity, couponId, userId } = msgData;
-  const category = await getTicketCategoryById(dbContext, categoryId);
+ 
+  const category = await getTicketCategoryById(dbContext, ticketCategoryId);
   const { price } = category;
   let finalPrice = price;
   let availableCoupons = null;
@@ -212,6 +278,7 @@ export const confirmTicketHandler = msgData => {
         tickets.push(await createTicket(dbContext, { category, userId, trx }));
       }
     } catch (error) {
+      logger.error(tokenBody, 'An error has occurred while confirming ticket');
       reject(error);
     }
 
@@ -224,16 +291,6 @@ export const confirmTicketHandler = msgData => {
     type: notifyType,
     msg: { msgData, tickets: results },
   });
-};
-
-export const releaseTicket = async(req, dbContext) => {
-  const decodedToken = decodeToken(req.token);
-  if (decodeToken.error) {
-    logger.error({ ...decodeToken, dbContext }, 'Token is invalid');
-    const error = new Error('TOKEN_IS_INVALID');
-    error.status = 412;
-    throw error;
-  }
 };
 
 export const cancelTicket = async(dbContext, ticketId, userId) => {
