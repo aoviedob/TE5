@@ -42,8 +42,13 @@ export const getTicketsByCouponId = async (dbContext, couponId) => {
   return (await ticketsRepo.getTicketsByCouponId(dbContext, couponId)).map(ticket => mapRepoEntity(ticket));
 };
 
-export const reserveTicket = (dbContext, ticket) => {
-  const msg = { ...ticket, dbContext };
+export const getTicketsByCustomerId = async (dbContext, customerId) => {
+  validatePreconditions(['dbContext', 'customerId'], { dbContext, customerId });
+  return (await ticketsRepo.getTicketsByCouponId(dbContext, customerId)).map(ticket => mapRepoEntity(ticket));
+};
+
+export const reserveTicket = async (dbContext, ticket, userId) => {
+  const msg = { ...ticket, dbContext, userId };
   validatePreconditions(['dbContext', 'ticketCategoryId', 'externalCustomerId', 'quantity', 'userId'], msg);
 
   const category = await getTicketCategoryById(dbContext, ticketCategoryId);
@@ -123,7 +128,7 @@ const validateCoupon = async (dbContext, ticket) => {
   return true;
 };
 
-export const reserveTicketHandler = msgData => {
+export const reserveTicketHandler = async msgData => {
   validatePreconditions(['dbContext', 'ticketCategoryId', 'externalCustomerId', 'quantity', 'userId'], msgData);
   const { dbContext, ticketCategoryId,  quantity, couponId, userId } = msgData;
   const category = await getTicketCategoryById(dbContext, ticketCategoryId);
@@ -178,7 +183,7 @@ export const releaseTicket = async req => {
     throw error;
   }
 
-  const released = await ((new UnitOfWork(dbContext)).transact(async (trx, resolve, reject) => {
+  await ((new UnitOfWork(dbContext)).transact(async (trx, resolve, reject) => {
     try {
       const { dbContext, ticketCategoryId, quantity: ticketQuantity, couponId, userId } = tokenBody;
       const { available, quantity: categoryQuantity } = await getTicketCategoryById(dbContext, ticketCategoryId);
@@ -228,12 +233,12 @@ const handleTokenError = async(req, { body, error }) => {
   }
 
   logger.error(logData, 'Token is invalid');
-  const error = new Error('INCONSISTENCY_DETECTED');
-  error.status = 412;
-  throw error;
+  const err = new Error('INCONSISTENCY_DETECTED');
+  err.status = 412;
+  throw err;
 }
 
-export const confirmTicket = (req) => {
+export const confirmTicket = async (req) => {
   const decodedToken = decodeToken(req.token);
   await handleTokenError(req, decodedToken);
 
@@ -248,7 +253,7 @@ export const confirmTicket = (req) => {
   });
 };
 
-export const confirmTicketHandler = msgData => {
+export const confirmTicketHandler = async msgData => {
   validatePreconditions(['dbContext', 'ticketCategoryId', 'externalCustomerId', 'quantity', 'userId'], msgData);
   const { dbContext, ticketCategoryId,  quantity, couponId, userId } = msgData;
  

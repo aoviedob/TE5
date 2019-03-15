@@ -69,6 +69,15 @@ export const getTicketsByCategoryId = async (dbContext, categoryId) => {
   });
 };
 
+export const getTicketsByCustomerId = async (dbContext, customerId) => { 
+  const unitOfWork = new UnitOfWork(dbContext);
+  return await unitOfWork.getAllWhere(schema, { 
+    tableName: TICKET_TABLE, 
+    columns: TICKET_TABLE_COLUMNS,
+    where: unitOfWork.dbConnection.raw('external_customer_id = :customerId', { customerId })
+  });
+};
+
 export const getTicketsByCouponId = async (dbContext, couponId) => { 
   const unitOfWork = new UnitOfWork(dbContext);
   return await unitOfWork.getAllWhere(schema, { 

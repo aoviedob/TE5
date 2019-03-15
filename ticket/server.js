@@ -31,4 +31,4 @@ app.listen(3060, () => {
   logger.info('Ticket Server started successfully on port 3060');
 });
 
-await createSocketServer(app);
+createSocketServer(app);

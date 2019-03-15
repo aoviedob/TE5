@@ -1,7 +1,9 @@
-import CustomerApi from './customer';
-import OrderApi from './order';
+import CouponApi from './coupon';
+import CategoryApi from './ticket-category';
+import TicketApi from './ticket';
 
 export const initApis = app => {
-  new CustomerApi(app);
-  new OrderApi(app);
+  new CouponApi(app);
+  new CategoryApi(app);
+  new TicketApi(app);
 };

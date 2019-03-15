@@ -23,7 +23,7 @@ export const receiveMessages = async () => {
       logger.info({ name, msg }, 'New message received');
 
       const message = JSON.parse(msg.content.toString());
-      await handleQueueMapping[message.type](message.data);
+      await handleQueueMapping[message.type](message.msg);
 
     }, { noAck: true });
 
