@@ -1,6 +1,6 @@
 import * as orderService from '../services/order-service';
 import { UnitOfWorkContext } from '../helpers/enums/unit_of_work';
-import { RequiredRole } from '../decorators/authorization-handler';
+import { RequiredRole, authenticate } from '../decorators/authorization-handler';
 import { PredefinedRole } from '../helpers/enums/dal-types';
 
 const { POSTGRES_CONTEXT } = UnitOfWorkContext;
@@ -8,14 +8,14 @@ const { POSTGRES_CONTEXT } = UnitOfWorkContext;
 export default class CustomerApi {
 
   constructor(app) {
-    app.get('/api/orders/byCustomer/:customerId', this.getOrdersByCustomerId);
-    app.get('/api/orders/:orderId', this.getOrderById);
-    app.post('/api/orders', this.createOrder);
-    app.post('/api/orders/lines', this.createOrderLine);
-    app.put('/api/orders/:orderId', this.updateOrder);
-    app.put('/api/orders/lines/:orderId/:productId', this.updateOrderLine);
-    app.delete('/api/orders/:orderId', this.deleteOrder);
-    app.delete('/api/orders/lines/:orderId/:productId', this.deleteOrderLine);
+    app.get('/api/orders/byCustomer/:customerId', authenticate, this.getOrdersByCustomerId);
+    app.get('/api/orders/:orderId', authenticate, this.getOrderById);
+    app.post('/api/orders', authenticate, this.createOrder);
+    app.post('/api/orders/lines',authenticate,  this.createOrderLine);
+    app.put('/api/orders/:orderId',authenticate,  this.updateOrder);
+    app.put('/api/orders/lines/:orderId/:productId', authenticate, this.updateOrderLine);
+    app.delete('/api/orders/:orderId', authenticate, this.deleteOrder);
+    app.delete('/api/orders/lines/:orderId/:productId', authenticate, this.deleteOrderLine);
   }
 
   @RequiredRole([PredefinedRole.ADMIN, PredefinedRole.CUSTOMER])

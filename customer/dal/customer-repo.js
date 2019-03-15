@@ -1,7 +1,6 @@
 import UnitOfWork from '../database/unit_of_work.js';
 import { UnitOfWorkContext } from '../helpers/enums/unit_of_work';
 import { schema } from '../config';
-import moment from 'moment';
 
 export const CUSTOMER_TABLE = 'customer';
 const CUSTOMER_TABLE_COLUMNS = [

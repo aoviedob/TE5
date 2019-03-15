@@ -38,3 +38,7 @@ afterEach(async() => {
   await truncateTables();
   logger.info('Finished afterEach');
 });
+
+jest.setTimeout(60000);
+require('./customer-service-test');
+require('./order-service-test');

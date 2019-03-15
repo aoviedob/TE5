@@ -8,7 +8,8 @@ const getTemporalToken = async() => {
   const { token } = await request
     .post(authExternalLoginUrl)
     .send(encryptedCredentials)
-    .set('Accept', 'application/json');
+    .set('Accept', 'application/json')
+    .set('Content-Type', 'application/json');
 
   return token;
 };
@@ -19,7 +20,8 @@ export const createUser = async customer => {
     .post(authCreateUserUrl)
     .send({ ...customer, isCustomer: true })
     .set('Authorization', `Bearer ${token}`)
-    .set('Accept', 'application/json');
+    .set('Accept', 'application/json')
+    .set('Content-Type', 'application/json');
 
   return externalUserId;
 };
@@ -28,4 +30,5 @@ export const getProduct = async (req, productId) =>
   await request
     .get(`${productUrl}/${productId}`)
     .set('Authorization', `Bearer ${req.token}`)
-    .set('Accept', 'application/json');
+    .set('Accept', 'application/json')
+    .set('Content-Type', 'application/json');

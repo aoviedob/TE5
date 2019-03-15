@@ -5,4 +5,9 @@ module.exports = {
     ADMIN: 'admin',
     EXTERNAL: 'external',
   },
+  OrderStatus: {
+    PENDING: 'pending',
+    PROCESSED: 'processed',
+    CANCELLED: 'cancelled',
+  },
 };

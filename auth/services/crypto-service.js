@@ -42,7 +42,7 @@ export const createToken = (object, options = {}) => {
 };
 
 export const verifyToken = token => {
-  const { tokenKey, tokenExpiresIn, tokenAlgorithm } = cryptoConfig;
+  const { tokenKey } = cryptoConfig;
   const { body } = jwt.verify(token, tokenKey);
   return decrypt(body);
 };

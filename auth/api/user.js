@@ -16,7 +16,7 @@ export default class UserApi {
     app.put('/api/users/:userId', this.updateUser);
     app.delete('/api/users/:userId', this.deleteUser);
     app.post('/api/login', this.login);
-    app.post('/api/authenticate', this.authenticate);
+    app.get('/api/authenticate', this.authenticate);
     app.post('/api/external/login', this.externalLogin);
   }
 
@@ -69,5 +69,5 @@ export default class UserApi {
     return await userService.login(POSTGRES_CONTEXT, body);
   }
 
-  authenticate(req) { return authenticate(req); }
+  authenticate(req) { return userService.authenticate(req); }
 }
