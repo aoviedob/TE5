@@ -28,4 +28,12 @@ module.exports = {
     user: getEnvVariable('AUTH_SYSTEM_LOGIN_USER', 'andres+system@gmail.com'),
     password: getEnvVariable('AUTH_SYSTEM_LOGIN_PASSWORD', 'secret'),
   },
+  managerDefaultLoginCredentials: {
+    user: getEnvVariable('DEFAULT_LOGIN_USER', 'andres+manager@gmail.com'),
+    password: getEnvVariable('DEFAULT_LOGIN_PASSWORD', 'secret'),
+  },
+  defaultLoginCredentials: {
+    user: getEnvVariable('DEFAULT_LOGIN_USER', 'andres+default@gmail.com'),
+    password: getEnvVariable('DEFAULT_LOGIN_PASSWORD', 'secret'),
+  }
 };

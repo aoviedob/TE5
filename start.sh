@@ -1,11 +1,14 @@
 docker pull postgres:9.6
-docker volume create pgdb
 
 if [ ! "$(docker ps -q -f name=postgres)" ]; then
   if [ "$(docker ps -aq -f status=exited -f name=postgres)" ]; then
-    docker rm postgres
+    docker stop postgres
+  else
+    docker run -d --name postgres -p 5432:5432 --net="host" -v pgdb:/data postgres:9.6	
   fi
  
+  docker start postgres
+else
   docker run -d --name postgres -p 5432:5432 --net="host" -v pgdb:/data postgres:9.6
 fi
 
@@ -17,3 +20,5 @@ docker exec -it postgres psql -h localhost -p 5432 -U postgres -c "ALTER USER po
 
 ./auth/start.sh;
 ./customer/start.sh;
+./event/start.sh;
+./ticket/start.sh;
