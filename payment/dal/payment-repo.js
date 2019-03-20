@@ -2,8 +2,8 @@ import UnitOfWork from '../database/unit_of_work.js';
 import { UnitOfWorkContext } from '../helpers/enums/unit_of_work';
 import { schema } from '../config';
 
-export const PAYMENT_TABLE = 'payment_request';
-const PAYMENT_TABLE_COLUMNS = [
+export const PAYMENT_REQUEST_TABLE = 'payment_request';
+const PAYMENT_REQUEST_TABLE_COLUMNS = [
   'id',
   'client_id',
   'external_invoice_id',
@@ -15,82 +15,105 @@ const PAYMENT_TABLE_COLUMNS = [
   'created_at'
 ];
 
-export const getCustomersByName = async (dbContext, name) => { 
+export const PAYMENT_RESPONSE_TABLE = 'payment_response';
+const PAYMENT_RESPONSE_TABLE_COLUMNS = [
+  'id',
+  'payment_request_id',
+  'transaction',
+  'status',
+  'details',
+  'created_at'
+];
+
+export const TRANSACTION_TABLE = 'transaction';
+const TRANSACTION_TABLE_COLUMNS = [
+  'id',
+  'payment_request_id',
+  'transaction',
+  'details',
+  'created_at'
+];
+
+export const getPaymentRequestsByClientId = async (dbContext, clientId) => { 
   const unitOfWork = new UnitOfWork(dbContext);
   return await unitOfWork.getAllWhere(schema, { 
-    tableName: PAYMENT_TABLE, 
-    columns: PAYMENT_TABLE_COLUMNS,
-    where: unitOfWork.dbConnection.raw('fullname LIKE :name', { name: `%${name}%` })
+    tableName: PAYMENT_REQUEST_TABLE, 
+    columns: PAYMENT_REQUEST_TABLE_COLUMNS,
+    where: unitOfWork.dbConnection.raw('client_id = :clientId', { clientId })
   });
 };
 
-export const getCustomers = async dbContext => 
-  await(new UnitOfWork(dbContext).getAll(schema, { 
-  	tableName: PAYMENT_TABLE, 
-  	columns: PAYMENT_TABLE_COLUMNS 
-  }));
-
-export const getCustomerById = async (dbContext, customerId) => { 
+export const getPaymentRequestByInvoiceId = async (dbContext, clientId, invoiceId) => { 
   const unitOfWork = new UnitOfWork(dbContext);
   return await unitOfWork.getOneWhere(schema, { 
-  	tableName: PAYMENT_TABLE, 
-  	columns: PAYMENT_TABLE_COLUMNS,
-  	where: unitOfWork.dbConnection.raw('id = :customerId', { customerId })
+    tableName: PAYMENT_REQUEST_TABLE, 
+    columns: PAYMENT_REQUEST_TABLE_COLUMNS,
+    where: unitOfWork.dbConnection.raw('client_id = :clientId AND external_invoice_id = :invoiceId', { clientId, invoiceId })
   });
 };
 
-export const getCustomerByEmail = async (dbContext, email) => { 
-  const unitOfWork = new UnitOfWork(dbContext);
-  return await unitOfWork.getOneWhere(schema, { 
-    tableName: PAYMENT_TABLE, 
-    columns: PAYMENT_TABLE_COLUMNS,
-    where: unitOfWork.dbConnection.raw('email = :email', { email })
-  });
-};
-
-
-export const getCustomersByName = async (dbContext, name) => { 
+export const getPaymentRequestsByCustomerId = async (dbContext, clientId, customerId) => {
   const unitOfWork = new UnitOfWork(dbContext);
   return await unitOfWork.getAllWhere(schema, { 
-  	tableName: PAYMENT_TABLE, 
-  	columns: PAYMENT_TABLE_COLUMNS,
-  	where: unitOfWork.dbConnection.raw('fullname LIKE :name', { name: `%${name}%` })
+    tableName: PAYMENT_REQUEST_TABLE, 
+    columns: PAYMENT_REQUEST_TABLE_COLUMNS,
+    where: unitOfWork.dbConnection.raw('client_id = :clientId AND external_customer_id = :customerId', { clientId, customerId })
   });
 };
 
-export const getCustomersByEmail = async (dbContext, email) => { 
-  const unitOfWork = new UnitOfWork(dbContext);
-  return await unitOfWork.getAllWhere(schema, { 
-    tableName: PAYMENT_TABLE, 
-    columns: PAYMENT_TABLE_COLUMNS,
-    where: unitOfWork.dbConnection.raw('email LIKE :email', { email: `%${email}%` })
-  });
-};
-
-
-export const updateCustomer = async (dbContext, customerId, customer) => { 
-  const unitOfWork = new UnitOfWork(dbContext);
-  return await unitOfWork.update(schema, { 
-  	tableName: PAYMENT_TABLE, 
-  	columns: PAYMENT_TABLE_COLUMNS,
-  	entity: customer,
-  	where: unitOfWork.dbConnection.raw('id = :customerId', { customerId })
-  });
-};
-
-export const deleteCustomer = async (dbContext, customerId) => { 
-  const unitOfWork = new UnitOfWork(dbContext);
-  return await unitOfWork.delete(schema, { 
-  	tableName: PAYMENT_TABLE, 
-  	where: unitOfWork.dbConnection.raw('id = :customerId', { customerId })
-  });
-};
-
-export const createCustomer = async (dbContext, customer) => {
+export const createPaymentRequest = async (dbContext, request) => {
   const result = await (new UnitOfWork(dbContext).create(schema, { 
-    tableName: PAYMENT_TABLE, 
-    columns: PAYMENT_TABLE_COLUMNS,
-    entity: customer,
+    tableName: PAYMENT_REQUEST_TABLE, 
+    columns: PAYMENT_REQUEST_TABLE_COLUMNS,
+    entity: request,
+  }));
+  
+  return (result.length && result[0]) || {};
+};
+
+export const createPaymentRequest = async (dbContext, request) => {
+  const result = await (new UnitOfWork(dbContext).create(schema, { 
+    tableName: PAYMENT_REQUEST_TABLE, 
+    columns: PAYMENT_REQUEST_TABLE_COLUMNS,
+    entity: request,
+  }));
+  
+  return (result.length && result[0]) || {};
+};
+
+export const getPaymentResponsesByCliendId = async (dbContext, clientId) => {
+  const unitOfWork = new UnitOfWork(dbContext);
+  return await unitOfWork.getAllWhere(schema, { 
+    tableName: PAYMENT_RESPONSE_TABLE, 
+    columns: PAYMENT_RESPONSE_TABLE_COLUMNS,
+    where: unitOfWork.dbConnection.raw('client_id = :clientId', { clientId })
+  });
+};
+
+export const getPaymentResponseByRequestId = async (dbContext, requestId) => { 
+  const unitOfWork = new UnitOfWork(dbContext);
+  return await unitOfWork.getOneWhere(schema, { 
+    tableName: PAYMENT_RESPONSE_TABLE, 
+    columns: PAYMENT_RESPONSE_TABLE_COLUMNS,
+    where: unitOfWork.dbConnection.raw('payment_request_id = :requestId', { requestId })
+  });
+};
+
+export const createPaymentResponse = async (dbContext, response) => {
+  const result = await (new UnitOfWork(dbContext).create(schema, { 
+    tableName: PAYMENT_RESPONSE_TABLE, 
+    columns: PAYMENT_RESPONSE_TABLE_COLUMNS,
+    entity: response,
+  }));
+  
+  return (result.length && result[0]) || {};
+};
+
+export const createTransaction = async (dbContext, transaction) => {
+  const result = await (new UnitOfWork(dbContext).create(schema, { 
+    tableName: TRANSACTION_TABLE, 
+    columns: TRANSACTION_TABLE_COLUMNS,
+    entity: transaction,
   }));
   
   return (result.length && result[0]) || {};
