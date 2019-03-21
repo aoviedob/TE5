@@ -2,21 +2,20 @@ const { getEnvVariable } = require('./helpers/environment');
 
 module.exports = {
   schema: getEnvVariable('PAYMENT_SCHEMA', 'payment'),
-  authExternalLoginUrl: getEnvVariable('AUTH_EXTERNAL_LOGIN_URL', 'http://localhost:3000/api/external/login'),
-  authExternalAuthenticateUrl: getEnvVariable('AUTH_EXTERNAL_AUTHENTICATE_URL', 'http://localhost:3000/api/authenticate'),
-  authCreateUserUrl: getEnvVariable('AUTH_CREATE_USER_URL', 'http://localhost:3000/api/users'),
-  productUrl: getEnvVariable('PRODUCT_URL', 'http://localhost:3050/api/ticketCategory'),
   crypto: {
-    sharedEncryptionKey: getEnvVariable('SHARED_ENCRYPTION_KEY', '4&//#@.c9Cb%*|44_<kl[<CI?u|5WW5->='),
+    encryptionKey: getEnvVariable('ENCRYPTION_KEY', 'e*$**.c7%*m=oo+_<C<kl[OOu*Md-><<?'),
+    tokenKey: getEnvVariable('TOKEN_KEY', '%*(oo)y.t%^m^%a|fg__$l#C[k#u"%%-@@<'),
+    apiEncryptionKey: getEnvVariable('API_ENCRYPTION_KEY', '**((&(yhka%n^^_b|2g@_$l7csk!u@%*-*@<'),
+    clientEncryptionKey: getEnvVariable('CLIENT_ENCRYPTION_KEY', '~*(~$/yhka%n^^_b|&g7_)l7cskUu@/*-&@9'),
+    tokenExpiresIn: getEnvVariable('PAYMENT_TOKEN_EXPIRES_IN', '1d'),
+    apiKeyExpiresIn: getEnvVariable('PAYMENT_API_KEY_EXPIRES_IN', '1d'),
+    tokenAlgorithm: 'HS256',
     algorithm: 'AES-256-CTR',
     algorithmKeySize: 32,
     algorithmIvSize: 16,
     algorithmEncode: 'base64',
     algorithmCharset: 'utf8',
   },
-  authExternalLoginCredentials: {
-    user: getEnvVariable('AUTH_EXTERNAL_LOGIN_USER', 'andres+external@gmail.com'),
-    password: getEnvVariable('AUTH_EXTERNAL_LOGIN_PASSWORD', 'secret'),
-  },
-  maxAllowedProductQuantity: getEnvVariable('MAX_ALLOWED_PRODUCT_QUANTITY', 10),
+  domain: getEnvVariable('PAYMENT_SERVICE_DOMAIN', 'localhost:4550'),
+  formUrl: getEnvVariable('PAYMENT_FORM_URL', '/paymentService'),
 };

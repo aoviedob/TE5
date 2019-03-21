@@ -1,7 +1,49 @@
-import * as customerRepo from '../dal/customer-repo';
+import * as paymentRepo from '../dal/payment-repo';
 import { validatePreconditions } from '../helpers/validator';
 import { mapRepoEntity, mapParams } from '../helpers/mapper';
-import { createUser } from './external-service';
+import { decryptWithPrivateKey, decrypt, encryptWithPrivateKey } from './crypto-service';
+import { domain, formUrl } from '../config';
+
+export const getClientById = async (dbContext, clientId) => {
+  validatePreconditions(['dbContext', 'clientId'], { dbContext, clientId });
+  return mapRepoEntity(await(paymentRepo.getCustomerById(dbContext, clientId)));
+};
+
+export const initiatePayment = async(dbContext, clientId, body) => {
+  validatePreconditions(['dbContext', 'clientId'], { dbContext, clientId });
+  const client = await getClientById(dbContext, clientId);
+  
+  if (client == null) {
+    logger.error({ dbContext, clientId }, 'INCONSISTENCY_DETECTED - Client does not exist');
+    const error = new Error('INCONSISTENCY_DETECTED');
+    error.status = 412;
+    throw error;
+  }
+  const { privateKey: encryptedPrivateKey } = client;
+  const privateKey = decrypt(encryptedPrivateKey).privateKey;
+  
+  let decryptedBody;
+  try {
+    decryptedBody = decryptWithPrivateKey(body, privateKey);  
+  } catch(err) {
+    logger.error({ dbContext, clientId }, 'INCONSISTENCY_DETECTED - Content is not properly encrypted');
+    const error = new Error('INCONSISTENCY_DETECTED');
+    error.status = 412;
+    throw error;
+  }
+
+  const { invoice, customerId, amount } = decryptedBody;
+  const apiKey = createApiKey();
+
+  return encryptWithPrivateKey({
+    formUrl: `${domain}${formUrl}?${apiKey}`,
+    apiKey,
+  }, privateKey);
+};
+
+export const pay = () => {
+
+};
 
 export const getCustomers = async dbContext => { 
   validatePreconditions(['dbContext'], { dbContext });
@@ -38,9 +80,4 @@ export const createCustomer = async (dbContext, customer) => {
   const externalUserId = await createUser(customer);
   const { id: customerId } = await customerRepo.createCustomer(dbContext, mapParams({ ...customer, externalUserId }));
   return await getCustomerById(dbContext, customerId);
-};
-
-export const deleteCustomer = async (dbContext, customerId) => {
-  validatePreconditions(['dbContext', 'customerId'], { dbContext, customerId });
-  await customerRepo.deleteCustomer(dbContext, customerId);
 };

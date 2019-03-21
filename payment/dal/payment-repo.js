@@ -34,6 +34,21 @@ const TRANSACTION_TABLE_COLUMNS = [
   'created_at'
 ];
 
+export const CLIENT_TABLE = 'client';
+const CLIENT_TABLE_COLUMNS = [
+  'id',
+  'legal_name',
+  'identification',
+  'account',
+  'private_key',
+  'webhook_url',
+  'phone',
+  'email',
+  'address',
+  'created_at',
+  'updated_at'
+];
+
 export const getPaymentRequestsByClientId = async (dbContext, clientId) => { 
   const unitOfWork = new UnitOfWork(dbContext);
   return await unitOfWork.getAllWhere(schema, { 
@@ -117,4 +132,13 @@ export const createTransaction = async (dbContext, transaction) => {
   }));
   
   return (result.length && result[0]) || {};
+};
+
+export const getClientById = async (dbContext, clientId) => {
+  const unitOfWork = new UnitOfWork(dbContext);
+  return await unitOfWork.getOneWhere(schema, { 
+    tableName: CLIENT_TABLE, 
+    columns: CLIENT_TABLE_COLUMNS,
+    where: unitOfWork.dbConnection.raw('id = :clientId', { clientId })
+  });
 };

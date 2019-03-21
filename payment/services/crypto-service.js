@@ -30,9 +30,6 @@ export const decrypt = (encryptedJSON, customEncryptionKey = null) => {
   return JSON.parse(decryptedText);
 };
 
-export const decryptWithSharedPrivateKey = encryptedJSON =>
-  decrypt(encryptedJSON, cryptoConfig.sharedEncryptionKey);
-
 export const createToken = (object, options = {}) => {
   const { tokenKey, tokenExpiresIn, tokenAlgorithm } = cryptoConfig;
   
@@ -47,4 +44,31 @@ export const verifyToken = token => {
   return decrypt(body);
 };
 
-export const createHash = text => crypto.createHash('sha256').update(text).digest(cryptoConfig.algorithmEncode);
+export const createApiKey = (options = {}) => {
+  const { apiEncryptionKey, tokenAlgorithm } = cryptoConfig;
+
+  const tokenOptions = { algorithm: tokenAlgorithm, ...options };
+  return jwt.sign({}, apiEncryptionKey , tokenOptions);
+};
+
+export const verifyApiKey = token => {
+  const { apiEncryptionKey } = cryptoConfig;
+  try {
+    const { body } = jwt.verify(token, apiEncryptionKey);
+  } catch (error) {
+    return false;
+  }
+  return true;
+};
+
+
+export const createPrivateKey = (object, options = {}) => {
+  const { clientEncryptionKey, tokenAlgorithm } = cryptoConfig;
+
+  const tokenOptions = { algorithm: tokenAlgorithm, ...options };
+  return jwt.sign({}, clientEncryptionKey , tokenOptions);
+};
+
+export const decryptWithPrivateKey = (body, privateKey) => decrypt(body, privateKey);
+
+export const encryptWithPrivateKey = (object, privateKey) =>  encrypt(object, privateKey);

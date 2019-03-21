@@ -7,7 +7,6 @@ exports.up = async dbConnection =>
       legal_name varchar(500) UNIQUE not null,
       identification varchar(500) UNIQUE not null,
       account text not null,
-      api_key text not null,
       private_key text not null,
       webhook_url text not null,
       phone varchar(500),

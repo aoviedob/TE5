@@ -27,5 +27,5 @@ app.use(expressLogger({
 initApis(app);
 
 app.listen(4550, () => {
-  logger.info('Customer Server started successfully on port 4550');
+  logger.info('Payment Server started successfully on port 4550');
 });
