@@ -44,21 +44,21 @@ export const verifyToken = token => {
   return decrypt(body);
 };
 
-export const createApiKey = (options = {}) => {
+export const createApiKey = (object, options = {}) => {
   const { apiEncryptionKey, tokenAlgorithm } = cryptoConfig;
 
   const tokenOptions = { algorithm: tokenAlgorithm, ...options };
-  return jwt.sign({}, apiEncryptionKey , tokenOptions);
+  return jwt.sign(object, apiEncryptionKey , tokenOptions);
 };
 
 export const verifyApiKey = token => {
   const { apiEncryptionKey } = cryptoConfig;
   try {
-    const { body } = jwt.verify(token, apiEncryptionKey);
+    const content = jwt.verify(token, apiEncryptionKey);
   } catch (error) {
     return false;
   }
-  return true;
+  return content;
 };
 
 

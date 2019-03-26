@@ -9,16 +9,17 @@ export const getClientById = async (dbContext, clientId) => {
   return mapRepoEntity(await(paymentRepo.getCustomerById(dbContext, clientId)));
 };
 
-export const initiatePayment = async(dbContext, clientId, body) => {
+const authenticate = async(dbContext, clientId, body) => {
   validatePreconditions(['dbContext', 'clientId'], { dbContext, clientId });
   const client = await getClientById(dbContext, clientId);
-  
+
   if (client == null) {
     logger.error({ dbContext, clientId }, 'INCONSISTENCY_DETECTED - Client does not exist');
     const error = new Error('INCONSISTENCY_DETECTED');
     error.status = 412;
     throw error;
   }
+
   const { privateKey: encryptedPrivateKey } = client;
   const privateKey = decrypt(encryptedPrivateKey).privateKey;
   
@@ -31,17 +32,56 @@ export const initiatePayment = async(dbContext, clientId, body) => {
     error.status = 412;
     throw error;
   }
+  return decryptedBody;
+};
 
+export const requestApiKey = (dbContext, clientId) => {
+  await authenticate(dbContext, clientId, body);
+  return createApiKey({ clientId });
+};
+
+export const initiatePayment = async(dbContext, clientId) => {
+  const decryptedBody = await authenticate(dbContext, clientId, body);
+ 
   const { invoice, customerId, amount } = decryptedBody;
-  const apiKey = createApiKey();
+  validatePreconditions(['invoice', 'customerId', 'amount'], decryptedBody);
+  const token = createToken({ ...decryptedBody, clientId });
 
   return encryptWithPrivateKey({
-    formUrl: `${domain}${formUrl}?${apiKey}`,
-    apiKey,
+    formUrl: `${domain}${formUrl}?token=${token}`,
   }, privateKey);
 };
 
-export const pay = () => {
+export const pay = async (req, dbContext, paymentData) => {
+  let tokenContent;
+  try{
+    tokenContent = verifyToken(req.token);
+  } catch(err) {
+    logger.error({ dbContext, paymentData }, 'INCONSISTENCY_DETECTED - Payment token is not valid');
+    const error = new Error('INCONSISTENCY_DETECTED');
+    error.status = 412;
+    throw error;
+  }
+
+  const apiKey = getApiKeyFromRequest(req);
+  const apiKeyVerification = verifyApiKey(apiKey);
+
+  if (!apiKeyVerification) {
+    logger.error({ dbContext, tokenContent, paymentData, clientId }, 'INCONSISTENCY_DETECTED - ApiKey is not valid');
+    const error = new Error('INCONSISTENCY_DETECTED');
+    error.status = 412;
+    throw error;
+  }
+
+  const { clientId } = apiKeyVerification;
+  const { clientId: tokenClientId } = tokenContent;
+
+  if (clientId !== tokenClientId) {
+    logger.error({ dbContext, tokenContent, paymentData, clientId }, 'INCONSISTENCY_DETECTED - Unmatching keys');
+    const error = new Error('INCONSISTENCY_DETECTED');
+    error.status = 412;
+    throw error;
+  }
 
 };
 
