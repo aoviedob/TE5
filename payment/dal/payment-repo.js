@@ -86,16 +86,6 @@ export const createPaymentRequest = async (dbContext, request) => {
   return (result.length && result[0]) || {};
 };
 
-export const createPaymentRequest = async (dbContext, request) => {
-  const result = await (new UnitOfWork(dbContext).create(schema, { 
-    tableName: PAYMENT_REQUEST_TABLE, 
-    columns: PAYMENT_REQUEST_TABLE_COLUMNS,
-    entity: request,
-  }));
-  
-  return (result.length && result[0]) || {};
-};
-
 export const getPaymentResponsesByCliendId = async (dbContext, clientId) => {
   const unitOfWork = new UnitOfWork(dbContext);
   return await unitOfWork.getAllWhere(schema, { 

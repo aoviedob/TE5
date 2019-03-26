@@ -1,0 +1,5 @@
+{
+  "dependencies": {
+    "credit-card-validate": "^0.9.3"
+  }
+}

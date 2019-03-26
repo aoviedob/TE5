@@ -14,3 +14,7 @@ ticket/.yarn-cache/
 ticket/yarn-error.log
 ticket/node_modules/
 ticket/logs/
+payment/.yarn-cache/
+payment/yarn-error.log
+payment/node_modules/
+payment/logs/

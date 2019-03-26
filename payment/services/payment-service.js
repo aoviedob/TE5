@@ -3,14 +3,14 @@ import { validatePreconditions } from '../helpers/validator';
 import { mapRepoEntity, mapParams } from '../helpers/mapper';
 import { decryptWithPrivateKey, decrypt, encryptWithPrivateKey } from './crypto-service';
 import { domain, formUrl } from '../config';
+import CardValidate from 'credit-card-validate';
 
 export const getClientById = async (dbContext, clientId) => {
   validatePreconditions(['dbContext', 'clientId'], { dbContext, clientId });
   return mapRepoEntity(await(paymentRepo.getCustomerById(dbContext, clientId)));
 };
 
-const authenticate = async(dbContext, clientId, body) => {
-  validatePreconditions(['dbContext', 'clientId'], { dbContext, clientId });
+const getClientPrivateKey = async(dbContext, clientId) => {
   const client = await getClientById(dbContext, clientId);
 
   if (client == null) {
@@ -21,7 +21,13 @@ const authenticate = async(dbContext, clientId, body) => {
   }
 
   const { privateKey: encryptedPrivateKey } = client;
-  const privateKey = decrypt(encryptedPrivateKey).privateKey;
+  return decrypt(encryptedPrivateKey).privateKey;
+};
+
+const authenticate = async(dbContext, clientId, body) => {
+  validatePreconditions(['dbContext', 'clientId'], { dbContext, clientId });
+
+  const privateKey = await getClientPrivateKey(dbContext, clientId);
   
   let decryptedBody;
   try {
@@ -52,12 +58,37 @@ export const initiatePayment = async(dbContext, clientId) => {
   }, privateKey);
 };
 
-export const pay = async (req, dbContext, paymentData) => {
+const creditCardFactory = CardValidate.CreditCardFactory(CardValidate.cards);
+
+const throwPaymentDataInvalidError = data => {
+  logger.error(data, 'INCONSISTENCY_DETECTED - Payment data is invalid');
+  const error = new Error('INCONSISTENCY_DETECTED');
+  error.status = 412;
+  throw error;
+};
+
+const validatePaymentData = (paymentData, extraData) => {
+  try {
+    const { cardNumber, cardHolder, securityCode, expirationDate } = paymentData;
+    
+    const formattedExpDate = new Date(expirationDate);
+    const [type] = creditCardFactory.find(cardNumber, formattedExpDate, securityCode);
+    const card = CardValidate.cards.[type](cardNumber, formattedExpDate, securityCode);
+    if (!card.isValid()) {
+      throwPaymentDataInvalidError({ cardNumber, cardHolder, ...extraData });
+    }
+  } catch {
+    throwPaymentDataInvalidError({ cardNumber, cardHolder, ...extraData });
+  }
+};
+
+export const pay = async (req, dbContext, paymentData = {}) => {
+  const { cardNumber, cardHolder } = paymentData;
   let tokenContent;
   try{
     tokenContent = verifyToken(req.token);
   } catch(err) {
-    logger.error({ dbContext, paymentData }, 'INCONSISTENCY_DETECTED - Payment token is not valid');
+    logger.error({ dbContext, cardNumber,  cardHolder }, 'INCONSISTENCY_DETECTED - Payment token is not valid');
     const error = new Error('INCONSISTENCY_DETECTED');
     error.status = 412;
     throw error;
@@ -67,7 +98,7 @@ export const pay = async (req, dbContext, paymentData) => {
   const apiKeyVerification = verifyApiKey(apiKey);
 
   if (!apiKeyVerification) {
-    logger.error({ dbContext, tokenContent, paymentData, clientId }, 'INCONSISTENCY_DETECTED - ApiKey is not valid');
+    logger.error({ dbContext, cardNumber, cardHolder }, 'INCONSISTENCY_DETECTED - ApiKey is not valid');
     const error = new Error('INCONSISTENCY_DETECTED');
     error.status = 412;
     throw error;
@@ -77,47 +108,25 @@ export const pay = async (req, dbContext, paymentData) => {
   const { clientId: tokenClientId } = tokenContent;
 
   if (clientId !== tokenClientId) {
-    logger.error({ dbContext, tokenContent, paymentData, clientId }, 'INCONSISTENCY_DETECTED - Unmatching keys');
+    logger.error({ dbContext, tokenContent, cardHolder, cardHolder, clientId }, 'INCONSISTENCY_DETECTED - Unmatching keys');
     const error = new Error('INCONSISTENCY_DETECTED');
     error.status = 412;
     throw error;
   }
 
-};
+  validatePreconditions(['invoice', 'customerId', 'amount', 'clientId', 'dbContext', 'cardNumber', 'cardHolder', 'securityCode'], { ...tokenContent, ...paymentData, dbContext });
+  const { invoice, customerId, amount, clientId } = tokenContent;
 
-export const getCustomers = async dbContext => { 
-  validatePreconditions(['dbContext'], { dbContext });
-  return (await customerRepo.getCustomers(dbContext)).map(customer => mapRepoEntity(customer));
-};
+  validatePaymentData(paymentData, tokenContent);
 
-export const getCustomerById = async (dbContext, customerId) => {
-  validatePreconditions(['dbContext', 'customerId'], { dbContext, customerId });
-  return mapRepoEntity((await customerRepo.getCustomerById(dbContext, customerId)));
-};
+  const privateKey = await getClientPrivateKey(dbContext, clientId);
+  const { cardNumber, cardHolder } = paymentData;
+  
+  const { id: paymentRequestId } = await paymentRepo.createPaymentRequest(dbContext, mapParams({ clientId, externalInvoiceId: invoice, externalCustomerId: customerId, amount, cardNumber: encryptWithPrivateKey(cardNumber, privateKey, true), cardHolder: encryptWithPrivateKey(cardHolder, privateKey, true) }));
+  if (!paymentRequestId) {
+    return null;
+  }
 
-export const getCustomersByName = async (dbContext, name) => {
-  validatePreconditions(['dbContext', 'name'], { dbContext, name });
-  return (await customerRepo.getCustomersByName(dbContext, name)).map(customer => mapRepoEntity(customer));
-};
-
-export const getCustomersByEmail = async (dbContext, email) => {
-  validatePreconditions(['dbContext', 'email'], { dbContext, email });
-  return (await customerRepo.getCustomersByEmail(dbContext, email)).map(customer => mapRepoEntity(customer));
-};
-
-export const getCustomerByEmail = async (dbContext, email) => {
-  validatePreconditions(['dbContext', 'email'], { dbContext, email });
-  return mapRepoEntity(await customerRepo.getCustomerByEmail(dbContext, email));
-};
-
-export const updateCustomer = async (dbContext, customerId, customer) => { 
-  validatePreconditions(['dbContext', 'customerId', 'customer'], { dbContext, customerId, customer });
-  return await customerRepo.updateCustomer(dbContext, customerId, mapParams(customer));
-};
-
-export const createCustomer = async (dbContext, customer) => {
-  validatePreconditions(['dbContext', 'email', 'fullname', 'password'], { dbContext, ...customer });
-  const externalUserId = await createUser(customer);
-  const { id: customerId } = await customerRepo.createCustomer(dbContext, mapParams({ ...customer, externalUserId }));
-  return await getCustomerById(dbContext, customerId);
+  const { transaction } = await paymentRepo.createTransaction(dbContext, mapParams({ paymentRequestId }));
+  return await paymentRepo.createPaymentResponse(dbContext, mapParams({ paymentRequestId, transaction, status: 'SUCCESS' }));
 };

@@ -2,7 +2,7 @@ import crypto from 'crypto';
 import { crypto as cryptoConfig } from '../config';
 import jwt from 'jsonwebtoken';
 
-export const encrypt = (object, customEncryptionKey) => { 
+export const encrypt = (data, customEncryptionKey, isText = false) => { 
   const { algorithmIvSize, algorithm, encryptionKey, algorithmEncode, algorithmCharset, algorithmKeySize } = cryptoConfig;
   
   const initializationVector = crypto
@@ -11,13 +11,13 @@ export const encrypt = (object, customEncryptionKey) => {
     .slice(0, algorithmIvSize);
 
   const cipher = crypto.createCipheriv(algorithm, (customEncryptionKey || encryptionKey).slice(0, algorithmKeySize), initializationVector);
-  let encryptedJSON = cipher.update(JSON.stringify(object), algorithmCharset, algorithmEncode);
+  let encryptedJSON = cipher.update((isText ? data : JSON.stringify(data)), algorithmCharset, algorithmEncode);
   encryptedJSON += cipher.final(algorithmEncode);
 
   return `${initializationVector}:${encryptedJSON}`;
 };
 
-export const decrypt = (encryptedJSON, customEncryptionKey = null) => {
+export const decrypt = (encryptedJSON, customEncryptionKey = null, isText = false ) => {
   const { algorithm, encryptionKey, algorithmEncode, algorithmCharset, algorithmKeySize } = cryptoConfig;
   
   const encryptedParts = encryptedJSON.split(':');
@@ -27,7 +27,7 @@ export const decrypt = (encryptedJSON, customEncryptionKey = null) => {
   const decipher = crypto.createDecipheriv(algorithm, (customEncryptionKey || encryptionKey).slice(0, algorithmKeySize), initializationVector);
   let decryptedText = decipher.update(encryptedText, algorithmEncode, algorithmCharset);
   decryptedText += decipher.final(algorithmCharset);
-  return JSON.parse(decryptedText);
+  return isText ? decryptedText : JSON.parse(decryptedText);
 };
 
 export const createToken = (object, options = {}) => {
@@ -69,6 +69,6 @@ export const createPrivateKey = (object, options = {}) => {
   return jwt.sign({}, clientEncryptionKey , tokenOptions);
 };
 
-export const decryptWithPrivateKey = (body, privateKey) => decrypt(body, privateKey);
+export const decryptWithPrivateKey = (body, privateKey, isText) => decrypt(body, privateKey, isText);
 
-export const encryptWithPrivateKey = (object, privateKey) =>  encrypt(object, privateKey);
+export const encryptWithPrivateKey = (object, privateKey, isText) =>  encrypt(object, privateKey, isText);
