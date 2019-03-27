@@ -114,7 +114,7 @@ export const pay = async (req, dbContext, paymentData = {}) => {
     throw error;
   }
 
-  validatePreconditions(['invoice', 'customerId', 'amount', 'clientId', 'dbContext', 'cardNumber', 'cardHolder', 'securityCode'], { ...tokenContent, ...paymentData, dbContext });
+  validatePreconditions(['invoice', 'customerId', 'amount', 'clientId', 'dbContext', 'cardNumber', 'cardHolder', 'securityCode', 'expirationDate'], { ...tokenContent, ...paymentData, dbContext });
   const { invoice, customerId, amount, clientId } = tokenContent;
 
   validatePaymentData(paymentData, tokenContent);

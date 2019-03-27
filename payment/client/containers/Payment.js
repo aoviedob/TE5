@@ -1,5 +1,8 @@
 import React, { Component } from 'react';
+import { Form, Button } from 'react-bootstrap';
+import { inject } from 'mobx-react';
 
+@inject('payment')
 export default class Payment extends Component {
 
   render() {

@@ -8,6 +8,7 @@
         },
       },
     ],
+    '@babel/preset-typescript',
     '@babel/preset-react',
   ],
   "env": {
@@ -28,12 +29,21 @@
         loose: true,
       },
     ],
+    "@babel/plugin-transform-modules-commonjs",
+               "@babel/plugin-transform-destructuring",
+                        "transform-es2015-parameters",
+                  
+        
+    'transform-flow-strip-types',
+
     '@babel/plugin-transform-runtime',
+        "babel-plugin-add-module-exports",
+  
     '@babel/plugin-proposal-do-expressions',
     '@babel/plugin-proposal-export-default-from',
     '@babel/plugin-proposal-export-namespace-from',
     '@babel/plugin-proposal-object-rest-spread',
-    '@babel/plugin-proposal-optional-chaining',
+    '@babel/plugin-proposal-optional-chaining'
   ],
   "ignore": ['node_modules/**/*.js'],
 }
