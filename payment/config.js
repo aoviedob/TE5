@@ -17,5 +17,5 @@ module.exports = {
     algorithmCharset: 'utf8',
   },
   domain: getEnvVariable('PAYMENT_SERVICE_DOMAIN', 'localhost:4550'),
-  formUrl: getEnvVariable('PAYMENT_FORM_URL', '/paymentService'),
+  formUrl: getEnvVariable('PAYMENT_FORM_URL', '/payment'),
 };
