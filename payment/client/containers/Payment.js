@@ -4,7 +4,18 @@ import { inject } from 'mobx-react';
 @inject('payment')
 export default class Payment extends Component {
 
+  constructor(props) {
+    super(props);
+    this.state = { paymentData: props.payment.paymentData };
+  }
+
+  onInputChange = (field, event) => {
+    console.log('value', event.target.value);
+    this.state = { paymentData: { ... this.state.paymentData, [field]: this.state.paymentData[field] + event.target.value }};
+  };
+
   render() {
+    const { cardHolder } = this.state.paymentData;
     return <div className="container">
     <div className="row">
         <div className="col-xs-12 col-md-4">
@@ -20,8 +31,9 @@ export default class Payment extends Component {
                         <label htmlFor="cardHolder">
                             Card Holder</label>
                         
-                            <input type="text" className="form-control" id="cardHolder"
+                            <input type="text" className="form-control" id="cardHolder" onChange={event => this.onInputChange('cardHolder', event)} value={cardHolder}
                                 required autoFocus />
+                            
                         
 
                     </div>
