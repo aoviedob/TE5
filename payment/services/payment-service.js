@@ -1,7 +1,7 @@
 import * as paymentRepo from '../dal/payment-repo';
 import { validatePreconditions } from '../helpers/validator';
 import { mapRepoEntity, mapParams } from '../helpers/mapper';
-import { decryptWithPrivateKey, decrypt, encryptWithPrivateKey } from './crypto-service';
+import { decryptWithPrivateKey, decrypt, encryptWithPrivateKey, verifyToken } from './crypto-service';
 import { domain, formUrl } from '../config';
 import CardValidate from 'credit-card-validate';
 
@@ -41,12 +41,12 @@ const authenticate = async(dbContext, clientId, body) => {
   return decryptedBody;
 };
 
-export const requestApiKey = (dbContext, clientId) => {
+export const requestApiKey = (dbContext, clientId, body) => {
   await authenticate(dbContext, clientId, body);
   return createApiKey({ clientId });
 };
 
-export const initiatePayment = async(dbContext, clientId) => {
+export const initiatePayment = async(dbContext, clientId, body) => {
   const decryptedBody = await authenticate(dbContext, clientId, body);
  
   const { invoice, customerId, amount } = decryptedBody;
@@ -56,6 +56,19 @@ export const initiatePayment = async(dbContext, clientId) => {
   return encryptWithPrivateKey({
     formUrl: `${domain}${formUrl}?token=${token}`,
   }, privateKey);
+};
+
+export const getPaymentAmount = async req => {
+  try {
+    const { amount } = verifyToken(req.token);
+    return { amount };
+  } catch(error) {
+    logger.error(data, 'INCONSISTENCY_DETECTED - Provided token is invalid');
+    const error = new Error('INCONSISTENCY_DETECTED');
+    error.status = 412;
+    throw error;
+  }
+  return null;
 };
 
 const creditCardFactory = CardValidate.CreditCardFactory(CardValidate.cards);

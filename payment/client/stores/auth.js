@@ -1,20 +1,19 @@
 import { observable, computed, action, toJS } from 'mobx';
 
 class Auth {
-    @observable token;
+  @observable token;
 
-    constructor() {
-      this.token = null;
-    };
+  constructor() {
+    this.token = null;
+  };
 
-    @computed get isAuthenticated () {
-        return !!this.token;
-    }
+  @computed get isAuthenticated () {
+    return !!this.token;
+  }
 
-    @action async hydrate (token) { 
-        this.token = token;
-    }
-
+  @action async hydrate (token) { 
+    this.token = token;
+  }
 };
 
 

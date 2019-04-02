@@ -1,7 +1,5 @@
-import CustomerApi from './customer';
-import OrderApi from './order';
+import PaymentApi from './payment';
 
 export const initApis = app => {
-  new CustomerApi(app);
-  new OrderApi(app);
+  new PaymentApi(app);
 };

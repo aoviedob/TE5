@@ -1,32 +1,17 @@
 import { observable, action } from 'mobx';
-import { makePost } from '../modules/api-client';
+import { makeGet, makePost } from '../modules/api-client';
 
 class Payment {
-  @observable paymentData;
-  @observable cardInfo;
   @observable result;
-  @observable cardType;
+  @observable amount = 0;
 
-  constructor() {
-    this.paymentData = {
-      cardNumber: '',
-      cardHolder: '',
-      securityCode: '',
-      expirationDate: ''
-    };
-  };
-
-  @action async pay () { 
-    this.result = await makePost('/api/payment', this.paymentData);
+  @action async pay (paymentData) { 
+    this.result = await makePost('http://localhost:4550/api/payment', paymentData);
   }
 
-  @action async checkCardType () { 
-    const cardTypeResult = await makePost('/api/payment/card', this.cardInfo);
-    if (cardTypeResult.invalid) {
-      this.result = 'The Credit Card does not exist';
-      return this.result;
-    }
-    this.cardType = cardTypeResult.type;
+  @action async getAmount (token) { 
+    const { amount } = (await makeGet('http://localhost:4550/api/payment/amount')) || {};
+    this.amount = amount;
   }
 
 };

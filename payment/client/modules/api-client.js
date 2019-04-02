@@ -1,5 +1,5 @@
 import request from 'superagent';
-import auth from '../stores/auth';
+import { auth } from '../stores/auth';
 
 const setHeaders = (req) => req.set('authorization', auth.token).accept('application/json');
 
@@ -13,4 +13,9 @@ export const makePost = async (url, payload) => {
     .accept('application/json');
 
     return response;
+};
+
+export const makeGet = async url => {
+    const response = await request.get(url).use(setHeaders);
+    return JSON.parse(response.text);
 };
