@@ -1,26 +1,21 @@
 import { getTokenFromRequest } from '../helpers/request';
 
-const unprotectedApis = [
-  '/api/login'
-];
-
 export const requestHandler = (route, action) =>
   async (req, res, next) => {
-    if (!unprotectedApis.includes(route)) {
-      try {
+    try {
         const token = getTokenFromRequest(req);
         req.token = token;
       } catch(error) {
         res.status(401).send('UNAUTHORIZED');
         return;
       }
-    }
-
+  
     try {
       const result = await action(req);
       res.setHeader('Content-Type', 'application/json');
       res.json(JSON.stringify(result));
     } catch(error) {
+      console.log('errorHola', error);
       res.status(error.status).send(error.message);
     }
   };

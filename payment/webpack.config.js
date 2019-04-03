@@ -2,6 +2,7 @@
 var path = require('path');
 var webpack = require('webpack');
 var HtmlWebPackPlugin = require("html-webpack-plugin");
+var config = require('./config');
 
 var htmlWebpackPlugin = new HtmlWebPackPlugin({
   template: "./client/index.html",
@@ -10,8 +11,12 @@ var htmlWebpackPlugin = new HtmlWebPackPlugin({
 
 module.exports = {
   entry: ['./client/client.js'],
-  output: { path: __dirname, filename: 'bundle.js' },
+  output: { path: `${__dirname}/dist`, filename: 'bundle.js' },
   mode: 'development',
+  devServer: {
+    inline: true,
+    port: 4551,
+  },
   module: {
     rules: [
       {

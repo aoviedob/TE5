@@ -11,7 +11,7 @@ class Auth {
     return !!this.token;
   }
 
-  @action async hydrate (token) { 
+  @action async hydrate (token) {
     this.token = token;
   }
 };

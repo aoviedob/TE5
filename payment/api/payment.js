@@ -10,6 +10,7 @@ export default class PaymentApi {
     app.get('/api/payment/amount', this.getPaymentAmount);
     app.post('/api/payment/key', this.getCustomersByName);
     app.post('/api/payment/initiate', this.getCustomersByName);
+    app.post('api/payment/login', this.login);
   }
   
   async pay(req) {
@@ -30,4 +31,6 @@ export default class PaymentApi {
     const { body } = req;
     return await paymentService.initiatePayment(req, clientId, body);
   }
+
+  async login(req) { return await paymentService.login(req); }
 }

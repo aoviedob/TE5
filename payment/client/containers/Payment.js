@@ -16,7 +16,7 @@ export default class Payment extends Component {
 
     const fields = [{
       name: 'cardHolder',
-      rules: 'required|alpha',
+      rules: 'required',
     }, {
       name: 'cardNumber',
       rules: 'required|numeric',
@@ -43,11 +43,12 @@ export default class Payment extends Component {
 
 
   async componentWillMount() {
-    await this.props.payment.getAmount();
+  //  await this.props.payment.getAmount();
   }
   
   render() {
-    const { amount } = this.props.payment;
+    const { amount, result } = this.props.payment;
+    console.log('resulta', result);
     const errors = this.form.errors();
     return <div className="container">
     <div className="row">
@@ -98,6 +99,7 @@ export default class Payment extends Component {
                     <button type="submit" onClick={this.form.onSubmit} className="btn btn-success btn-lg btn-block" >Pay</button>
                     <button onClick={this.form.onClear} className="btn btn-lg btn-block" >Cancel</button>
                 </div>
+                       {!!result.isInvalid && <label className="label label-danger"> Your card information is invalid </label>}
             </div>
         </div>
     </div>
