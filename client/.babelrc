@@ -1,0 +1,49 @@
+{
+  "presets": [
+    [
+      '@babel/preset-env',
+      {
+        targets: {
+          "node": 'current',
+        },
+      },
+    ],
+    '@babel/preset-typescript',
+    '@babel/preset-react',
+  ],
+  "env": {
+    "test": {
+      "presets": [["@babel/preset-env"], "@babel/preset-react"]
+    }
+  },
+  "plugins": [
+    [
+      '@babel/plugin-proposal-decorators',
+      {
+        legacy: true,
+      },
+    ],
+    [
+      '@babel/plugin-proposal-class-properties',
+      {
+        loose: true,
+      },
+    ],
+    "@babel/plugin-transform-modules-commonjs",
+               "@babel/plugin-transform-destructuring",
+                        "transform-es2015-parameters",
+                  
+        
+    'transform-flow-strip-types',
+
+    '@babel/plugin-transform-runtime',
+        "babel-plugin-add-module-exports",
+  
+    '@babel/plugin-proposal-do-expressions',
+    '@babel/plugin-proposal-export-default-from',
+    '@babel/plugin-proposal-export-namespace-from',
+    '@babel/plugin-proposal-object-rest-spread',
+    '@babel/plugin-proposal-optional-chaining'
+  ],
+  "ignore": ['node_modules/**/*.js'],
+}
