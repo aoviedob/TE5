@@ -5,17 +5,17 @@ var HtmlWebPackPlugin = require("html-webpack-plugin");
 var config = require('./config');
 
 var htmlWebpackPlugin = new HtmlWebPackPlugin({
-  template: "./client/index.html",
+  template: "./index.html",
   filename: "./index.html"
 });
 
 module.exports = {
-  entry: ['./client/client.js'],
+  entry: ['./client.js'],
   output: { path: `${__dirname}/dist`, filename: 'bundle.js' },
   mode: 'development',
   devServer: {
     inline: true,
-    port: 4551,
+    port: 5112,
   },
   module: {
     rules: [

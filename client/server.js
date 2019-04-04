@@ -3,31 +3,26 @@ import cors from 'cors';
 import bodyParser from 'body-parser';
 import bunyan from 'bunyan';
 import expressLogger from 'express-bunyan-logger';
-import { initApis } from './api/api';
-import { routerMiddleware } from './api/api-middleware';
 
-const logger = bunyan.createLogger({ name: 'PaymentProvider'});
+const logger = bunyan.createLogger({ name: 'ClientServer'});
 
 const app = new Express();
-routerMiddleware(app);
 
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 app.use(expressLogger({
-  name: 'PaymentProvider',
+  name: 'ClientServer',
   streams: [{
     type: 'rotating-file',
     level: 'info',
-    path: './logs/payment.log',
+    path: './logs/client.log',
     period: '1d',
     count: 3,
   }]
 }));
 
-initApis(app);
-
-app.listen(4550, () => {
-  logger.info('Payment Server started successfully on port 4550');
+app.listen(5112, () => {
+  logger.info('Client Server started successfully on port 5112');
 });
 
 const isDeveloping = process.env.NODE_ENV !== 'production';
@@ -56,6 +51,5 @@ if (isDeveloping) {
   app.use(webpackHotMiddleware(compiler));
   
 } else {
-  // serve the content using static directory
   app.use(express.static(`${__dirname}/dist/bundle.js`));
 }

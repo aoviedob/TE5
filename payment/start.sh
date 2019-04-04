@@ -10,7 +10,7 @@ if [ ! "$(docker ps -q -f name=payment)" ]; then
   
   docker rmi payment
   docker build --tag=payment .
-  docker run -d --name payment -p 4550 -p 4551 --net="host" payment
+  docker run -d --name payment -p 4550 --net="host" payment
 fi
 
 ./scripts/create_schema.sh;
