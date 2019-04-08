@@ -1,6 +1,5 @@
 import { observable, action } from 'mobx';
 import { makeGet, makePost } from '../modules/api-client';
-import config from '../../config';
 
 class Payment {
   @observable result = {};
