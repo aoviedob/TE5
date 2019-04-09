@@ -1,2 +1,2 @@
 export { auth } from './auth';
-export { payment } from './payment';
+export { event } from './event';

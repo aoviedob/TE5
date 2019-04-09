@@ -2,20 +2,22 @@ import React, { Component } from 'react';
 
 export default class SearchBox extends Component {
 
-  render() {
+  handleOnSearch = () => {
+    const { onSearch } = this.props;
+    onSearch && onSearch(this.input.value);
+  }
 
-    return  <div className="row justify-content-center">
-                <div className="col-12 col-md-10 col-lg-8">
+  render() {
+    
+    return  <div className="justify-content-center">
+                <div className="col-12 col-md-12 col-lg-12">
                     <form className="card card-sm">
-                        <div className="card-body row no-gutters align-items-center">
+                        <div className="row no-gutters align-items-center">
                             <div className="col">
-                              <input className="form-control form-control-lg form-control-borderless" type="search" placeholder="Search topics or keywords"/>
+                              <input ref={node => { this.input = node; } } className="form-control form-control-lg form-control-borderless" type="search" placeholder="Search Events"/>
                             </div>
-                             <div className="col-auto">
-                              <i className="fas fa-search h4 text-body"></i>
-                            </div>
-                            <div className="col-auto">
-                              <button className="btn btn-lg btn-success" type="submit">Search</button>
+                             <div style={{paddingLeft: 10, paddingRight: 10, cursor: 'pointer' }} className="col-auto">
+                             <i onClick={this.handleOnSearch} className="material-icons">search</i>
                             </div>
                         </div>
                     </form>

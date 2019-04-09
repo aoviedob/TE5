@@ -55,11 +55,11 @@ module.exports = {
         }
       },
       {
-        test: /\.scss$/,
+        test: /\.css$/,
         use: [
           { loader: 'css-local-loader' },
           { loader: 'style-loader', options: { sourceMap: true } },
-          { loader: 'css-loader', options: { sourceMap: true, modules: true, minimize: false, importLoaders: 1, localIdentName: '[local]_[hash:base64:5]' } },
+          { loader: 'css-loader' },
           { loader: 'sass-loader', options: { sourceMap: true, outputStyle: 'expanded', sourceMapContents: true } }
         ]
       }
