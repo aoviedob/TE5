@@ -3,11 +3,11 @@ import React, { Component } from 'react';
 export default class Card extends Component {
 
   render() {
-  	const { image, title, subtitle, description, children } = this.props;
-    return  <div className="card card-cascade">
+  	const { image, title, subtitle, description, children, className } = this.props;
+    return  <div className={`${className} card card-cascade`}>
 			  {image &&
 			     <div className="view view-cascade overlay">
-				   <img className="card-img-top" src={event}/>
+				   <img className="card-img-top" src={image}/>
 				     <a>
 				       <div className="mask rgba-white-slight"></div>
 				     </a>

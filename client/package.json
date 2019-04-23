@@ -48,6 +48,7 @@
     "babel-preset-env": "^1.7.0",
     "babel-preset-stage-0": "^6.24.1",
     "bunyan": "^1.8.12",
+    "connect-history-api-fallback": "^1.6.0",
     "cors": "^2.8.5",
     "css-loader": "^2.1.1",
     "css-local-loader": "^1.0.5",

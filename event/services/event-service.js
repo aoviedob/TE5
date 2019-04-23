@@ -3,9 +3,10 @@ import { validatePreconditions } from '../helpers/validator';
 import { mapRepoEntity, mapParams } from '../helpers/mapper';
 import UnitOfWork from '../database/unit_of_work.js';
 
-export const getEvents = async dbContext => { 
+export const getEvents = async (dbContext, limit) => { 
   validatePreconditions(['dbContext'], { dbContext });
-  return (await eventRepo.getEvents(dbContext)).map(event => mapRepoEntity(event));
+  const limitResults = limit ? parseInt(limit) : '';
+  return (await eventRepo.getEvents(dbContext, limitResults)).map(event => mapRepoEntity(event));
 };
 
 export const getEventById = async (dbContext, eventId) => {
@@ -13,19 +14,21 @@ export const getEventById = async (dbContext, eventId) => {
   return mapRepoEntity((await eventRepo.getEventById(dbContext, eventId)));
 };
 
-export const getEventsByCategoryId = async (dbContext, categoryId) => {
+export const getEventsByCategoryId = async (dbContext, categoryId, limit) => {
   validatePreconditions(['dbContext', 'categoryId'], { dbContext, categoryId });
-  return (await eventRepo.getEventsByCategoryId(dbContext, categoryId)).map(event => mapRepoEntity(event));
+  const limitResults = limit ? parseInt(limit) : '';
+  return (await eventRepo.getEventsByCategoryId(dbContext, categoryId, limitResults)).map(event => mapRepoEntity(event));
 };
 
-export const getEventsByOrganizerId = async (dbContext, organizerId) => {
+export const getEventsByOrganizerId = async (dbContext, organizerId, limit) => {
   validatePreconditions(['dbContext', 'organizerId'], { dbContext, organizerId });
-  return (await eventRepo.getEventsByOrganizerId(dbContext, organizerId)).map(event => mapRepoEntity(event));
+  const limitResults = limit ? parseInt(limit) : '';
+  return (await eventRepo.getEventsByOrganizerId(dbContext, organizerId, limitResults)).map(event => mapRepoEntity(event));
 };
 
-export const getEventsByName = async (dbContext, name) => {
+export const getEventsByName = async (dbContext, { name, categoryId, organizerId, limit }) => {
   validatePreconditions(['dbContext', 'name'], { dbContext, name });
-  return (await eventRepo.getEventsByName(dbContext, name)).map(event => mapRepoEntity(event));
+  return (await eventRepo.getEventsByName(dbContext, { name, categoryId, organizerId, limit: (limit ? parseInt(limit) : null) })).map(event => mapRepoEntity(event));
 };
 
 export const updateEvent = async (dbContext, eventId, event, userId) => { 

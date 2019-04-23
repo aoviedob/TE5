@@ -20,7 +20,10 @@ export default class EventApi {
   }
 
   @RequiredRole([PredefinedRole.ADMIN, PredefinedRole.SYSTEM])
-  async getEvents(req) { return await eventService.getEvents(POSTGRES_CONTEXT); }
+  async getEvents(req) { 
+    const { limit } = req.query || {};
+    return await eventService.getEvents(POSTGRES_CONTEXT, limit);
+  }
 
   @RequiredRole([PredefinedRole.ADMIN, PredefinedRole.SYSTEM])
   async getEventById(req) {
@@ -31,19 +34,25 @@ export default class EventApi {
   @RequiredRole([PredefinedRole.ADMIN, PredefinedRole.SYSTEM])
   async getEventsByCategoryId(req) {
     const { categoryId } = req.params || {};
-    return await eventService.getEventsByCategoryId(POSTGRES_CONTEXT, categoryId);
+    const { limit } = req.query || {};
+    return await eventService.getEventsByCategoryId(POSTGRES_CONTEXT, categoryId, limit);
   }
 
   @RequiredRole([PredefinedRole.ADMIN, PredefinedRole.SYSTEM])
   async getEventsByOrganizerId(req) {
     const { organizerId } = req.params || {};
-    return await eventService.getEventsByOrganizerId(POSTGRES_CONTEXT, organizerId);
+    const { limit } = req.query || {};
+    return await eventService.getEventsByOrganizerId(POSTGRES_CONTEXT, organizerId, limit);
   }
 
   @RequiredRole([PredefinedRole.ADMIN, PredefinedRole.SYSTEM])
   async getEventsByName(req) {
     const { name } = req.params || {};
-    return await eventService.getEventsByName(POSTGRES_CONTEXT, name);
+    const { categoryId, organizerId, limit } = req.query || {};
+    console.log('categoryIdHOla', categoryId);
+    console.log('organizerId', organizerId);
+    const likeName = name !== 'undefined' ? name : '';
+    return await eventService.getEventsByName(POSTGRES_CONTEXT, { name: likeName, categoryId, organizerId, limit });
   }
 
   @RequiredRole([PredefinedRole.ADMIN])

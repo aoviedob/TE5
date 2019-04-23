@@ -18,8 +18,8 @@ const EVENT_TABLE_COLUMNS = [
   'end_date',
   'status',
   'country',
-  'addressLine1',
-  'addressLine2',
+  'address_line1',
+  'address_line2',
   'latitude',
   'longitude',
   'updated_by',
@@ -39,10 +39,11 @@ const SALES_TARGET_TABLE_COLUMNS = [
   'updated_at'
 ];
 
-export const getEvents = async dbContext => 
+export const getEvents = async (dbContext, limitResults) => 
   await(new UnitOfWork(dbContext).getAll(schema, { 
   	tableName: EVENT_TABLE, 
-  	columns: EVENT_TABLE_COLUMNS 
+  	columns: EVENT_TABLE_COLUMNS,
+    limit: limitResults,
   }));
 
 export const getEventById = async (dbContext, eventId) => { 
@@ -54,30 +55,34 @@ export const getEventById = async (dbContext, eventId) => {
   });
 };
 
-export const getEventsByCategoryId = async (dbContext, categoryId) => { 
+export const getEventsByCategoryId = async (dbContext, categoryId, limitResults) => { 
   const unitOfWork = new UnitOfWork(dbContext);
   return await unitOfWork.getAllWhere(schema, { 
   	tableName: EVENT_TABLE,
   	columns: EVENT_TABLE_COLUMNS,
-  	where: unitOfWork.dbConnection.raw('event_category_id = :categoryId', { categoryId })
+  	where: unitOfWork.dbConnection.raw('event_category_id = :categoryId', { categoryId }),
+    limit: limitResults,
   });
 };
 
-export const getEventsByOrganizerId = async (dbContext, organizerId) => { 
+export const getEventsByOrganizerId = async (dbContext, organizerId, limitResults) => { 
   const unitOfWork = new UnitOfWork(dbContext);
   return await unitOfWork.getAllWhere(schema, { 
     tableName: EVENT_TABLE, 
     columns: EVENT_TABLE_COLUMNS,
-    where: unitOfWork.dbConnection.raw('event_organizer_id = :organizerId', { organizerId })
+    where: unitOfWork.dbConnection.raw('event_organizer_id = :organizerId', { organizerId }),
+    limit: limitResults,
   });
 };
 
-export const getEventsByName = async (dbContext, name) => { 
+export const getEventsByName = async (dbContext, { name = '', categoryId, organizerId, limit }) => { 
   const unitOfWork = new UnitOfWork(dbContext);
+
   return await unitOfWork.getAllWhere(schema, { 
     tableName: EVENT_TABLE, 
     columns: EVENT_TABLE_COLUMNS,
-    where: unitOfWork.dbConnection.raw('name LIKE :name', { name: `%${name}%` })
+    where: unitOfWork.dbConnection.raw(`name LIKE :name ${(categoryId ? 'AND event_category_id = :categoryId': '')} ${(organizerId ? 'AND event_organizer_id = :organizerId': '')}`, { name: `%${name}%`, categoryId, organizerId }),
+    limit,
   });
 };
 

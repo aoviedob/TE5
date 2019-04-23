@@ -14,8 +14,7 @@ module.exports = {
   output: { path: `${__dirname}/dist`, filename: 'bundle.js' },
   mode: 'development',
   devServer: {
-    inline: true,
-    port: 5112,
+    historyApiFallback: true,
   },
   module: {
     rules: [

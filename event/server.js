@@ -10,7 +10,7 @@ const logger = bunyan.createLogger({ name: 'EventServer'});
 
 const app = new Express();
 routerMiddleware(app);
-
+app.use(cors());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 app.use(expressLogger({

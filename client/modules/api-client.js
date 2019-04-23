@@ -1,7 +1,7 @@
 import request from 'superagent';
 import { auth } from '../stores/auth';
 
-const setHeaders = (req) => req.set('authorization', auth.token).accept('application/json');
+const setHeaders = (req) => req.set('authorization', `Bearer ${auth.token}`).accept('application/json');
 const handleApiError = error => {
   if(error.status === 401) {
     window.location = '/';
@@ -24,11 +24,13 @@ export const makePost = async (url, payload = {}) => {
   }
 };
 
-export const makeGet = async url => {
+export const makeGet = async (url, redirectOnFail = true ) => {
   try {
     const response = await request.get(url).use(setHeaders);
     return JSON.parse(response.text);
   } catch(error) {
-     handleApiError(error);
+    if (redirectOnFail){
+      handleApiError(error);
+    }
   }
 };

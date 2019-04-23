@@ -3,6 +3,7 @@ import cors from 'cors';
 import bodyParser from 'body-parser';
 import bunyan from 'bunyan';
 import expressLogger from 'express-bunyan-logger';
+import path from 'path';
 
 const logger = bunyan.createLogger({ name: 'ClientServer'});
 
@@ -47,6 +48,8 @@ if (isDeveloping) {
       colors: true,
     }
   });
+  const history = require('connect-history-api-fallback');
+  app.use(history());
   app.use(wpMiddleware);
   app.use(webpackHotMiddleware(compiler));
   

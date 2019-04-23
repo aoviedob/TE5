@@ -1,4 +1,6 @@
 import { observable, computed, action, toJS } from 'mobx';
+import { makePost } from '../modules/api-client';
+import config from '../config';
 
 class Auth {
   @observable token;
@@ -11,8 +13,15 @@ class Auth {
     return !!this.token;
   }
 
-  @action async hydrate (token) {
+  @action hydrate (token) {
     this.token = token;
+  }
+
+  @action async systemLogin () {
+    const { token } = (await makePost(`${config.authServiceDomain}/api/login`, config.authSystemLoginCredentials)) || {};
+    if (token){
+      this.hydrate(token);
+    }
   }
 };
 

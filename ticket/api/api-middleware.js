@@ -1,14 +1,18 @@
 import { getTokenFromRequest } from '../helpers/request';
+import bunyan from 'bunyan';
+const logger = bunyan.createLogger({ name: 'TicketApiMiddleware'});
 
-const unprotectedApis = [
-  '/api/login'
-];
+const unprotectedApis = [];
 
 export const requestHandler = (route, action) =>
   async (req, res, next) => {
     if (!unprotectedApis.includes(route)) {
       try {
         const token = getTokenFromRequest(req);
+        if (!token){
+          throw new Error('UNAUTHORIZED');
+        }
+
         req.token = token;
       } catch(error) {
         res.status(401).send('UNAUTHORIZED');
@@ -21,7 +25,8 @@ export const requestHandler = (route, action) =>
       res.setHeader('Content-Type', 'application/json');
       res.json(JSON.stringify(result));
     } catch(error) {
-      res.status(error.status).send(error.message);
+      logger.error(error, 'Error on request');
+      res.status(error.status || 500).send(error.message);
     }
   };
 

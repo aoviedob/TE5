@@ -1,21 +1,23 @@
 import React, { Component } from 'react';
+import { inject, observer } from 'mobx-react';
 
+@observer
 export default class Dropdown extends Component {
 
-  handleOnSearch = () => {
-    const { onSearch } = this.props;
-    onSearch && onSearch(this.input.value);
+  handleOnChange = event => {
+    const { onOptionSelected } = this.props;
+    const value = event.target.value === '0' ? null: event.target.value;
+    onOptionSelected && onOptionSelected(value);
   }
 
   render() {
-    
-    return      <select className="selectpicker" data-live-search="true">
-      <option>1</option>
-      <option>2</option>
-      <option>3</option>
-      <option>4</option>
-      <option>5</option>
-    </select>;
-  }
+    console.log(111);
+    const { items = [], defaultItem } = this.props;
+    const cls = items.length > 0 ? 'selectpicker dropdown-container' : 'dropdown-container';
+    return <select className={cls} onChange={this.handleOnChange} data-live-search="true">
+                 <option key={defaultItem.name} value={0}> {defaultItem.name} </option>
+              {items.map((item, index)=> <option value={item.id} key={`${item.name}-${index}`}> {item.name} </option>)}
+            </select>;
+  };
 
 }

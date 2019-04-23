@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
-import { BrowserRouter, Route } from 'react-router-dom'
+import { BrowserRouter, Route, Switch, Header } from 'react-router-dom'
 import Home from './Home/Home';
+import EventDetails from './EventDetails/EventDetails';
 import { inject } from 'mobx-react';
 
 @inject('auth')
@@ -13,7 +14,10 @@ class Root extends Component {
     return (
         <BrowserRouter>
           <div>
-            <Route path='/' component={Home} />
+            <Switch>
+              <Route exact path='/' component={Home} />
+              <Route exact path='/eventDetails/:eventId' component={EventDetails} />
+            </Switch>
           </div>
         </BrowserRouter>
     );

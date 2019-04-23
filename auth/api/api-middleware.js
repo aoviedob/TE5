@@ -1,5 +1,7 @@
 import { verifyToken } from '../services/crypto-service';
 import { getTokenFromRequest } from '../helpers/request';
+import bunyan from 'bunyan';
+const logger = bunyan.createLogger({ name: 'AuthApiMiddleware'});
 
 const unprotectedApis = [
   '/api/login',
@@ -22,8 +24,9 @@ export const requestHandler = (route, action) =>
     try {
       const result = await action(req);
       res.setHeader('Content-Type', 'application/json');
-      res.json(JSON.stringify(result));
+      res.json(result);
     } catch(error) {
+      logger.error(error, 'Error on request');
       res.status(error.status || 400).send(error.message);
     }
   };

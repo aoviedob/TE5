@@ -12,12 +12,18 @@ const getTokenInUrl = pathname => {
   return matches[1];
 };
 
-const token = getTokenInUrl(window.location.search);
-stores.auth.hydrate(token);
-
-render(
-  <Provider {...stores}>
-    <Root key={`key-${Date.now()}`} />
+new Promise(async (resolve) => {
+  const token = getTokenInUrl(window.location.search);
+  if (!token) { 
+    await stores.auth.systemLogin(token);
+  } else {
+    stores.auth.hydrate(token);
+  }
+resolve();
+}).then(() =>
+  render(
+    <Provider {...stores}>
+      <Root key={`key-${Date.now()}`} />
     </Provider>,
-  document.querySelector('#root'),
-);
+    document.querySelector('#root'),
+  ));

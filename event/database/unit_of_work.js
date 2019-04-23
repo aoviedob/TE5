@@ -44,15 +44,16 @@ export default class UnitOfWork {
     return result.rows || result;
   };
 
-  _getAll = (schema, { tableName, columns, trx }) =>
+  _getAll = (schema, { tableName, columns, limit, trx }) =>
     this.dbConnection.raw(`
       SELECT ${columns.join(',')}
       FROM :schema:.:tableName:
+      ${(limit ? `LIMIT ${limit}` : '')}
     `, { schema, tableName });
 
-  getAll = async (schema, { tableName, columns, trx }) => 
+  getAll = async (schema, { tableName, columns, limit, trx }) => 
     await this.executeTransaction({ 
-      func: () => this._getAll(schema, { tableName, columns }),
+      func: () => this._getAll(schema, { tableName, columns, limit }),
       trx
     });
 
@@ -74,18 +75,19 @@ export default class UnitOfWork {
     return result.length ? result[0] : {};
   };
 
-  _getAllWhere = (schema, { tableName, columns, join = '', where = '', groupBy = null }) =>
+  _getAllWhere = (schema, { tableName, columns, join = '', where = '', groupBy = null, limit }) =>
     this.dbConnection.raw(`
       SELECT ${columns.join(',')}
       FROM :schema:.:tableName:
       ${join}
       WHERE ${where}
       ${(groupBy ? `GROUP BY (${groupBy})`: '')}
+      ${(limit ? `LIMIT ${limit}` : '')}
     `, { schema, tableName });
 
-  getAllWhere = async (schema, { tableName, columns, join, where, groupBy, trx }) => 
+  getAllWhere = async (schema, { tableName, columns, join, where, groupBy, limit, trx }) => 
     await this.executeTransaction({ 
-      func: () => this._getAllWhere(schema, { tableName, columns, join, where, groupBy }),
+      func: () => this._getAllWhere(schema, { tableName, columns, join, where, groupBy, limit }),
       trx
     });
   

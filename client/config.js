@@ -1,5 +1,11 @@
 const { getEnvVariable } = require('./helpers/environment');
 
 module.exports = {
-  domain: getEnvVariable('EVENT_SERVICE_DOMAIN', 'http://localhost:3050'),
+  eventServiceDomain: getEnvVariable('EVENT_SERVICE_DOMAIN', 'http://localhost:3050'),
+  ticketServiceDomain: getEnvVariable('TICKET_SERVICE_DOMAIN', 'http://localhost:3060'),
+  authServiceDomain: getEnvVariable('AUTH_SERVICE_DOMAIN', 'http://localhost:3000'),
+  authSystemLoginCredentials: {
+    email: getEnvVariable('AUTH_SYSTEM_LOGIN_USER', 'andres+system@gmail.com'),
+    password: getEnvVariable('AUTH_SYSTEM_LOGIN_PASSWORD', 'secret'),
+  },
 };
