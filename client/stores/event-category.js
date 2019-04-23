@@ -1,14 +1,18 @@
-import { observable, action } from 'mobx';
+import { observable, action, toJS } from 'mobx';
 import { makeGet } from '../modules/api-client';
 import config from '../config';
 
 class EventCategory {
-  @observable eventCategories = [];
+  categories = [];
+
+  get eventCategories() {
+    return toJS(this.categories);
+  }
 
   @action async getEventCategories () { 
     const eventCategories = (await makeGet(`${config.eventServiceDomain}/api/categories`)) || [];
     if(eventCategories.length) {
-      this.eventCategories = eventCategories;
+      this.categories = eventCategories;
     }
   }
 

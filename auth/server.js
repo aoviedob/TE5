@@ -5,8 +5,17 @@ import bunyan from 'bunyan';
 import expressLogger from 'express-bunyan-logger';
 import { initApis } from './api/api';
 import { routerMiddleware } from './api/api-middleware';
+import fs from 'fs';
 
 const logger = bunyan.createLogger({ name: 'AuthServer'});
+
+const logsDir = './logs';
+const logsFilePath = `${logsDir}/auth.log`;
+
+if(!fs.existsSync(logsFilePath)) {
+  !fs.existsSync(logsDir) && fs.mkdirSync(logsDir);
+  fs.writeFileSync(logsFilePath, '');
+}
 
 const app = new Express();
 routerMiddleware(app);
@@ -18,7 +27,7 @@ app.use(expressLogger({
   streams: [{
     type: 'rotating-file',
     level: 'info',
-    path: './logs/auth.log',
+    path: logsFilePath,
     period: '1d',
     count: 3,
   }]

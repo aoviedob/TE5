@@ -4,8 +4,17 @@ import bodyParser from 'body-parser';
 import bunyan from 'bunyan';
 import expressLogger from 'express-bunyan-logger';
 import path from 'path';
+import fs from 'fs';
 
 const logger = bunyan.createLogger({ name: 'ClientServer'});
+
+const logsDir = './logs';
+const logsFilePath = `${logsDir}/client.log`;
+
+if(!fs.existsSync(logsFilePath)) {
+ !fs.existsSync(logsDir) && fs.mkdirSync(logsDir);
+  fs.writeFileSync(logsFilePath, '');
+}
 
 const app = new Express();
 
@@ -16,7 +25,7 @@ app.use(expressLogger({
   streams: [{
     type: 'rotating-file',
     level: 'info',
-    path: './logs/client.log',
+    path: logsFilePath,
     period: '1d',
     count: 3,
   }]

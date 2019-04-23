@@ -2,6 +2,7 @@ const { getEnvVariable } = require('./helpers/environment');
 
 module.exports = {
   schema: getEnvVariable('TICKET_SCHEMA', 'ticket'),
+  authExternalAuthenticateUrl: getEnvVariable('AUTH_EXTERNAL_AUTHENTICATE_URL', 'http://localhost:3000/api/authenticate'),
   queue: {
     hostname: getEnvVariable('QUEUE_HOSTNAME', 'amqp://localhost'),
     name: getEnvVariable('QUEUE_NAME', 'ticketsQueue'),

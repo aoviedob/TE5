@@ -12,7 +12,7 @@ export default class Slideshow extends Component {
   renderImages = items => items.map((item, index) => {
   	const className = index === 0 ? 'carousel-item active' : 'carousel-item';
   	return (<div className={className}>
-			  <div className="img"><img className="d-block img-fluid" src={item.src}/></div>
+			  <div className="img"><img className="d-block img-fluid" src={item.src} style={{ backgroundSize: 'cover', height: 300, minWidth: '100%' }}/></div>
 			</div>);
   });
 

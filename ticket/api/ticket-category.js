@@ -27,7 +27,7 @@ export default class TicketCategoryApi {
     return await categoryService.getTicketCategoryById(POSTGRES_CONTEXT, categoryId);
   }
 
-  @RequiredRole([PredefinedRole.ADMIN, PredefinedRole.EVENT_MANAGER, PredefinedRole.AGENT])
+  @RequiredRole([PredefinedRole.ADMIN, PredefinedRole.EVENT_MANAGER, PredefinedRole.AGENT, PredefinedRole.SYSTEM])
   async getCategoriesByEventId(req) {
     const { eventId } = req.params || {};
     return await categoryService.getTicketCategoriesByEventId(POSTGRES_CONTEXT, eventId);

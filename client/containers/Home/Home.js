@@ -52,11 +52,11 @@ export default class Home extends Component {
     this.setState({ word }, async () => await this.searchEvents());
   };
 
-  onCategorySelected = categoryId => {
+  onCategorySelected = ({ id: categoryId}) => {
     this.setState({ categoryId }, async () => await this.searchEvents());
   };
 
-  onOrganizerSelected = organizerId => {
+  onOrganizerSelected = ({ id: organizerId}) => {
     this.setState({ organizerId }, async () => await this.searchEvents());
   };
 
@@ -79,6 +79,12 @@ export default class Home extends Component {
     return pages;
   };
 
+  getSlideShowItems = () => {
+    const { events = [] } = this.props.event;
+    const end = events.length > 3 ? 3 : events.length;
+    return events.slice(0, end).map(event => ({ src: event.coverImageUrl }));
+  };
+
   render() {
     const { events = [] } = this.props.event;
     const pagedEvents = this.getPagedEvents();
@@ -89,7 +95,7 @@ export default class Home extends Component {
     		     </div>
     		     <div className="row">
                <div className="col-sm-12">
-                 <Slideshow></Slideshow>
+                 <Slideshow items={this.getSlideShowItems()}></Slideshow>
                </div>
              </div>
              <div className="row">
@@ -102,10 +108,8 @@ export default class Home extends Component {
                  <CardDeck>{this.renderEvents(pagedEvents)}</CardDeck>
                </div>
              </div>
-             <div className="row justify-content-center">
-               <div className="col-sm-10">
-                  <Pager>{this.renderPages(events)}</Pager>
-               </div>
+             <div className="row justify-content-center pages">
+                <Pager>{this.renderPages(events)}</Pager>
              </div>
   	       </Container>;
   }

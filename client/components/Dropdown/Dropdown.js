@@ -1,23 +1,41 @@
 import React, { Component } from 'react';
-import { inject, observer } from 'mobx-react';
 
-@observer
 export default class Dropdown extends Component {
+  constructor(props) {
+    super(props);
 
-  handleOnChange = event => {
-    const { onOptionSelected } = this.props;
-    const value = event.target.value === '0' ? null: event.target.value;
-    onOptionSelected && onOptionSelected(value);
+    this.state = {
+      searchValue: '',
+      selectedItem: {},
+    };
   }
 
+  handleOnChange = (item) => {
+    if (item === this.props.defaultItem) return;
+
+    this.setState({ selectedItem: item });
+    const { onOptionSelected } = this.props;
+    onOptionSelected && onOptionSelected(item);
+  }
+
+  handleOnSearch = event => {
+    this.setState({ searchValue: event.target.value });
+  };
+
   render() {
-    console.log(111);
     const { items = [], defaultItem } = this.props;
-    const cls = items.length > 0 ? 'selectpicker dropdown-container' : 'dropdown-container';
-    return <select className={cls} onChange={this.handleOnChange} data-live-search="true">
-                 <option key={defaultItem.name} value={0}> {defaultItem.name} </option>
-              {items.map((item, index)=> <option value={item.id} key={`${item.name}-${index}`}> {item.name} </option>)}
-            </select>;
+    const { searchValue, selectedItem } = this.state;
+
+    return <div className="dropdown">
+            <a className="dropdown-button btn btn-light white grey-text btn-block" type="button" data-toggle="dropdown" href="#">{selectedItem.name || defaultItem.name}</a>
+              <div className="dropdown-menu full-width  btn-block">
+                <input type="text" class="form-control" placeholder="Search" onChange={this.handleOnSearch} value={searchValue}/>
+                <a className="dropdown-item" key={`${defaultItem.name}`} onClick={() => this.handleOnChange(defaultItem)}>{defaultItem.name}</a>
+                {items.map((item, index) =>
+                  <a className="dropdown-item" key={`${item.name}-${index}`} onClick={() => this.handleOnChange(item)}>{item.name}</a>
+                )}
+              </div>
+            </div>;
   };
 
 }

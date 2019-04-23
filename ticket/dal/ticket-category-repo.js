@@ -13,8 +13,6 @@ const TICKET_CATEGORY_TABLE_COLUMNS = [
   'settings',
   'created_by',
   'updated_by',
-  'created_at',
-  'updated_at'
 ];
 
 export const getTicketCategories = async dbContext => 
@@ -37,7 +35,7 @@ export const getTicketCategoriesByEventId = async (dbContext, eventId) => {
   return await unitOfWork.getAllWhere(schema, { 
   	tableName: TICKET_CATEGORY_TABLE, 
   	columns: TICKET_CATEGORY_TABLE_COLUMNS,
-  	where: unitOfWork.dbConnection.raw('event_id LIKE :eventId', { eventId })
+  	where: unitOfWork.dbConnection.raw('external_event_id = :eventId', { eventId })
   });
 };
 
