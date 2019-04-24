@@ -7,21 +7,23 @@ const getTemporalToken = async() => {
   const encryptedCredentials = encrypt({ user, password });
   const { token } = await request
     .post(authExternalLoginUrl)
-    .send(encryptedCredentials)
-    .set('Accept', 'application/json')
-    .set('Content-Type', 'application/json');
+    .type('form')
+    .accept('application/json')
+    .send(encryptedCredentials);
 
   return token;
 };
 
 export const createUser = async customer => {
+
   const token = await getTemporalToken();
+  console.log('customer', customer);
   const { id: externalUserId } = await request
     .post(authCreateUserUrl)
-    .send({ ...customer, isCustomer: true })
+    .type('form')
     .set('Authorization', `Bearer ${token}`)
-    .set('Accept', 'application/json')
-    .set('Content-Type', 'application/json');
+    .accept('application/json')
+    .send({ ...customer, isCustomer: true })
 
   return externalUserId;
 };

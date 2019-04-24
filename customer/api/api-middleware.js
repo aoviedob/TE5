@@ -23,7 +23,7 @@ export const requestHandler = (route, action) =>
     try {
       const result = await action(req);
       res.setHeader('Content-Type', 'application/json');
-      res.json(JSON.stringify(result));
+      res.json(result);
     } catch(error) {
       logger.error(error, 'Error on request');
       res.status(error.status || 500).send(error.message);

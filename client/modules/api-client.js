@@ -15,8 +15,7 @@ export const makePost = async (url, payload = {}) => {
       .post(url)
       .type('form')
       .use(setHeaders)
-      .send(payload)
-      .accept('application/json');
+      .send(payload);
 
     return JSON.parse(response.text);
   } catch(error) {

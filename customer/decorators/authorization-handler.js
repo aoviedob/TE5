@@ -12,6 +12,7 @@ export const authenticate = async (req, res, next) => {
     .catch(error => {
       logger.error(error, 'Authenticate error');
     });
+
   if (!tokenBody) {
     next();
   }
@@ -20,10 +21,11 @@ export const authenticate = async (req, res, next) => {
 };
 
 export const RequiredRole = roles => (target, name, descriptor) => {
+
  var oldValue = descriptor.value;
 
   descriptor.value = (...args) => {
-    
+    console.log('hola', args[0].tokenBody);
     const { role = {}, user = {} } = args[0].tokenBody;
     
     if (roles.includes(role.name)) {

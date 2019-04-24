@@ -5,13 +5,13 @@ export default class Slideshow extends Component {
 
   renderSlideLinks = items => items.map((item, index) => {
   	const className = index === 0 ? 'active' : '';
-  	return (<li data-target="#slideshow" data-slide-to={index} className={className}></li>);
+  	return (<li key={`${item.name}-sli-${index}`} data-target="#slideshow" data-slide-to={index} className={className}></li>);
   });
 
 
   renderImages = items => items.map((item, index) => {
   	const className = index === 0 ? 'carousel-item active' : 'carousel-item';
-  	return (<div className={className}>
+  	return (<div key={`${item.name}-sdi-${index}`}  className={className}>
 			  <div className="img"><img className="d-block img-fluid" src={item.src} style={{ backgroundSize: 'cover', height: 300, minWidth: '100%' }}/></div>
 			</div>);
   });

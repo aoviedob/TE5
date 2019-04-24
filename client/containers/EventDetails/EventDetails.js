@@ -53,6 +53,10 @@ export default class EventDetails extends Component {
     }
   }
 
+  onBuyClicked = () => {
+    this.props.history.push(`/register`);
+  }
+
   goToRelatedEvent = event => { 
     this.props.event.setSelectedEvent(event);
     this.props.history.push(`/eventDetails/${event.id}`);
@@ -106,7 +110,7 @@ export default class EventDetails extends Component {
                       <li>Organizer Email: {email}</li>
                       <li>Organizer Website: {organizerWebUrl}</li>
                     </ul>
-                    <a>Buy</a>
+                    <button onClick={() => this.onBuyClicked()}>Buy</button>
                   </div>
                   </div>
                 </div>

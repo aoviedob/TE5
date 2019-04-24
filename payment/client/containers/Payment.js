@@ -48,7 +48,7 @@ export default class Payment extends Component {
   
   render() {
     const { amount, result } = this.props.payment;
-    console.log('resulta', result);
+
     const errors = this.form.errors();
     return <div className="container">
     <div className="row">

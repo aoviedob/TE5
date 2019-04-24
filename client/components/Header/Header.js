@@ -24,7 +24,7 @@ export default class Header extends Component {
 			  </header>
 			  <nav className="navbar navbar-expand-lg navbar-dark mx-background-top-linear">
 			    <div className="container">
-			      <a className="navbar-brand"> Tickets and Events System</a>
+			      <a className="navbar-brand" style={{ color: 'white' }}> Tickets and Events System</a>
 			      <button className="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
 			        <span className="navbar-toggler-icon"></span>
 			      </button>

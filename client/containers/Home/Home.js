@@ -74,7 +74,7 @@ export default class Home extends Component {
     const pages = [];
 
     for(let i = 0; i < pagesLength; i++) {
-      pages.push(<Page key={`page${i}`} onClick={() => { this.setState({ sliceStart: i * this.pagesChunkSize, sliceEnd: (i + 1) * this.pagesChunkSize }); } }>{i + 1}</Page>);
+      pages.push(<Page key={`page-${i}-${events[i].name}`} onClick={() => { this.setState({ sliceStart: i * this.pagesChunkSize, sliceEnd: (i + 1) * this.pagesChunkSize }); } }>{i + 1}</Page>);
     }
     return pages;
   };
@@ -89,7 +89,7 @@ export default class Home extends Component {
     const { events = [] } = this.props.event;
     const pagedEvents = this.getPagedEvents();
 
-  	return <Container>
+  	return <Container className="home-container">
     		     <div className="row">
     		       <Header></Header>
     		     </div>

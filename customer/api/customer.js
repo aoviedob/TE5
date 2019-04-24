@@ -48,6 +48,7 @@ export default class CustomerApi {
   @RequiredRole([PredefinedRole.ADMIN, PredefinedRole.SYSTEM])
   async createCustomer(req) {
     const { body } = req;
+    console.log('entra aqui');
     return await customerService.createCustomer(POSTGRES_CONTEXT, body);
   }
 

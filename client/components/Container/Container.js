@@ -1,5 +1,5 @@
 import React from 'react';
 
-export const Container = props =><div className="container-fluid">
-  {props.children}
+export const Container = ({children, rest}) =><div className="container-fluid" {...rest}>
+  {children}
 </div>;

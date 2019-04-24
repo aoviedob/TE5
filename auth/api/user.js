@@ -61,6 +61,7 @@ export default class UserApi {
 
   async externalLogin(req) {
     const { body } = req;
+    console.log('body', body);
     return await userService.externalLogin(POSTGRES_CONTEXT, body); 
   }
   
