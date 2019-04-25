@@ -38,8 +38,8 @@ export default class Home extends Component {
 
   renderEvents = events => events.map((event, index) =>
                            <div key={`${event.name}${index}`} className="col-sm-4">
-                             <Card className="card-container" image={event.coverImageUrl} title={event.name} subtitle={`${event.addressLine1}${event.addressLine2}`} description={event.metadata.description} >
-                               <a type="button" className="btn btn-success card-actions" onClick={() => this.goToEventDetails(event)} >View</a>
+                             <Card className="card-container radius" image={event.coverImageUrl} title={event.name} subtitle={`${event.addressLine1}${event.addressLine2}`} description={event.metadata.description} >
+                               <a type="button" className="btn button" onClick={() => this.goToEventDetails(event)} >View</a>
                                <a type="button" onClick={() => this.buyTicket(event)} className="btn-floating btn-small btn-fb">Buy</a>
                              </Card>
                            </div>);
@@ -104,7 +104,7 @@ export default class Home extends Component {
                </div>
              </div>
              <div className="row">
-               <div className="col-sm-12 card-deck-container">
+               <div className="col-sm-8 offset-sm-2 card-deck-container card">
                  <CardDeck>{this.renderEvents(pagedEvents)}</CardDeck>
                </div>
              </div>

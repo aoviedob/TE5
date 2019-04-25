@@ -13,6 +13,9 @@ export default class CustomerRegister extends Component {
 
   constructor(props) {
     super(props);
+    this.state = {
+      unmatchingPasswords: false,
+    }
     const plugins = {
       dvr: dvr(validatorjs)
     };
@@ -45,29 +48,42 @@ export default class CustomerRegister extends Component {
       placeholder: 'Confirm Password *'
     }];
     
+    const ctx = this;
     const hooks = {
       async onSuccess(form) {
-        await props.customer.registerCustomer(form.values());
+        const { password, confirmPassword } = form.values();
+        if (password !== confirmPassword) {
+          return ctx.setState({unmatchingPasswords: true});
+        }
+
+        const result = await props.customer.registerCustomer(form.values());
+        if (result.error && result.error.status === 409 ) {
+           return ctx.setState({userAlreadyExists: true});
+        }
+        return this.props.history.push(`/login`);
       }
     };
 
     this.form = new MobxReactForm({ fields }, { plugins, hooks });
   }
- 
+   
+  goToLogin = () => this.props.history.push(`/login`);
+
   render() {
     const errors = this.form.errors();
+    const { unmatchingPasswords, userAlreadyExists } = this.state;
     
-    return (<Container>
+    return (<Container className="register-container">
         <div className="row">
           <Header></Header>
         </div>
         <div className="register">
-                <div className="row">
+                <div className="row h-100">
                     <div className="col-md-3 register-left">
-                        <img src="https://image.ibb.co/n7oTvU/logo_white.png" alt=""/>
+                        <i className="material-icons" style={{fontSize: 100 }}>account_box</i>
                         <h3>Welcome</h3>
-                        <p>You are 30 seconds away from earning your own money!</p>
-                        <input type="submit" name="" value="Login"/><br/>
+                        <p>You are only one step away from buying great tickets!</p>
+                        <input type="submit" name="" value="Login" onClick={() => this.goToLogin()}/><br/>
                     </div>
                     <div className="col-md-9 register-right">
                         <form role="form" onSubmit={this.form.onSubmit}>
@@ -83,6 +99,7 @@ export default class CustomerRegister extends Component {
                                             <div className="form-group">
                                                 <input type="text" className="form-control"  {...this.form.$('email').bind()} />
                                                 {errors.email && <label className="label label-danger"> {errors.email} </label>}
+                                                {userAlreadyExists && <label className="label label-danger"> User already exists </label>}
                                             </div>
                                              <div className="form-group">
                                                 <input type="text" className="form-control"  {...this.form.$('phone').bind()} />
@@ -101,6 +118,7 @@ export default class CustomerRegister extends Component {
                                             <div className="form-group">
                                                 <input className="form-control"   {...this.form.$('confirmPassword').bind()} type="password" />
                                                 {errors.confirmPassword && <label className="label label-danger"> {errors.confirmPassword} </label>}
+                                                {unmatchingPasswords && <label className="label label-danger"> Passwords must match </label>}
                                             </div>
                                             <input type="submit" className="btnRegister"  onClick={() => this.form.onSubmit} value="Register" />
                                         </div>

@@ -5,7 +5,9 @@ const setHeaders = (req) => req.set('authorization', `Bearer ${auth.token}`).acc
 const handleApiError = error => {
   if(error.status === 401) {
     window.location = '/';
+    return;
   }
+  return { error: { status: error.status }};
 };
 
 export const makePost = async (url, payload = {}) => {
@@ -19,7 +21,7 @@ export const makePost = async (url, payload = {}) => {
 
     return JSON.parse(response.text);
   } catch(error) {
-    handleApiError(error);
+    return handleApiError(error);
   }
 };
 
@@ -29,7 +31,7 @@ export const makeGet = async (url, redirectOnFail = true ) => {
     return JSON.parse(response.text);
   } catch(error) {
     if (redirectOnFail){
-      handleApiError(error);
+      return handleApiError(error);
     }
   }
 };

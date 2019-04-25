@@ -1,5 +1,5 @@
 .home-container {
-  background-color: #00c6ff  
+	background: -webkit-linear-gradient(left, #3931af, #00c6ff);
 }
 
 .card-actions {
@@ -14,4 +14,10 @@
 
 .pages {
   margin-top: (10rem/16);	
+}
+
+.button {    
+  background: #0062cc;
+  color: white !important;
+  width: 50%;
 }

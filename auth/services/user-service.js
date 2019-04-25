@@ -62,6 +62,15 @@ export const createUser = async (dbContext, user = {}) => {
   }
   validatePreconditions(preconditions, { dbContext, ...user });
 
+  const existingUser = await getUserByEmail(dbContext, user.email);
+  
+  if (existingUser.email) {
+    logger.error({ email: existingUser.email }, 'User already exists');
+    const error = new Error('EXISTING_USER');
+    error.status = 409;
+    throw error;
+  }
+
   let userToSave = { ...user };
   if (user.isCustomer) {
     const { id: userTypeId } = await getUserTypeByName(dbContext, DalTypes.PredefinedUserType.CUSTOMER);
@@ -140,7 +149,7 @@ export const login = async (dbContext, user) => {
 
 export const externalLogin = async (dbContext, encryptedContent) => {
   validatePreconditions(['dbContext', 'encryptedContent'], {dbContext, encryptedContent });
-  
+
   let user;
   try {
     user = decryptWithSharedPrivateKey(encryptedContent);
@@ -150,7 +159,6 @@ export const externalLogin = async (dbContext, encryptedContent) => {
     error.status = 500;
     throw error;
   }
-
   validatePreconditions(['email', 'password'], user);
   
   const { email, password } = user;
@@ -163,7 +171,7 @@ export const externalLogin = async (dbContext, encryptedContent) => {
   
   const { user: dbUser, role, userType } = await userRepo.login(dbContext, { email, password: createHash(password) });
   
-  if (role.rights.includes('externalLogin')) {
+  if (!role.rights.includes('externalLogin')) {
     logger.error(user, 'Not enough rights');
     const error = new Error('NOT_ENOUGH_RIGHTS');
     error.status = 401;

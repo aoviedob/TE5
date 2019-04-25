@@ -15,7 +15,7 @@ module.exports = {
     algorithmCharset: 'utf8',
   },
   authExternalLoginCredentials: {
-    user: getEnvVariable('AUTH_EXTERNAL_LOGIN_USER', 'andres+external@gmail.com'),
+    email: getEnvVariable('AUTH_EXTERNAL_LOGIN_USER', 'andres+external@gmail.com'),
     password: getEnvVariable('AUTH_EXTERNAL_LOGIN_PASSWORD', 'secret'),
   },
   maxAllowedProductQuantity: getEnvVariable('MAX_ALLOWED_PRODUCT_QUANTITY', 10),

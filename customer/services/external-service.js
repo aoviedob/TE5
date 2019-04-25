@@ -3,29 +3,33 @@ import request from 'superagent';
 import { encrypt } from './crypto-service';
 
 const getTemporalToken = async() => {
-  const { user, password } = authExternalLoginCredentials;
-  const encryptedCredentials = encrypt({ user, password });
-  const { token } = await request
+  const { email, password } = authExternalLoginCredentials;
+  const encryptedCredentials = encrypt({ email, password });
+  const { body } = await request
     .post(authExternalLoginUrl)
     .type('form')
     .accept('application/json')
-    .send(encryptedCredentials);
+    .send({ body: encryptedCredentials });
 
-  return token;
+  return body.token;
 };
 
 export const createUser = async customer => {
 
   const token = await getTemporalToken();
-  console.log('customer', customer);
-  const { id: externalUserId } = await request
-    .post(authCreateUserUrl)
-    .type('form')
-    .set('Authorization', `Bearer ${token}`)
-    .accept('application/json')
-    .send({ ...customer, isCustomer: true })
 
-  return externalUserId;
+  try {  
+    const { id: externalUserId } = await request
+      .post(authCreateUserUrl)
+      .type('form')
+      .set('Authorization', `Bearer ${token}`)
+      .accept('application/json')
+      .send({ ...customer, isCustomer: true });
+
+      return externalUserId;
+   } catch(error) {
+     throw error;
+   }
 };
 
 export const getProduct = async (req, productId) =>

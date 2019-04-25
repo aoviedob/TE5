@@ -3,6 +3,7 @@ import { BrowserRouter, Route, Switch, Header } from 'react-router-dom'
 import Home from './Home/Home';
 import EventDetails from './EventDetails/EventDetails';
 import CustomerRegister from './CustomerRegister/CustomerRegister';
+import Login from './Login/Login';
 import { inject } from 'mobx-react';
 
 @inject('auth')
@@ -19,6 +20,7 @@ class Root extends Component {
               <Route exact path='/' component={Home} />
               <Route exact path='/eventDetails/:eventId' component={EventDetails} />
               <Route exact path='/register' component={CustomerRegister} />
+              <Route exact path='/login' component={Login} />
             </Switch>
           </div>
         </BrowserRouter>

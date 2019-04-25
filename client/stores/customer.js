@@ -5,6 +5,7 @@ import config from '../config';
 class Customer {
   @action async registerCustomer (customer) {
     const result = (await makePost(`${config.customerServiceDomain}/api/customers`, customer)) || {};
+    return result;
   }
 };
 

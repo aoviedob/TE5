@@ -23,6 +23,15 @@ class Auth {
       this.hydrate(token);
     }
   }
+
+  @action async login (credentials) {
+    const { token } = (await makePost(`${config.authServiceDomain}/api/login`, credentials)) || {};
+    if (token){
+      this.hydrate(token);
+      return true;
+    }
+    return false;
+  }
 };
 
 
