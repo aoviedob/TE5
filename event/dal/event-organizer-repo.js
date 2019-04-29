@@ -130,3 +130,11 @@ export const getUsersByOrganizerId = async (dbContext, organizerId) => {
   });
 };
 
+export const getOrganizersByUserId= async (dbContext, userId) => { 
+  const unitOfWork = new UnitOfWork(dbContext);
+  return Promise.all((await unitOfWork.getAllWhere(schema, { 
+    tableName: USERS_BY_ORGANIZER_TABLE, 
+    columns: USERS_BY_ORGANIZER_TABLE_COLUMNS,
+    where: unitOfWork.dbConnection.raw('external_user_id = :userId', { userId })
+  })).map(async x => await getEventOrganizerById(dbContext, x.event_organizer_id)));
+};

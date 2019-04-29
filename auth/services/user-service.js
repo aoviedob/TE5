@@ -119,7 +119,7 @@ const validateCredentialsAndCreateToken = async(dbContext, { user, role, userTyp
     await updateLoginAttempts(dbContext, email);
     logger.error({ email }, 'Unauthorized Login');
     const error = new Error('UNAUTHORIZED');
-    error.status = 401;
+    error.status = 404;
     throw error;
   }
 

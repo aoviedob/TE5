@@ -10,10 +10,12 @@ import { inject } from 'mobx-react';
 @inject('auth')
 class Root extends Component {
 
+  hasRermission = () => {
+    const { isAuthenticated } = this.props.auth;
+    if (!isAuthenticated) this.props.history.replace('/');
+  } 
+
   render() {
-    /* if(!this.props.auth.isAuthenticated) {
-      return <div>Are you lost?</div>
-    }*/
     return (
         <BrowserRouter>
           <div>
@@ -22,7 +24,7 @@ class Root extends Component {
               <Route exact path='/eventDetails/:eventId' component={EventDetails} />
               <Route exact path='/register' component={CustomerRegister} />
               <Route exact path='/login' component={Login} />
-              <Route exact path='/ticketCategoryManagement' component={TicketCategoryManagement} />
+              <Route exact path='/ticketCategoryManagement' onEnter={this.hasRermission} component={TicketCategoryManagement} />
             </Switch>
           </div>
         </BrowserRouter>

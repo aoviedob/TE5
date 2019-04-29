@@ -6,7 +6,7 @@ class Auth {
   @observable token;
 
   constructor() {
-    this.token = null;
+    this.token = sessionStorage.getItem('token') || null;
   };
 
   @computed get isAuthenticated () {
@@ -15,9 +15,12 @@ class Auth {
 
   @action hydrate (token) {
     this.token = token;
+    sessionStorage.setItem('token', token);
   }
 
   @action async systemLogin () {
+    if (this.isAuthenticated) return;
+
     const { token } = (await makePost(`${config.authServiceDomain}/api/login`, config.authSystemLoginCredentials)) || {};
     if (token){
       this.hydrate(token);

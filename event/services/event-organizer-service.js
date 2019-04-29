@@ -81,3 +81,9 @@ export const getUsersByOrganizerId = async (dbContext, organizerId) => {
   validatePreconditions(['dbContext', 'organizerId'], { dbContext, organizerId });
   return mapRepoEntity((await eventOrganizerRepo.getUsersByOrganizerId(dbContext, organizerId)));
 };
+
+export const getOrganizersByUserId = async (dbContext, userId) => {
+  validatePreconditions(['dbContext', 'userId'], { dbContext, userId });
+  return (await eventOrganizerRepo.getOrganizersByUserId(dbContext, userId)).map(organizer => mapRepoEntity(organizer));
+};
+

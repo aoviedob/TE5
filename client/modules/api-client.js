@@ -3,7 +3,7 @@ import { auth } from '../stores/auth';
 
 const setHeaders = (req) => req.set('authorization', `Bearer ${auth.token}`).accept('application/json');
 const handleApiError = error => {
-  if(error.status === 401) {
+  if(error.status === 401 || error.status === 403) {
     window.location = '/';
     return;
   }
@@ -28,7 +28,7 @@ export const makePost = async (url, payload = {}) => {
 export const makeGet = async (url, redirectOnFail = true ) => {
   try {
     const response = await request.get(url).use(setHeaders);
-    return JSON.parse(response.text);
+    return response.text ? JSON.parse(response.text) : null;
   } catch(error) {
     if (redirectOnFail){
       return handleApiError(error);

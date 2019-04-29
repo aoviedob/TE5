@@ -13,6 +13,7 @@ export default class EventOrganizerApi {
     app.get('/api/organizers/byIdentification/:identification', authenticate, this.getEventOrganizersByIdentification);
     app.get('/api/organizers/byName/:name', authenticate, this.getEventOrganizersByName);
     app.get('/api/organizers/users/:organizerId', authenticate, this.getUsersByOrganizerId);
+    app.get('/api/organizers/byUser/:userId', authenticate, this.getOrganizersByUserId);
     app.post('/api/organizers', authenticate, this.createEventOrganizer);
     app.put('/api/organizers/:organizerId', authenticate, this.updateEventOrganizer);
     app.delete('/api/organizers/:organizerId', authenticate, this.deleteEventOrganizer);
@@ -25,6 +26,12 @@ export default class EventOrganizerApi {
   async getEventOrganizerById(req) {
     const { organizerId } = req.params || {};
     return await eventOrganizerService.getEventOrganizerById(POSTGRES_CONTEXT, organizerId);
+  }
+
+  @RequiredRole([PredefinedRole.ADMIN, PredefinedRole.EVENT_MANAGER])
+  async getOrganizersByUserId(req) {
+    const { tokenBody: { user: { id: userId }} } = req;
+    return await eventOrganizerService.getOrganizersByUserId(POSTGRES_CONTEXT, userId);
   }
 
   @RequiredRole([PredefinedRole.ADMIN, PredefinedRole.SYSTEM])

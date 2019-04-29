@@ -4,5 +4,7 @@ module.exports = {
     CUSTOMER: 'customer',
     ADMIN: 'admin',
     EXTERNAL: 'external',
+    EVENT_MANAGER: 'eventManager',
+    AGENT: 'agent',
   },
 };

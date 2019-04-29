@@ -1,0 +1,19 @@
+.btnAdd{
+    margin-top: 10%;
+    border: none;
+    border-radius: 1.5rem;
+    padding: 2%;
+    background: #0062cc;
+    color: #fff !important;
+    font-weight: 600;
+    width: (200rem/16);
+    cursor: pointer;
+}
+
+.organizer-selector {
+  padding-top: (10rem/16);
+}
+
+.filter-bar {
+  padding: (20rem/16);
+}

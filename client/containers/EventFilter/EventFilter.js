@@ -21,7 +21,7 @@ export default class EventFilter extends Component {
     return <div className="row"> 
         		 <div className="col-sm-2 dropdown-container"><Dropdown items={eventCategories} onOptionSelected={onCategorySelected} defaultItem={{name: 'Select Category' }}/></div>
     		     <div className="col-sm-2 dropdown-container"><Dropdown items={eventOrganizers} onOptionSelected={onOrganizerSelected} defaultItem={{name: 'Select Organizer' }}/></div>
-    		     <div className="col-sm-8" style={{ paddingTop: 5 }}><SearchBox onSearch={this.onSearch}></SearchBox></div>
+    		     <div className="col-sm-8" style={{ paddingTop: 5 }}><SearchBox onSearch={this.onSearch} placeholder="Search Events"></SearchBox></div>
   	       </div>;
   }
 

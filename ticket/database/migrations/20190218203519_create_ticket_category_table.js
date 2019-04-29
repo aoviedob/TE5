@@ -6,6 +6,7 @@ exports.up = async dbConnection =>
       id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
       name varchar(500) UNIQUE not null,
       external_event_id uuid not null,
+      external_organizer_id uuid not null,
       quantity int not null,
       available int not null,
       price numeric(7,2) not null,

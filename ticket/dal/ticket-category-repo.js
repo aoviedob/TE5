@@ -7,6 +7,7 @@ const TICKET_CATEGORY_TABLE_COLUMNS = [
   'id',
   'name',
   'external_event_id',
+  'external_organizer_id',
   'quantity',
   'available',
   'price',
@@ -53,7 +54,7 @@ export const getTicketCategoriesByOrganizerId = async (dbContext, organizerId) =
   return await unitOfWork.getAllWhere(schema, { 
     tableName: TICKET_CATEGORY_TABLE, 
     columns: TICKET_CATEGORY_TABLE_COLUMNS,
-    where: unitOfWork.dbConnection.raw('organizer_id = :organizerId', { organizerId })
+    where: unitOfWork.dbConnection.raw('external_organizer_id = :organizerId', { organizerId })
   });
 };
 

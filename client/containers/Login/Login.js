@@ -29,7 +29,7 @@ export default class Login extends Component {
       placeholder: 'Email *',
     }, {
       name: 'password',
-      rules: 'required|between:8,25',
+      rules: 'required|between:6,25',
       placeholder: 'Password *'
     }];
     
@@ -38,10 +38,15 @@ export default class Login extends Component {
       async onSuccess(form) {
         const isUserLogged = await props.auth.login(form.values());
         ctx.setState({ isUserLogged, loginClicked: true });
+        if (isUserLogged) ctx.props.history.push('/ticketCategoryManagement');
       }
     };
 
     this.form = new MobxReactForm({ fields }, { plugins, hooks });
+  }
+
+  componentWillMount() {
+    if(this.props.auth.isAuthenticated) this.props.history.push('/');
   }
  
   render() {
@@ -59,7 +64,7 @@ export default class Login extends Component {
                         <h3>Welcome Back</h3>
                     </div>
                     <div className="col-md-9 register-right">
-                        <form role="form">
+                        <form role="form" onSubmit={this.form.onSubmit}>
                             <div className="tab-content" id="myTabContent">
                                 <div className="tab-pane fade show active" id="home" role="tabpanel" aria-labelledby="home-tab">
                                     <h3 className="register-heading">Login</h3>
@@ -68,7 +73,7 @@ export default class Login extends Component {
                                             <div className="form-group">
                                                 <input type="text" className="form-control"  {...this.form.$('email').bind()} />
                                                 {errors.email && <label className="label label-danger"> {errors.email} </label>}
-                                                {loginClicked && isUserLogged && <label className="label label-danger"> Incorrect email or password </label>}
+                                                {loginClicked && !isUserLogged && <label className="label label-danger"> Incorrect email or password </label>}
                                             </div>
                                         </div>
                                         <div className="col-md-6">
@@ -76,7 +81,7 @@ export default class Login extends Component {
                                                 <input className="form-control"  {...this.form.$('password').bind()} type="password" />
                                                 {errors.password && <label className="label label-danger"> {errors.password} </label>}
                                             </div>
-                                            <input type="submit" className="btnRegister"  onClick={() => this.form.onSubmit} value="Login" />
+                                            <input type="button" className="btnRegister"  onClick={this.form.onSubmit} value="Login" />
                                         </div>
                                     </div>
                                 </div>

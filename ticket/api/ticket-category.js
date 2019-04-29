@@ -12,7 +12,7 @@ export default class TicketCategoryApi {
     app.get('/api/categories/:categoryId', authenticate, this.getCategoryById);
     app.get('/api/categories/byEvent/:eventId', authenticate, this.getCategoriesByEventId);
     app.get('/api/categories/byName/:name', authenticate, this.getCategoriesByName);
-    app.get('/api/categories/byOrganizerId/:organizerId', authenticate, this.getCategoriesByOrganizerId);
+    app.get('/api/categories/byOrganizer/:organizerId', authenticate, this.getCategoriesByOrganizerId);
     app.post('/api/categories', authenticate, this.createCategory);
     app.put('/api/categories/:categoryId', authenticate, this.updateCategory);
     app.delete('/api/categories/:categoryId', authenticate, this.deleteCategory);

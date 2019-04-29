@@ -25,7 +25,7 @@ export const RequiredRole = roles => (target, name, descriptor) => {
 
   descriptor.value = (...args) => {
     const { role = {}, user = {} } = args[0].tokenBody;
-    
+    console.log('rddd', role);
     if (roles.includes(role.name)) {
       return oldValue.apply(this, args);     
     }
