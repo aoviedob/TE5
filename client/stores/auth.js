@@ -18,12 +18,16 @@ class Auth {
     sessionStorage.setItem('token', token);
   }
 
+  @action hydrateSystem (token) {
+    this.systemToken = token;
+  }
+
   @action async systemLogin () {
     if (this.isAuthenticated) return;
 
     const { token } = (await makePost(`${config.authServiceDomain}/api/login`, config.authSystemLoginCredentials)) || {};
     if (token){
-      this.hydrate(token);
+      this.hydrateSystem(token);
     }
   }
 

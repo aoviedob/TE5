@@ -3,8 +3,10 @@ import { makePost } from '../modules/api-client';
 import config from '../config';
 
 class Customer {
+  useSystemToken = true;
+
   @action async registerCustomer (customer) {
-    const result = (await makePost(`${config.customerServiceDomain}/api/customers`, customer)) || {};
+    const result = (await makePost(`${config.customerServiceDomain}/api/customers`, customer, this.useSystemToken)) || {};
     return result;
   }
 };

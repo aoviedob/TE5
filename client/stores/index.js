@@ -5,3 +5,4 @@ export { eventOrganizer } from './event-organizer';
 export { ticket } from './ticket';
 export { ticketCategory } from './ticket-category';
 export { customer } from './customer';
+export { management } from './management';

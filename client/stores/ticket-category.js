@@ -4,9 +4,16 @@ import config from '../config';
 import FieldTypes from '../helpers/enums/field-types';
 
 class TicketCategory {
+  useSystemToken = false;
+  redirectOnFail = true;
+  
   @observable category = null;
   @observable categories = [];
   @observable categoryModel = {
+    id: {
+      rules: [],  
+      type: FieldTypes.Hidden,
+    },
     name: {     
       rules: 'required|string',
       placeholder: 'Name *',
@@ -41,6 +48,7 @@ class TicketCategory {
   }
 
   @action fillModel(category) {
+    this.categoryModel.id.value = category.id;
     this.categoryModel.name.value = category.name;
     this.categoryModel.externalEventId.value = category.externalEventId;
     this.categoryModel.quantity.value = category.quantity;
@@ -48,13 +56,13 @@ class TicketCategory {
   }
   
   @action async getCategoriesByEvent (eventId) {
-    const categories = (await makeGet(`${config.ticketServiceDomain}/api/categories/byEvent/${eventId}`)) || [];
+    const categories = (await makeGet(`${config.ticketServiceDomain}/api/categories/byEvent/${eventId}`, this.redirectOnFail, true)) || [];
     this.categories = categories;
     return categories;
   }
 
   @action async getCategory (categoryId) {
-    const category = (await makeGet(`${config.ticketServiceDomain}/api/categories/${categoryId}`)) || {};
+    const category = (await makeGet(`${config.ticketServiceDomain}/api/categories/${categoryId}`, this.redirectOnFail, this.useSystemToken)) || {};
     if(category) {
       this.category = category;
     }
@@ -62,15 +70,14 @@ class TicketCategory {
   }
 
   @action async getCategories () {
-     const categories = (await makeGet(`${config.ticketServiceDomain}/api/categories`)) || [];
+     const categories = (await makeGet(`${config.ticketServiceDomain}/api/categories`, this.redirectOnFail, this.useSystemToken)) || [];
     this.categories = categories;
     return categories;
   }
 
   @action async getCategoriesByOrganizer (organizerId) {
-    const categories = (await makeGet(`${config.ticketServiceDomain}/api/categories/byOrganizer/${organizerId}`)) || [];
+    const categories = (await makeGet(`${config.ticketServiceDomain}/api/categories/byOrganizer/${organizerId}`, this.redirectOnFail, this.useSystemToken)) || [];
     if (categories) {
-        console.log('categories', { t: categories});
       this.categories = categories;
       return categories;
     }
@@ -93,13 +100,16 @@ class TicketCategory {
   }
 
   @action async saveTicketCategory(category) {
-    const result = (await makePost(`${config.ticketServiceDomain}/api/categories`, category)) || {};
+    const result = (await makePost(`${config.ticketServiceDomain}/api/categories`, category, this.useSystemToken)) || {};
   }
 
   @action async updateTicketCategory(category) {
-    const result = (await makePut(`${config.ticketServiceDomain}/api/categories/${category.id}`, category)) || {};
+    const result = (await makePut(`${config.ticketServiceDomain}/api/categories/${category.id}`, category, this.useSystemToken)) || {};
   }
 
+  @action async deleteTicketCategory(category) {
+    const result = (await makeDelete(`${config.ticketServiceDomain}/api/categories/${category.id}`, this.useSystemToken)) || {};
+  }
 };
 
 export const ticketCategory = new TicketCategory();

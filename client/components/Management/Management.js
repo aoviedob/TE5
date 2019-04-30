@@ -8,8 +8,10 @@ import MobxReactForm from 'mobx-react-form';
 import validatorjs from 'validatorjs';
 import FieldTypes from '../../helpers/enums/field-types';
 import Dropdown from '../Dropdown/Dropdown';
-import { observer } from 'mobx-react';
+import { observer, inject } from 'mobx-react';
+import isEqual from 'lodash/isEqual';
 
+@inject('management')
 @observer
 export default class Management extends Component {
 
@@ -19,10 +21,10 @@ export default class Management extends Component {
   }
 
   componentWillUpdate(nextProps) {
-  //  if(nextProps.model !== this.props.model) {
-      console.log('entra');
+   if(nextProps.management.shouldInitForm) {
+      nextProps.management.setShouldInitForm(false);
       this.initForm(nextProps);
-    //}
+   }
   }
 
   initForm = props => {
@@ -31,7 +33,6 @@ export default class Management extends Component {
     };
 
     const fields = this.getFieldsSettings(props.model);
-    console.log('test', fields);
 
     const ctx = this;
     const hooks = {
@@ -56,11 +57,12 @@ export default class Management extends Component {
   });
 
   FieldTypeMapping = {
-  	[FieldTypes.Text]: ({ fieldName, value }) => <input {...this.form.$(fieldName).bind()}   type="text" className="form-control"/>,
+    [FieldTypes.Text]: ({ fieldName, value }) => <input {...this.form.$(fieldName).bind()}   type="text" className="form-control"/>,
     [FieldTypes.Number]: ({ fieldName, value }) => <input {...this.form.$(fieldName).bind()}  type="number" className="form-control" />,
   	[FieldTypes.Dropdown]: ({ fieldName, value, onChange, defaultItem, items }) => <Dropdown items={items} {...this.form.$(fieldName).bind()} onOptionSelected={item => onChange(this.form, item, fieldName)} defaultItem={defaultItem} selectedId={value} />,
   	[FieldTypes.Checkbox]: ({ fieldName, value }) => <input {...this.form.$(fieldName).bind()} type="checkbox" className="form-control" />,
   	[FieldTypes.Password]: ({ fieldName, value }) => <input {...this.form.$(fieldName).bind()} className="form-control" type="password" />,
+    [FieldTypes.Hidden]: ({ fieldName }) => <input {...this.form.$(fieldName).bind()} type="hidden" />,
   };
 
   renderFields = model => Object.keys(model).map(fieldName => {
@@ -83,6 +85,11 @@ export default class Management extends Component {
     onEditClicked && (await onEditClicked(item));
   };
 
+  handleDeleteClick = async item => {
+    const { onDeleteClicked } = this.props;
+    onDeleteClicked && (await onDeleteClicked(item));
+  };
+
   renderColumns = row => { 
   	const columns = Object.keys(row).reduce((acc, key, index) => {
   	  const column = row[key];
@@ -93,19 +100,20 @@ export default class Management extends Component {
     }, []);
 
     columns.push(<Column><a style={{cursor: 'pointer' }} onClick={() => this.handleEditClick(row)}><i className="material-icons">edit</i></a></Column>);
-    columns.push(<Column><i className="material-icons">close</i></Column>);
+    columns.push(<Column><a style={{cursor: 'pointer' }} onClick={() => this.handleDeleteClick(row)}><i className="material-icons">close</i></a></Column>);
     return columns;
   };
 
   renderRows = rows => rows.map((row, index) => <Row key={`${row.id}-${index}`}>{this.renderColumns(row)}</Row>);
 
   render() {
-  	const { rows, model, submitLabel, headers, title } = this.props;
+  	const { rows, model, submitLabel, headers, title, deleteDescription } = this.props;
+
     return (<div>
     		      {rows.length > 0 && <Table headers={headers}>
     		        {this.renderRows(rows)}
     		      </Table>}
-              <Modal title={title} id="myModal" modalType="modal fade modal-dialog modal-dialog-centered modal-lg">
+              <Modal title={title} id="addEditModal" modalType="modal fade modal-dialog modal-dialog-centered modal-lg">
      				    <form role="form" onSubmit={this.form.onSubmit}>
                   {this.renderFields(model)}
                   <div className="modal-footer">
@@ -113,6 +121,8 @@ export default class Management extends Component {
                   </div>
           	    </form>
               </Modal>
+
+
             </div>);
   }
 

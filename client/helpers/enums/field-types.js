@@ -4,4 +4,5 @@ module.exports = {
   Dropdown: 'dropdown',
   Checkbox: 'checkbox',
   Password: 'password',
+  Hidden: 'hidden',
 };

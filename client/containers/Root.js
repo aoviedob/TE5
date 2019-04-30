@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { BrowserRouter, Route, Switch, Header } from 'react-router-dom'
+import { BrowserRouter, Route, Switch, Header, Redirect } from 'react-router-dom'
 import Home from './Home/Home';
 import EventDetails from './EventDetails/EventDetails';
 import CustomerRegister from './CustomerRegister/CustomerRegister';
@@ -10,11 +10,6 @@ import { inject } from 'mobx-react';
 @inject('auth')
 class Root extends Component {
 
-  hasRermission = () => {
-    const { isAuthenticated } = this.props.auth;
-    if (!isAuthenticated) this.props.history.replace('/');
-  } 
-
   render() {
     return (
         <BrowserRouter>
@@ -24,7 +19,13 @@ class Root extends Component {
               <Route exact path='/eventDetails/:eventId' component={EventDetails} />
               <Route exact path='/register' component={CustomerRegister} />
               <Route exact path='/login' component={Login} />
-              <Route exact path='/ticketCategoryManagement' onEnter={this.hasRermission} component={TicketCategoryManagement} />
+              <Route exact path='/ticketCategoryManagement' render={() => { 
+                if (!this.props.auth.isAuthenticated) {
+                  return <Redirect to="/login" />;
+                } else {
+                  return <TicketCategoryManagement/>;
+                }
+              }} />
             </Switch>
           </div>
         </BrowserRouter>

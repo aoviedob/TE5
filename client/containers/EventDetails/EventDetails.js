@@ -2,6 +2,8 @@ import React, { Component } from 'react';
 import { inject, observer } from 'mobx-react';
 import { Container } from '../../components/Container/Container';
 import Header from '../../components/Header/Header';
+import moment from 'moment';
+import './EventDetails.css';
 
 @inject('event', 'eventCategory', 'eventOrganizer', 'ticketCategory')
 @observer
@@ -23,6 +25,7 @@ export default class EventDetails extends Component {
     const event = await props.event.getEvent(eventId);
     const eventOrganizer = await this.props.eventOrganizer.getOrganizer(event.eventOrganizerId);
     const ticketCategories = await this.props.ticketCategory.getCategoriesByEvent(eventId);
+    console.log('ticketCategories', ticketCategories);
     
     const events = [];
     events.push(...(await props.event.getEventsByOrganizer(eventOrganizer.id, 4)));
@@ -81,8 +84,20 @@ export default class EventDetails extends Component {
           </div>;
       };
 
+  renderTicketCategories = categories => categories.map(category =>
+      <div className="col-lg-4">
+        <div className="card mb-5 mb-lg-0">
+          <div className="card-body">
+            <h5 className="card-title text-muted text-uppercase text-center">{category.name}</h5>
+            <h6 className="card-price text-center">${category.price}</h6>
+            <hr>
+            <a href="#" className="btn btn-block btn-primary text-uppercase">Buy</a>
+          </div>
+        </div>
+      </div>);
+
   render() {
-    const { event, eventOrganizer, relatedEvents } = this.state;
+    const { event, eventOrganizer, relatedEvents, ticketCategories = [] } = this.state;
     const { name, coverImageUrl, metadata, startDate, endDate, webUrl } = event || {};    
     const { phone, email, webUrl: organizerWebUrl, name: organizerName } = eventOrganizer || {};    
     return (<Container>
@@ -103,13 +118,14 @@ export default class EventDetails extends Component {
                     <p>{metadata.description || 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nam viverra euismod odio, gravida pellentesque urna varius vitae. Sed dui lorem, adipiscing in adipiscing et, interdum nec metus. Mauris ultricies, justo eu convallis placerat, felis enim.'}</p>
                     <h3 className="my-3">Details</h3>
                     <ul>
-                      <li>Start Date: {startDate}</li>
-                      <li>Etart Date: {endDate}</li>
+                      <li>Start Date: {moment(startDate).format('llll')}</li>
+                      <li>End Date: {moment(endDate).format('llll')}</li>
                       {webUrl && <li>Website: {webUrl}</li>}
                       <li>Organizer Phone: {phone}</li>
                       <li>Organizer Email: {email}</li>
                       <li>Organizer Website: {organizerWebUrl}</li>
                     </ul>
+                     <div className="row">{this.renderTicketCategories(ticketCategories)}</div>
                     <button onClick={() => this.onBuyClicked()}>Buy</button>
                   </div>
                   </div>

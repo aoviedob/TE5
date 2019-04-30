@@ -9,6 +9,8 @@ class Event {
   @observable organizerId = null;
   @observable limit = null;
   @observable selectedEvent = {};
+  useSystemToken = true;
+  redirectOnFail = true;
 
   @action async searchEvents (word, { limit, categoryId, organizerId }) {
   	this.word = word;
@@ -21,7 +23,7 @@ class Event {
   	queryParams += organizerId ? `&organizerId=${organizerId}` : '';
     const url = `${config.eventServiceDomain}/api/events/byName/${word || 'undefined'}${queryParams}`;
     
-    const events = (await makeGet(url)) || [];
+    const events = (await makeGet(url, this.redirectOnFail, this.useSystemToken)) || [];
     if(events.length) {
       this.events = events;
     }
@@ -29,14 +31,14 @@ class Event {
 
   @action async getAllEvents (limit) {
   	let queryParams = limit ? `?limit=${limit}` : '';
-    const events = (await makeGet(`${config.eventServiceDomain}/api/events/${queryParams}`, false)) || [];
+    const events = (await makeGet(`${config.eventServiceDomain}/api/events/${queryParams}`, false, this.useSystemToken)) || [];
     if(events.length) {
       this.events = events;
     }
   }
 
   @action async getEvent (eventId) {
-    const event = (await makeGet(`${config.eventServiceDomain}/api/events/${eventId}`)) || {};
+    const event = (await makeGet(`${config.eventServiceDomain}/api/events/${eventId}`, this.redirectOnFail, this.useSystemToken)) || {};
     if(event.length) {
       this.selectedEvent = event;
     }
@@ -45,12 +47,12 @@ class Event {
 
   @action async getEventsByOrganizer (organizerId, limit) {
     let queryParams = limit ? `?limit=${limit}` : '';
-    return (await makeGet(`${config.eventServiceDomain}/api/events/byOrganizer/${organizerId}${queryParams}`)) || [];
+    return (await makeGet(`${config.eventServiceDomain}/api/events/byOrganizer/${organizerId}${queryParams}`, this.redirectOnFail, this.useSystemToken)) || [];
   }
 
   @action async getEventsByCategory (categoryId, limit) {
     let queryParams = limit ? `?limit=${limit}` : '';
-    return (await makeGet(`${config.eventServiceDomain}/api/events/byCategory/${categoryId}${queryParams}`)) || [];
+    return (await makeGet(`${config.eventServiceDomain}/api/events/byCategory/${categoryId}${queryParams}`, this.redirectOnFail, this.useSystemToken)) || [];
   }
 
 
