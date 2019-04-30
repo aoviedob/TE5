@@ -25,6 +25,21 @@ export const makePost = async (url, payload = {}) => {
   }
 };
 
+export const makePut = async (url, payload = {}) => {
+  try {
+    const response = await
+      request
+      .put(url)
+      .type('form')
+      .use(setHeaders)
+      .send(payload);
+
+    return JSON.parse(response.text);
+  } catch(error) {
+    return handleApiError(error);
+  }
+};
+
 export const makeGet = async (url, redirectOnFail = true ) => {
   try {
     const response = await request.get(url).use(setHeaders);

@@ -14,6 +14,8 @@ const TICKET_CATEGORY_TABLE_COLUMNS = [
   'settings',
   'created_by',
   'updated_by',
+  'created_at',
+  'updated_at',
 ];
 
 export const getTicketCategories = async dbContext => 
