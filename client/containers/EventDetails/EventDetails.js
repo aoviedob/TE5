@@ -5,7 +5,7 @@ import Header from '../../components/Header/Header';
 import moment from 'moment';
 import './EventDetails.css';
 
-@inject('event', 'eventCategory', 'eventOrganizer', 'ticketCategory')
+@inject('event', 'eventCategory', 'eventOrganizer', 'ticketCategory', 'auth')
 @observer
 export default class EventDetails extends Component {
 
@@ -56,8 +56,13 @@ export default class EventDetails extends Component {
     }
   }
 
-  onBuyClicked = () => {
-    this.props.history.push(`/register`);
+  onBuyClicked = category => {
+    if (!this.props.auth.isAuthenticated) {
+      return this.props.history.push(`/register`);
+    }
+
+    const { eventId } = this.state;
+    return this.props.history.push(`/purchase`);
   }
 
   goToRelatedEvent = event => { 
@@ -85,13 +90,12 @@ export default class EventDetails extends Component {
       };
 
   renderTicketCategories = categories => categories.map(category =>
-      <div className="col-lg-4">
+      <div className="col-lg-6">
         <div className="card mb-5 mb-lg-0">
           <div className="card-body">
             <h5 className="card-title text-muted text-uppercase text-center">{category.name}</h5>
             <h6 className="card-price text-center">${category.price}</h6>
-            <hr>
-            <a href="#" className="btn btn-block btn-primary text-uppercase">Buy</a>
+            <a href="#" onClick={() => this.onBuyClicked(category)} className="btn btn-block btn-primary text-uppercase">Buy</a>
           </div>
         </div>
       </div>);
@@ -126,8 +130,7 @@ export default class EventDetails extends Component {
                       <li>Organizer Website: {organizerWebUrl}</li>
                     </ul>
                      <div className="row">{this.renderTicketCategories(ticketCategories)}</div>
-                    <button onClick={() => this.onBuyClicked()}>Buy</button>
-                  </div>
+                   </div>
                   </div>
                 </div>
               }
