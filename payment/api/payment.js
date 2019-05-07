@@ -8,8 +8,8 @@ export default class PaymentApi {
   constructor(app) {
     app.post('/api/payment', this.pay);
     app.get('/api/payment/amount', this.getPaymentAmount);
-    app.post('/api/payment/key', this.getCustomersByName);
-    app.post('/api/payment/initiate', this.getCustomersByName);
+    app.post('/api/payment/key', this.requestApiKey);
+    app.post('/api/payment/initiate', this.initiatePayment);
     app.post('api/payment/login', this.login);
   }
   

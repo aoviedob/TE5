@@ -13,6 +13,7 @@ import Moment from 'moment';
 import { extendMoment } from 'moment-range';
 import { createToken, decodeToken } from './crypto-service';
 import TokenErrors from '../helpers/enums/token-errors';
+import { initiatePayment } from './external-service';
 
 const moment = extendMoment(Moment);
 const logger = bunyan.createLogger({ name: 'TicketService'});
@@ -49,6 +50,7 @@ export const getTicketsByCustomerId = async (dbContext, customerId) => {
 
 export const reserveTicket = async (dbContext, ticket, userId) => {
   const msg = { ...ticket, dbContext, userId };
+
   validatePreconditions(['dbContext', 'ticketCategoryId', 'externalCustomerId', 'quantity', 'userId'], msg);
 
   const category = await getTicketCategoryById(dbContext, ticketCategoryId);

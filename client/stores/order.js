@@ -21,7 +21,6 @@ class Order {
     const category = (await makeGet(`${config.eventServiceDomain}/api/categories/${categoryId}`, this.redirectOnFail, this.useSystemToken)) || {};
     return category;
   }
-  
 
 };
 
