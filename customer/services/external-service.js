@@ -19,14 +19,15 @@ export const createUser = async customer => {
   const token = await getTemporalToken();
 
   try {  
-    const { body } = await request
+    const result = await request
       .post(authCreateUserUrl)
       .type('form')
       .set('Authorization', `Bearer ${token}`)
       .accept('application/json')
       .send({ ...customer, isCustomer: true });
-
-      return body.id;
+      console.log('resultHola', result);
+      console.log('bodyHola', result.body);
+      return result.body.id;
    } catch(error) {
      throw error;
    }

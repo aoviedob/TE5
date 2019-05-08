@@ -44,7 +44,9 @@ export default class UserApi {
   @RequiredRole([PredefinedRole.ADMIN, PredefinedRole.EXTERNAL])
   async createUser(req) {
     const { body } = req;
-    return await userService.createUser(POSTGRES_CONTEXT, body);
+    const t = await userService.createUser(POSTGRES_CONTEXT, body);
+    console.log('createdUser', t);
+    return t;
   }
 
   @RequiredRole([PredefinedRole.ADMIN])

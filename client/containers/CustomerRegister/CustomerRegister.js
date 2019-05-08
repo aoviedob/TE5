@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import { observer, inject } from 'mobx-react';
 import { Container } from '../../components/Container/Container';
-import Header from '../../components/Header/Header';
+import Header from '../Header/Header';
 import './CustomerRegister.css';
 import dvr from 'mobx-react-form/lib/validators/DVR';
 import MobxReactForm from 'mobx-react-form';

@@ -130,7 +130,7 @@ const validateCredentialsAndCreateToken = async(dbContext, { user, role, userTyp
     throw error;
   }
 
-  return { token: createToken({ user: sanitizeUser(user), role: mapRepoEntity(role), userType: mapRepoEntity(userType) }, tokenOptions), email: user.email };
+  return { token: createToken({ user: sanitizeUser(user), role: mapRepoEntity(role), userType: mapRepoEntity(userType) }, tokenOptions), email: user.email, fullname: user.fullname };
 };
 
 export const login = async (dbContext, user) => {

@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import { inject, observer } from 'mobx-react';
 import { Container } from '../../components/Container/Container';
-import Header from '../../components/Header/Header';
+import Header from '../Header/Header';
 import moment from 'moment';
 import './EventDetails.css';
 

@@ -1,8 +1,9 @@
 import React, { Component } from 'react';
 import { inject, observer } from 'mobx-react';
 import { Container } from '../../components/Container/Container';
-import Header from '../../components/Header/Header';
+import Header from '../Header/Header';
 import Dropdown from '../../components/Dropdown/Dropdown';
+import PaymentDialog from './PaymentDialog';
 
 @inject('auth', 'order', 'customer', 'ticketCategory', 'event', 'eventOrganizer')
 @observer
@@ -95,7 +96,7 @@ export default class Purchase extends Component {
       </tr>
     </thead>;
 
-  onContinueClicked = () => this.props.history.push('/');
+  onContinueClicked = () => window.location.replace('/');
 
   render() {
     const { customerOrder } = this.props.order;
@@ -135,6 +136,7 @@ export default class Purchase extends Component {
                 </table>
               </div>
             </div>
+        <PaymentDialog/>
       </Container>);
   }
 

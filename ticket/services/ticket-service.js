@@ -1,4 +1,4 @@
-import * as ticketRepo from '../dal/ticket-repo';
+import * as ticketsRepo from '../dal/ticket-repo';
 import { validatePreconditions } from '../helpers/validator';
 import { mapRepoEntity, mapParams } from '../helpers/mapper';
 import { sendQueueMessage } from '../helpers/queue';

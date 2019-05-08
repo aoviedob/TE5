@@ -129,7 +129,7 @@ export class PaymentDialog extends Component {
 
 
     return (
-      <Modal title={title} id="addEditModal" modalType="modal fade modal-dialog modal-dialog-centered modal-lg">
+      <Modal title={title} id="paymentModal" modalType="modal fade">
         <Iframe src={} />
       </Modal>
     );

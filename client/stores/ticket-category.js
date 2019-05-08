@@ -1,5 +1,5 @@
 import { observable, action, toJS } from 'mobx';
-import { makeGet, makePost, makePut } from '../modules/api-client';
+import { makeGet, makePost, makePut, makeDelete } from '../modules/api-client';
 import config from '../config';
 import FieldTypes from '../helpers/enums/field-types';
 
@@ -54,6 +54,15 @@ class TicketCategory {
     this.categoryModel.quantity.value = category.quantity;
     this.categoryModel.price.value = category.price;
   }
+
+  @action clearModel() {
+    this.categoryModel.id.value = null;
+    this.categoryModel.name.value = null;
+    this.categoryModel.externalEventId.value = null;
+    this.categoryModel.quantity.value = null;
+    this.categoryModel.price.value = null;
+  }
+  
   
   @action async getCategoriesByEvent (eventId) {
     const categories = (await makeGet(`${config.ticketServiceDomain}/api/categories/byEvent/${eventId}`, this.redirectOnFail, true)) || [];
@@ -108,7 +117,7 @@ class TicketCategory {
   }
 
   @action async deleteTicketCategory(category) {
-    const result = (await makeDelete(`${config.ticketServiceDomain}/api/categories/${category.id}`, this.useSystemToken)) || {};
+    const result = (await makeDelete(`${config.ticketServiceDomain}/api/categories/${category.id}`)) || {};
   }
 };
 

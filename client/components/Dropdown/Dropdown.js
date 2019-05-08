@@ -30,7 +30,7 @@ export default class Dropdown extends Component {
 
   render() {
     const { items = [], defaultItem, ...rest } = this.props;
-    const { searchValue, selectedItem } = this.state;
+    const { searchValue, selectedItem = {} } = this.state;
     const filteredItems = searchValue ? this.filterItems(items, searchValue) : items;
 
     return <div className="dropdown" {...rest} value={selectedItem.id}>

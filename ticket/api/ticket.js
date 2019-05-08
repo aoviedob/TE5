@@ -1,4 +1,4 @@
-import * as ticketService from '../services/coupon-service';
+import * as ticketService from '../services/ticket-service';
 import { UnitOfWorkContext } from '../helpers/enums/unit_of_work';
 import { RequiredRole, authenticate } from '../decorators/authorization-handler';
 import { PredefinedRole } from '../helpers/enums/dal-types';

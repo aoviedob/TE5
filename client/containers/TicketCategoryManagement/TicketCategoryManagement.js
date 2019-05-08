@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import Management from '../../components/Management/Management';
 import { observer, inject } from 'mobx-react';
 import { Container } from '../../components/Container/Container';
-import Header from '../../components/Header/Header';
+import Header from '../Header/Header';
 import Dropdown from '../../components/Dropdown/Dropdown';
 import SearchBox from '../../components/SearchBox/SearchBox';
 import './TicketCategoryManagement.css';
@@ -64,38 +64,45 @@ export default class TicketCategoryManagement extends Component {
   };
 
   onAddClicked = () => this.setState({ showModal: true });
-  onMoldalClosed = () => this.setState({ showModal: false });
+
+  onMoldalClosed = () => {
+    setTimeout(() => { 
+      this.setState({ isDeleteModalOpened: false, updateInProgress: false });
+      this.props.ticketCategory.clearModel();
+      this.props.management.setShouldInitForm(true);
+    }, 1000);
+  }
 
   onCategoryEditClicked = async category => {
-    this.setState({ updateInProgress: true });
     const dbCategory = await this.props.ticketCategory.getCategory(category.id);
     this.props.ticketCategory.fillModel(dbCategory);
 
     this.props.management.setShouldInitForm(true);
-  	this.btnAdd.click();
+  	this.setState({ updateInProgress: true });
+    this.btnAdd.click();
   };
 
   onCategoryEdited = async model => {
-    console.log('model', model);
   	await this.props.ticketCategory.updateTicketCategory({ ...model, externalOrganizerId: this.state.selectedOrganizerId});
   	await this.setCategoryRows(this.state.selectedOrganizerId);
   };
   
   onCategoryDeleteClicked = async category => {
-    const tickets = await this.props.ticket.getTicketByCategoryId(category.id);
+    const tickets = await this.props.ticket.getTicketsByCategoryId(category.id);
+    const state = { isDeleteModalOpened: true, modalTitle: 'Delete Ticket Category' };
     if (tickets.length > 0) {
-      this.setState({ canDelete: false, deleteDescription: 'This ticket category can not be deleted because tickets were already buyed' });  
+      this.setState({ ...state, canDelete: false, deleteLabel: 'OK', deleteDescription: 'This ticket category can not be deleted because tickets were already buyed' });  
     } else {
-      this.setState({ canDelete: true, deleteDescription: `Are you sure you want to delete '${category.name}'?` });  
+      this.setState({ ...state, canDelete: true, categoryToDelete: category, deleteDescription: `Are you sure you want to delete '${category.name}'?` });  
     }
     
-    this.btnDelete.click();
+    this.btnAdd.click();
   };
 
   onCategoryDeleted = async category => {
-    const { canDelete } = this.state;
+    const { canDelete, categoryToDelete } = this.state;
     if (canDelete) {
-      await this.props.ticketCategory.deleteTicketCategory(category);
+      await this.props.ticketCategory.deleteTicketCategory(categoryToDelete);
       await this.setCategoryRows(this.state.selectedOrganizerId);
     } else {
       
@@ -105,7 +112,7 @@ export default class TicketCategoryManagement extends Component {
   render() {
   	const { eventOrganizers } = this.props.eventOrganizer;
   	const { categoryModel, saveTicketCategory } = this.props.ticketCategory;
-  	const { selectedOrganizerId, categoryRows=[], showModal, updateInProgress, deleteDescription } = this.state;
+  	const { selectedOrganizerId, categoryRows=[], showModal, updateInProgress, deleteDescription, isDeleteModalOpened, modalTitle } = this.state;
 
     return (<Container>
     		 <Header/>
@@ -117,25 +124,27 @@ export default class TicketCategoryManagement extends Component {
                  {eventOrganizers.length > 0 && <SearchBox onSearch={this.onSearch} placeholder="Search Ticket Categories"></SearchBox>}
                </div>  
                <div className="col-sm-2">
-                 {selectedOrganizerId && <button ref={node => { this.btnAdd = node;} } className="btn btn-primary" data-toggle="modal" data-target="#addEditModal" onClick={() => this.onAddClicked() }><i className="material-icons" style={{ color: 'white'}}>add</i></button>}
+                 {selectedOrganizerId && <button ref={node => { this.btnAdd = node;} } className="btn btn-primary" data-toggle="modal" data-target="#multiModal"><i className="material-icons" style={{ color: 'white'}}>add</i></button>}
                </div>
              </div>
              <Management 
                onAdd={this.onCategoryAdded}
                onEdit={this.onCategoryEdited}
                isEdit={updateInProgress}
-               title="Create Ticket Category" 
+               modalTitle={modalTitle} 
                model={categoryModel} 
                rows={categoryRows} 
                headers={this.headers} 
-               submitLabel={updateInProgress ? 'Update' : 'Create' } 
+               submitLabel={updateInProgress ? 'Update' : 'Create' }
+               deleteLabel="Delete"
                showModal={showModal} 
-               onMoldalClosed={() => this.onMoldalClosed}
+               onMoldalClosed={this.onMoldalClosed}
                onEditClicked={this.onCategoryEditClicked}
                onDeleteClicked={this.onCategoryDeleteClicked}
+               onDeleted={this.onCategoryDeleted}
+               isDeleteModalOpened={isDeleteModalOpened}
                deleteDescription={deleteDescription} />
-               <input ref={node => { this.btnDelete = node;} } type="hidden" data-toggle="modal" data-target="#deleteModal"/>
-           </Container>);
+            </Container>);
   }
 
 }

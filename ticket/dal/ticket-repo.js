@@ -65,7 +65,7 @@ export const getTicketsByCategoryId = async (dbContext, categoryId) => {
   return await unitOfWork.getAllWhere(schema, { 
   	tableName: TICKET_TABLE, 
   	columns: TICKET_TABLE_COLUMNS,
-  	where: unitOfWork.dbConnection.raw('category_id = :categoryId', { categoryId })
+  	where: unitOfWork.dbConnection.raw('ticket_category_id = :categoryId', { categoryId })
   });
 };
 

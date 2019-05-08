@@ -85,6 +85,11 @@ export default class Management extends Component {
     onEditClicked && (await onEditClicked(item));
   };
 
+  handleOnDeleted = async item => {
+    const { onDeleted } = this.props;
+    onDeleted && (await onDeleted(item));
+  };
+  
   handleDeleteClick = async item => {
     const { onDeleteClicked } = this.props;
     onDeleteClicked && (await onDeleteClicked(item));
@@ -99,30 +104,37 @@ export default class Management extends Component {
       return acc;
     }, []);
 
-    columns.push(<Column><a style={{cursor: 'pointer' }} onClick={() => this.handleEditClick(row)}><i className="material-icons">edit</i></a></Column>);
-    columns.push(<Column><a style={{cursor: 'pointer' }} onClick={() => this.handleDeleteClick(row)}><i className="material-icons">close</i></a></Column>);
+    columns.push(<Column><a style={{cursor: 'pointer' }} onClick={async() => await this.handleEditClick(row)}><i className="material-icons">edit</i></a></Column>);
+    columns.push(<Column><a style={{cursor: 'pointer' }} onClick={async() => await this.handleDeleteClick(row)}><i className="material-icons">close</i></a></Column>);
     return columns;
   };
 
   renderRows = rows => rows.map((row, index) => <Row key={`${row.id}-${index}`}>{this.renderColumns(row)}</Row>);
 
   render() {
-  	const { rows, model, submitLabel, headers, title, deleteDescription } = this.props;
+  	const { rows, model, submitLabel, deleteLabel, headers, modalTitle, deleteDescription, isDeleteModalOpened, onMoldalClosed } = this.props;
 
     return (<div>
     		      {rows.length > 0 && <Table headers={headers}>
     		        {this.renderRows(rows)}
     		      </Table>}
-              <Modal title={title} id="addEditModal" modalType="modal fade modal-dialog modal-dialog-centered modal-lg">
-     				    <form role="form" onSubmit={this.form.onSubmit}>
-                  {this.renderFields(model)}
+              <Modal onMoldalClosed={onMoldalClosed} title={modalTitle} id="multiModal" modalType="modal fade">
+     				    {isDeleteModalOpened && 
+                <div>
+                  <p>{deleteDescription}</p>
                   <div className="modal-footer">
-                    <button type="button" className="btn btn-primary" type="submit" onClick={this.form.onSubmit}>{submitLabel}</button>
+                    <button type="button" className="btn btn-primary" onClick={this.handleOnDeleted}>{deleteLabel}</button>
                   </div>
-          	    </form>
+                </div>}
+                {!isDeleteModalOpened &&
+                  <form role="form" onSubmit={this.form.onSubmit}>
+                    {this.renderFields(model)}
+                    <div className="modal-footer">
+                      <button type="button" className="btn btn-primary" type="submit" onClick={this.form.onSubmit}>{submitLabel}</button>
+                    </div>
+          	      </form>
+                }
               </Modal>
-
-
             </div>);
   }
 
