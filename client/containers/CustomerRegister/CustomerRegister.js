@@ -60,7 +60,7 @@ export default class CustomerRegister extends Component {
         if (result.error && result.error.status === 409 ) {
            return ctx.setState({userAlreadyExists: true});
         }
-        return this.props.history.push(`/login`);
+        return ctx.props.history.push(`/login`);
       }
     };
 

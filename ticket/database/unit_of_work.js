@@ -162,7 +162,7 @@ export default class UnitOfWork {
   create = async (schema, { tableName, columns, entity, rawValues, encryptPassword, onConflict, trx }) => {
     this.addAuditValues(entity);
     return await this.executeTransaction({ 
-      func: () => this._create(schema, { tableName, columns, entity, rawValues, encryptPassword, onConflict }),
+      func: () => this._create(schema, { tableName, columns: columns.filter(column => column !== 'id'), entity, rawValues, encryptPassword, onConflict }),
       trx
     });
   };

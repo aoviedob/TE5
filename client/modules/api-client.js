@@ -21,6 +21,7 @@ export const makePost = async (url, payload = {}, useSystemToken = false) => {
 
     return JSON.parse(response.text);
   } catch(error) {
+    console.log('eerrr', error);
     return handleApiError(error);
   }
 };
@@ -36,6 +37,7 @@ export const makePut = async (url, payload = {}, useSystemToken = false) => {
 
     return JSON.parse(response.text);
   } catch(error) {
+    console.log('eerrr', error);
     return handleApiError(error);
   }
 };
@@ -59,6 +61,7 @@ export const makeGet = async (url, redirectOnFail = true, useSystemToken = false
     return response.text ? JSON.parse(response.text) : null;
   } catch(error) {
     if (redirectOnFail){
+      console.log('eerrr', { error, url });
       return handleApiError(error);
     }
   }

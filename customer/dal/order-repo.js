@@ -21,6 +21,7 @@ const ORDER_LINE_TABLE_COLUMNS = [
   'order_id',
   'external_product_name',
   'external_product_id',
+  'external_product_category_id',
   'quantity',
   'created_at',
   'updated_at'
@@ -41,6 +42,24 @@ export const getOrderById = async (dbContext, { orderId, trx }) => {
 
   return { ...order, orderLines: (orderLines ? orderLines.filter(ol => ol) : []) };
 };
+
+
+export const getOrderByStatus = async (dbContext, { status, customerId, trx }) => { 
+  const unitOfWork = new UnitOfWork(dbContext);
+  const order = await unitOfWork.getOneWhere(schema, { 
+    tableName: ORDER_TABLE, 
+    columns: [...formatDBColumns(ORDER_TABLE, ORDER_TABLE_COLUMNS), `json_agg("${ORDER_LINE_TABLE}".*) as "orderLines"`],
+    join: unitOfWork.dbConnection.raw('LEFT JOIN :schema:.:ORDER_LINE_TABLE: ON :ORDER_TABLE:.id = :ORDER_LINE_TABLE:.order_id', { ORDER_LINE_TABLE, ORDER_TABLE, schema }),
+    where: unitOfWork.dbConnection.raw(':ORDER_TABLE:.customer_id = :customerId AND :ORDER_TABLE:.status = status', { customerId, status, ORDER_TABLE }),
+    groupBy: unitOfWork.dbConnection.raw(':ORDER_TABLE:.id', { ORDER_TABLE }),
+    trx,
+  });
+  const { orderLines, id } = order;
+  if(!id) return {};
+
+  return { ...order, orderLines: (orderLines ? orderLines.filter(ol => ol) : []) };
+};
+
 
 export const getOrdersByCustomerId = async (dbContext, customerId) => { 
   const unitOfWork = new UnitOfWork(dbContext);

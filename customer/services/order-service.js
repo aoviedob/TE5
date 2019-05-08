@@ -18,6 +18,11 @@ export const getOrderById = async (dbContext, { orderId, trx }) => {
   return mapRepoEntity((await orderRepo.getOrderById(dbContext, { orderId, trx })));
 };
 
+export const getOrderByStatus = async (dbContext, { status, customerId }) => {
+  validatePreconditions(['dbContext', 'status'], { dbContext, status, customerId });
+  return mapRepoEntity((await orderRepo.getOrderByStatus(dbContext, { status, customerId })));
+};
+
 const validateProductQuantity = (req, orderLine) => {
   const { quantity } = orderLine;
   if (quantity > maxAllowedProductQuantity) {
@@ -31,8 +36,8 @@ const validateProductQuantity = (req, orderLine) => {
 const updateOrderAmount = async(req, { dbContext, orderId, trx }) => {
   const { orderLines = [] } = await getOrderById(dbContext, { orderId, trx });
   if (!orderLines.length) return;
-  
-  const products = await Promise.all(orderLines.map(async ({ externalProductId }) => await getProduct(req, externalProductId)));
+
+  const products = await Promise.all(orderLines.map(async ({ externalProductCategoryId }) => await getProduct(req, externalProductCategoryId)));
   if (!products || !products.length) {
     logger.error({ ...req.tokenBody, orderId }, 'Empty product list');
     const error = new Error('EMPTY_PRODUCT_LIST');
@@ -41,10 +46,17 @@ const updateOrderAmount = async(req, { dbContext, orderId, trx }) => {
   }
 
   const total_amount = products.reduce((acc, product) => {
-    const { quantity } = orderLines.find(ol => ol.externalProductId === product.id);
+    const { id, quantity } = orderLines.find(ol => ol.externalProductCategoryId === product.id);
+    if (quantity > product.available) {
+      logger.error({ id, quantity, orderId, available: product.available }, 'Not enough products');
+      const error = new Error('NOT_ENOUGH_PRODUCTS');
+      error.status = 500;
+      throw error;
+    }
     acc = acc + (product.price * quantity);
     return acc;
   }, 0);
+  console.log('total_amount', total_amount);
 
   await orderRepo.updateOrder(dbContext, { orderId, order: { total_amount }, trx });
 };
@@ -53,7 +65,7 @@ export const updateOrderLine = async (req, { dbContext, orderLine, trx }) => {
   validatePreconditions(['dbContext', 'orderId', 'externalProductId'], { dbContext, ...orderLine });
   validateProductQuantity(req, orderLine);
  
-  await ((new UnitOfWork(dbContext)).transact(async (trx, resolve, reject) => {
+  return await ((new UnitOfWork(dbContext)).transact(async (trx, resolve, reject) => {
     try {
       const { orderId, externalProductId } = orderLine;
       await orderRepo.updateOrderLine(dbContext, { orderId, externalProductId, orderLine: mapParams(orderLine), trx });
@@ -67,7 +79,7 @@ export const updateOrderLine = async (req, { dbContext, orderLine, trx }) => {
 };
 
 export const createOrderLine = async (req, { dbContext, orderLine }) => {
-  validatePreconditions(['dbContext', 'orderId', 'externalProductName', 'externalProductId', 'quantity'], { dbContext, ...orderLine });
+  validatePreconditions(['dbContext', 'orderId', 'externalProductName', 'externalProductId', 'quantity', 'externalProductCategoryId'], { dbContext, ...orderLine });
   validateProductQuantity(req, orderLine);
   
   return await ((new UnitOfWork(dbContext)).transact(async (trx, resolve, reject) => {
@@ -139,7 +151,7 @@ export const createOrder = async (req, { dbContext, order }) => {
 export const deleteOrder = async (dbContext, orderId) => {
   validatePreconditions(['dbContext', 'orderId'], { dbContext, orderId });
 
-  await ((new UnitOfWork(dbContext)).transact(async (trx, resolve, reject) => {
+  return await ((new UnitOfWork(dbContext)).transact(async (trx, resolve, reject) => {
     try {
       const { orderLines } = await getOrderById(dbContext, { orderId, trx });
 

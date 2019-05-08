@@ -14,7 +14,8 @@ const getTokenInUrl = pathname => {
 
 new Promise(async (resolve) => {
   const token = getTokenInUrl(window.location.search);
-  if (!token) { 
+  if (!token) {
+    console.log('entra');
     await stores.auth.systemLogin(token);
   } else {
     stores.auth.hydrate(token);

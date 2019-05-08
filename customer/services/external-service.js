@@ -19,22 +19,24 @@ export const createUser = async customer => {
   const token = await getTemporalToken();
 
   try {  
-    const { id: externalUserId } = await request
+    const { body } = await request
       .post(authCreateUserUrl)
       .type('form')
       .set('Authorization', `Bearer ${token}`)
       .accept('application/json')
       .send({ ...customer, isCustomer: true });
 
-      return externalUserId;
+      return body.id;
    } catch(error) {
      throw error;
    }
 };
 
-export const getProduct = async (req, productId) =>
-  await request
+export const getProduct = async (req, productId) => {
+  const result = await request
     .get(`${productUrl}/${productId}`)
     .set('Authorization', `Bearer ${req.token}`)
     .set('Accept', 'application/json')
     .set('Content-Type', 'application/json');
+  return result.body;
+};

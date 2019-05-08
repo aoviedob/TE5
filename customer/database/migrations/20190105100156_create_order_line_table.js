@@ -7,6 +7,7 @@ exports.up = async dbConnection =>
       order_id UUID  REFERENCES :schema:.order(id) not null,
       external_product_name varchar(500) not null,
       external_product_id uuid not null,
+      external_product_category_id uuid not null,
       quantity int not null,
       created_at timestamp not null,
       updated_at timestamp not null

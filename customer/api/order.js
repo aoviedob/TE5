@@ -10,6 +10,7 @@ export default class CustomerApi {
   constructor(app) {
     app.get('/api/orders/byCustomer/:customerId', authenticate, this.getOrdersByCustomerId);
     app.get('/api/orders/:orderId', authenticate, this.getOrderById);
+    app.get('/api/orders/:customerId/byStatus/:status', authenticate, this.getOrderByStatus);
     app.post('/api/orders', authenticate, this.createOrder);
     app.post('/api/orders/lines',authenticate,  this.createOrderLine);
     app.put('/api/orders/:orderId',authenticate,  this.updateOrder);
@@ -30,6 +31,12 @@ export default class CustomerApi {
     return await orderService.getOrderById(POSTGRES_CONTEXT, { orderId });
   }
 
+  @RequiredRole([PredefinedRole.ADMIN, PredefinedRole.CUSTOMER])
+  async getOrderByStatus(req) {
+    const { status, customerId } = req.params || {};
+    return await orderService.getOrderByStatus(POSTGRES_CONTEXT, { status, customerId });
+  }
+  
   @RequiredRole([PredefinedRole.ADMIN, PredefinedRole.CUSTOMER])
   async createOrder(req) {
     const { body } = req;
@@ -52,7 +59,7 @@ export default class CustomerApi {
   async updateOrderLine(req) {
     const { body, params = {} } = req;
     const { orderId, productId } = params; 
-    return await orderService.updateOrderLine(req, { dbContext: POSTGRES_CONTEXT, orderLine: { body, orderId, externalProductId: productId } });
+    return await orderService.updateOrderLine(req, { dbContext: POSTGRES_CONTEXT, orderLine: { ...body, orderId, externalProductId: productId } });
   }
 
   @RequiredRole([PredefinedRole.ADMIN, PredefinedRole.CUSTOMER])

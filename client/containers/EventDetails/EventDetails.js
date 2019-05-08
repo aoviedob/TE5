@@ -5,7 +5,7 @@ import Header from '../../components/Header/Header';
 import moment from 'moment';
 import './EventDetails.css';
 
-@inject('event', 'eventCategory', 'eventOrganizer', 'ticketCategory', 'auth')
+@inject('event', 'eventCategory', 'eventOrganizer', 'ticketCategory', 'auth', 'order')
 @observer
 export default class EventDetails extends Component {
 
@@ -56,13 +56,16 @@ export default class EventDetails extends Component {
     }
   }
 
-  onBuyClicked = category => {
+  onBuyClicked = async category => {
     if (!this.props.auth.isAuthenticated) {
-      return this.props.history.push(`/register`);
+      this.props.auth.setRedirectionUrl('/purchase');
+      return this.props.history.push('/register');
     }
 
     const { eventId } = this.state;
-    return this.props.history.push(`/purchase`);
+    const event = await this.props.event.getEvent(eventId);
+    this.props.order.setNewOrderLine(event, category);
+    return this.props.history.push('/purchase');
   }
 
   goToRelatedEvent = event => { 
@@ -95,7 +98,7 @@ export default class EventDetails extends Component {
           <div className="card-body">
             <h5 className="card-title text-muted text-uppercase text-center">{category.name}</h5>
             <h6 className="card-price text-center">${category.price}</h6>
-            <a href="#" onClick={() => this.onBuyClicked(category)} className="btn btn-block btn-primary text-uppercase">Buy</a>
+            <a href="#" onClick={async () => await this.onBuyClicked(category)} className="btn btn-block btn-primary text-uppercase">Buy</a>
           </div>
         </div>
       </div>);

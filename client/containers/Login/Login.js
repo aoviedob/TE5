@@ -38,7 +38,7 @@ export default class Login extends Component {
       async onSuccess(form) {
         const isUserLogged = await props.auth.login(form.values());
         ctx.setState({ isUserLogged, loginClicked: true });
-        if (isUserLogged) ctx.props.history.push('/ticketCategoryManagement');
+        if (isUserLogged) ctx.props.history.push(ctx.props.auth.redirectionUrl || '/');
       }
     };
 

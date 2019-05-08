@@ -19,7 +19,7 @@ export default class EventApi {
     app.delete('/api/events/:eventId', authenticate, this.deleteEvent);
   }
 
-  @RequiredRole([PredefinedRole.ADMIN, PredefinedRole.SYSTEM])
+  @RequiredRole([PredefinedRole.ADMIN, PredefinedRole.SYSTEM, PredefinedRole.CUSTOMER])
   async getEvents(req) { 
     const { limit } = req.query || {};
     return await eventService.getEvents(POSTGRES_CONTEXT, limit);

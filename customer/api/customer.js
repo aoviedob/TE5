@@ -39,7 +39,7 @@ export default class CustomerApi {
     return await customerService.getCustomersByEmail(POSTGRES_CONTEXT, email);
   }
 
-  @RequiredRole([PredefinedRole.ADMIN, PredefinedRole.SYSTEM])
+  @RequiredRole([PredefinedRole.ADMIN, PredefinedRole.SYSTEM, PredefinedRole.CUSTOMER])
   async getCustomerByEmail(req) {
     const { email } = req.params || {};
     return await customerService.getCustomerByEmail(POSTGRES_CONTEXT, email);

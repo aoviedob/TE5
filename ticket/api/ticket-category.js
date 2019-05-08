@@ -18,10 +18,10 @@ export default class TicketCategoryApi {
     app.delete('/api/categories/:categoryId', authenticate, this.deleteCategory);
   }
 
-  @RequiredRole([PredefinedRole.ADMIN])
+  @RequiredRole([PredefinedRole.ADMIN, PredefinedRole.CUSTOMER])
   async getCategories(req) { return await categoryService.getTicketCategories(POSTGRES_CONTEXT); }
 
-  @RequiredRole([PredefinedRole.ADMIN, PredefinedRole.EVENT_MANAGER, PredefinedRole.AGENT])
+  @RequiredRole([PredefinedRole.ADMIN, PredefinedRole.EVENT_MANAGER, PredefinedRole.AGENT, PredefinedRole.CUSTOMER])
   async getCategoryById(req) {
     const { categoryId } = req.params || {};
     return await categoryService.getTicketCategoryById(POSTGRES_CONTEXT, categoryId);

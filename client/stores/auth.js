@@ -4,18 +4,29 @@ import config from '../config';
 
 class Auth {
   @observable token;
+  @observable email;
+  @observable redirectionUrl;
 
   constructor() {
     this.token = sessionStorage.getItem('token') || null;
+    this.email = sessionStorage.getItem('email') || null;
   };
 
   @computed get isAuthenticated () {
     return !!this.token;
   }
 
-  @action hydrate (token) {
+  @action setRedirectionUrl(url) {
+    this.redirectionUrl = url;
+  }
+
+  @action hydrate (token, email) {
     this.token = token;
     sessionStorage.setItem('token', token);
+    if (email) {
+      this.email = email;
+      sessionStorage.setItem('email', email);
+    }
   }
 
   @action hydrateSystem (token) {
@@ -23,8 +34,6 @@ class Auth {
   }
 
   @action async systemLogin () {
-    if (this.isAuthenticated) return;
-
     const { token } = (await makePost(`${config.authServiceDomain}/api/login`, config.authSystemLoginCredentials)) || {};
     if (token){
       this.hydrateSystem(token);
@@ -32,9 +41,9 @@ class Auth {
   }
 
   @action async login (credentials) {
-    const { token } = (await makePost(`${config.authServiceDomain}/api/login`, credentials)) || {};
+    const { token, email } = (await makePost(`${config.authServiceDomain}/api/login`, credentials)) || {};
     if (token){
-      this.hydrate(token);
+      this.hydrate(token, email);
       return true;
     }
     return false;

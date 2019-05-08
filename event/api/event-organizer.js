@@ -19,7 +19,7 @@ export default class EventOrganizerApi {
     app.delete('/api/organizers/:organizerId', authenticate, this.deleteEventOrganizer);
   }
 
-  @RequiredRole([PredefinedRole.ADMIN, PredefinedRole.SYSTEM])
+  @RequiredRole([PredefinedRole.ADMIN, PredefinedRole.SYSTEM, PredefinedRole.CUSTOMER])
   async getEventOrganizers(req) { return await eventOrganizerService.getEventOrganizers(POSTGRES_CONTEXT); }
 
   @RequiredRole([PredefinedRole.ADMIN, PredefinedRole.SYSTEM])
