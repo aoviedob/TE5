@@ -10,12 +10,12 @@ const logger = bunyan.createLogger({ name: 'PaymentService'});
 
 export const getClientById = async (dbContext, clientId) => {
   validatePreconditions(['dbContext', 'clientId'], { dbContext, clientId });
-  return mapRepoEntity(await(paymentRepo.getCustomerById(dbContext, clientId)));
+  return mapRepoEntity(await(paymentRepo.getClientById(dbContext, clientId)));
 };
 
 const getClientPrivateKey = async(dbContext, clientId) => {
   const client = await getClientById(dbContext, clientId);
-
+  
   if (client == null) {
     logger.error({ dbContext, clientId }, 'INCONSISTENCY_DETECTED - Client does not exist');
     const error = new Error('INCONSISTENCY_DETECTED');
@@ -24,7 +24,7 @@ const getClientPrivateKey = async(dbContext, clientId) => {
   }
 
   const { privateKey: encryptedPrivateKey } = client;
-  return decrypt(encryptedPrivateKey).privateKey;
+  return decrypt(encryptedPrivateKey, null, true).privateKey;
 };
 
 const authenticate = async(dbContext, clientId, body) => {

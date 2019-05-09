@@ -56,6 +56,14 @@ class Order {
     this.order = order;
   }
 
+
+  @action async initiatePayment() {
+    const { order } = this;
+    if(!order || order.orderLines.length < 1) return;
+
+    const result = (await makePost(`${config.customerServiceDomain}/api/orders/place`, order)) || {};
+  }
+
 };
 
 export const order = new Order();

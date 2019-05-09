@@ -27,9 +27,8 @@ export default class PaymentApi {
   }
 
   async initiatePayment(req) {
-    const { clientId } = req.params || {};
-    const { body } = req;
-    return await paymentService.initiatePayment(req, clientId, body);
+    const { content, clientId  } = req.body;
+    return await paymentService.initiatePayment(req, clientId, content);
   }
 
   async login(req) { return await paymentService.login(req); }

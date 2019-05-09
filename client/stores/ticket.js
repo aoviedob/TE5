@@ -12,10 +12,6 @@ class Ticket {
     const result = (await makePost(`${config.ticketServiceDomain}/api/tickets/reserve`, ticket)) || {};
   }
 
-  @action async initiatePayment(payment) {
-    const result = (await makePost(`${config.ticketServiceDomain}/api/tickets/reserve`, payment)) || {};
-  }
-
 };
 
 export const ticket = new Ticket();

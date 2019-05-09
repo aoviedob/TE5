@@ -2,9 +2,12 @@ import { getTokenFromRequest } from '../helpers/request';
 import bunyan from 'bunyan';
 const logger = bunyan.createLogger({ name: 'PaymentApiMiddleware'});
 
+const unprotectedApis = ['/api/payment/initiate', '/api/payment/key'];
+
 export const requestHandler = (route, action) =>
   async (req, res, next) => {
-    try {
+    if (!unprotectedApis.includes(route)) {
+      try {
         const token = getTokenFromRequest(req);
         if (!token){
           throw new Error('UNAUTHORIZED');
@@ -15,6 +18,7 @@ export const requestHandler = (route, action) =>
         res.status(401).send('UNAUTHORIZED');
         return;
       }
+    }
   
     try {
       const result = await action(req);

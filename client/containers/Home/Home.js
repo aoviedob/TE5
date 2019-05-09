@@ -38,9 +38,13 @@ export default class Home extends Component {
 
   renderEvents = events => events.map((event, index) =>
                            <div key={`${event.name}${index}`} className="col-sm-4">
-                             <Card className="card-container radius" image={event.coverImageUrl} title={event.name} subtitle={`${event.addressLine1}${event.addressLine2}`} description={event.metadata.description} >
-                               <a type="button" className="btn button" onClick={() => this.goToEventDetails(event)} >View</a>
-                               <a type="button" onClick={() => this.buyTicket(event)} className="btn-floating btn-small btn-fb">Buy</a>
+                             <Card className="card-container" image={event.coverImageUrl} title={event.name} subtitle={`${event.addressLine1}${event.addressLine2}`} description={event.metadata.description} >
+                               <a className="btn" style={{ marginRight: 10 }} onClick={() => this.goToEventDetails(event)} >
+                                 <i class="material-icons">remove_red_eye</i> View
+                               </a>
+                               <a className="btn" onClick={() => this.buyTicket(event)}>
+                                 <i class="material-icons">add_shopping_cart</i>Add to cart
+                               </a>
                              </Card>
                            </div>);
 
@@ -104,7 +108,7 @@ export default class Home extends Component {
                </div>
              </div>
              <div className="row">
-               <div className="col-sm-8 offset-sm-2 card-deck-container card">
+               <div className="col-sm-8 offset-sm-2 card-deck-container">
                  <CardDeck>{this.renderEvents(pagedEvents)}</CardDeck>
                </div>
              </div>

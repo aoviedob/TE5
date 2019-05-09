@@ -25,7 +25,6 @@ export default class EventDetails extends Component {
     const event = await props.event.getEvent(eventId);
     const eventOrganizer = await this.props.eventOrganizer.getOrganizer(event.eventOrganizerId);
     const ticketCategories = await this.props.ticketCategory.getCategoriesByEvent(eventId);
-    console.log('ticketCategories', ticketCategories);
     
     const events = [];
     events.push(...(await props.event.getEventsByOrganizer(eventOrganizer.id, 4)));

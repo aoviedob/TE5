@@ -1,5 +1,4 @@
 import React, { Component } from 'react';
-import './SearchBox.css';
 
 export default class SearchBox extends Component {
 

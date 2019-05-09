@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import Modal from '../../components/Modal/Modal';
-import Iframe from '../../components/Iframe/Modal';
+import Iframe from '../../components/Iframe/Iframe';
 
 import { observer, inject } from 'mobx-react';
 import { action } from 'mobx';
@@ -10,7 +10,7 @@ const TIMEOUT_NOTIFICATION_PAYMENT = 60000;
 
 @inject('order')
 @observer
-export class PaymentDialog extends Component {
+export default class PaymentDialog extends Component {
 
   // This is called when we get a postMessage from payment-success or
   // payment-canceled
@@ -20,11 +20,9 @@ export class PaymentDialog extends Component {
     if (e.origin.indexOf(window.location.host) >= 0) {
       const message = tryParse(e.data.message, {});
       if (message.action === PAYMENT_TRANSACTION_REDIRECTED) {
-        logger.debug('postMessage was success redirect');
         this.onTransactionCompleted();
       }
       if (message.action === PAYMENT_TRANSACTION_CANCELED) {
-        logger.debug('postMessage was cancel redirect');
         onCanceledPay && onCanceledPay();
       }
     } else {
@@ -54,28 +52,6 @@ export class PaymentDialog extends Component {
     this.isPaymentIframeLoadingCompleted = false;
   };
 
-  initiatePayment = () => {
-    const {
-      applicantDetails,
-      application: {
-        personApplicationId,
-        quoteId,
-        propertyInfo: { propertyId },
-      },
-    } = this.props;
-    const { model } = this;
-
-
-    model.initiatePayment(
-      {
-        invoice: {
-         },
-        ...applicantDetails,
-      },
-      personApplicationId,
-    );
-  };
-
   onOpening = () => {
     this.startListening();
     this.resetState();
@@ -84,15 +60,15 @@ export class PaymentDialog extends Component {
 
   @action
   handleConfirmationTimeout = async () => {
-    logger.warn('Timed out waiting for confirmation - will poll one time');
+
     const paymentCompleted = await this.props.application.fetchPaymentCompleted();
-    logger.debug({ paymentCompleted }, 'Back from fetchPaymentCompleted');
+
     if (paymentCompleted) {
-      logger.warn('payment completed but got no notification');
+
       // parent will be responsible for closing us in this case
-      this.props.application.redirectToAdditionalInfo(this.props.auth.token);
+//      this.props.application.redirectToAdditionalInfo(this.props.auth.token);
     } else {
-      logger.warn('payment not completed but got redirect');
+  
       this.waitingForPaymentConfirmation = false;
     }
   };
@@ -104,15 +80,14 @@ export class PaymentDialog extends Component {
   };
 
   redirectIfAlreadyPaid = paymentStatus => {
-    if (paymentStatus !== INITIATE_PAYMENT_STATUS.ALREADY_PAID) return;
-
-    logger.info('user already paid - redirecting to part 2');
+//  if (paymentStatus !== INITIATE_PAYMENT_STATUS.ALREADY_PAID) return;
+  
     this.props.application.redirectToAdditionalInfo(this.props.auth.token);
   };
 
   checkPayment() {
-    const { paymentStatus } = this.model;
-    this.redirectIfAlreadyPaid(paymentStatus);
+    //const { paymentStatus } = this.model;
+    //this.redirectIfAlreadyPaid(paymentStatus);
   }
 
   componentDidMount() {
@@ -124,13 +99,10 @@ export class PaymentDialog extends Component {
   }
 
   render = () => {
-    const { dialogOpen, application, screen } = this.props;
-    const { displayingPaymentDialog, waitingForPaymentConfirmation, isAptxUrl } = this;
-
 
     return (
-      <Modal title={title} id="paymentModal" modalType="modal fade">
-        <Iframe src={} />
+      <Modal title='Payment' id="paymentModal" modalType="modal fade">
+        <Iframe />
       </Modal>
     );
   };

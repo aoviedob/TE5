@@ -6,6 +6,7 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "payment-start": "babel-node server.js",
+    "generate-client": "babel-node scripts/generate_key.js",
     "migrate-test": "babel-node --extensions '.ts,.js,.json' ./node_modules/knex/bin/cli.js migrate:latest --knexfile  ./database/connections/pg_test_knexfile.js",
     "migrate": "babel-node --extensions '.ts,.js,.json' ./node_modules/knex/bin/cli.js migrate:latest --knexfile  ./database/connections/pg_knexfile.js",
     "client-start": "webpack-dev-server"

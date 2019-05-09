@@ -1,4 +1,4 @@
-import { authExternalLoginUrl, authCreateUserUrl, authExternalLoginCredentials, productUrl } from '../config';
+import { authExternalLoginUrl, authCreateUserUrl, authExternalLoginCredentials, productUrl, initiatePaymentUrl, crypto, paymentClientId } from '../config';
 import request from 'superagent';
 import { encrypt } from './crypto-service';
 
@@ -41,3 +41,19 @@ export const getProduct = async (req, productId) => {
     .set('Content-Type', 'application/json');
   return result.body;
 };
+
+export const initiatePayment = async ({  invoice, customerId, amount }) => {
+  try {
+    const payload = encrypt({ invoice, customerId, amount }, crypto.paymentEncryptionKey);
+    const result = await request
+      .post(initiatePaymentUrl)
+      .type('form')
+      .accept('application/json')
+      .send({ payload, clientId: paymentClientId });
+      console.log('resultHola', result);
+      console.log('bodyHola', result.body);
+      return result.body;
+   } catch(error) {
+     throw error;
+   }
+}

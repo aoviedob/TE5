@@ -13,7 +13,6 @@ import Moment from 'moment';
 import { extendMoment } from 'moment-range';
 import { createToken, decodeToken } from './crypto-service';
 import TokenErrors from '../helpers/enums/token-errors';
-import { initiatePayment } from './external-service';
 
 const moment = extendMoment(Moment);
 const logger = bunyan.createLogger({ name: 'TicketService'});

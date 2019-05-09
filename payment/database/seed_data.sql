@@ -1,0 +1,23 @@
+INSERT INTO payment.client (
+      legal_name,
+      identification,
+      account,
+      private_key,
+      webhook_url,
+      phone,
+      email,
+      address,
+      created_at,
+      updated_at) 
+  VALUES(
+      'TE5', 
+      '3112434505', 
+      '424242424242424242', 
+      '38LXeUSX+SGs8vno:IwZu+T/AvH2+SjKKzUnmmGUj6+fZre+btgQlHY+AxA+EXEAGQA==', 
+      'http://localhost:3030/api/orders/transaction',
+      '22222222',
+      'andres@gmail.com',
+      'Line1',
+      NOW(),
+      NOW()
+      )

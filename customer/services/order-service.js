@@ -1,11 +1,12 @@
 import * as orderRepo from '../dal/order-repo';
 import { validatePreconditions } from '../helpers/validator';
 import { mapRepoEntity, mapParams } from '../helpers/mapper';
-import { getProduct } from './external-service';
+import { getProduct, initiatePayment } from './external-service';
 import { maxAllowedProductQuantity } from '../config';
 import UnitOfWork from '../database/unit_of_work.js';
 import DalTypes from '../helpers/enums/dal-types';
 import bunyan from 'bunyan';
+
 const logger = bunyan.createLogger({ name: 'OrderService'});
 
 export const getOrdersByCustomerId = async (dbContext, customerId) => { 
@@ -161,6 +162,20 @@ export const deleteOrder = async (dbContext, orderId) => {
 
       await orderRepo.deleteOrder(dbContext, { orderId, trx });
 
+      resolve(true);
+    } catch (error) {
+      reject(error);
+    }
+  }));
+};
+
+export const placeOrder = async (req, { dbContext, order }) => {
+  validatePreconditions(['dbContext', 'id'], { dbContext, ...order });
+  return await ((new UnitOfWork(dbContext)).transact(async (trx, resolve, reject) => {
+    try {
+      const dbOrder = await getOrderById(dbContext, { orderId: order.id, trx });
+      await initiatePayment({ test: 1});
+     
       resolve(true);
     } catch (error) {
       reject(error);

@@ -98,10 +98,15 @@ export default class Purchase extends Component {
 
   onContinueClicked = () => window.location.replace('/');
 
+  initiatePayment = async () => {
+    console.log('aaa');
+    await this.props.order.initiatePayment();
+  };
+
   render() {
     const { customerOrder } = this.props.order;
-    console.log('customerOrder', customerOrder);
     const { orderLines = [], totalAmount = 0 } = customerOrder || {};
+
     return (<Container>
               <Header></Header>
               <div className="row">
@@ -127,7 +132,7 @@ export default class Purchase extends Component {
                         </button>
                       </td>
                       <td>
-                        <button type="button" className="btn btn-success">
+                        <button disabled={orderLines.length < 1} type="button" className="btn btn-success" data-toggle="modal" data-target="#paymentModal" onClick={this.initiatePayment}>
                           Checkout <span className="glyphicon glyphicon-play"></span>
                         </button>
                       </td>
