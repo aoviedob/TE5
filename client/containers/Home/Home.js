@@ -40,10 +40,10 @@ export default class Home extends Component {
                            <div key={`${event.name}${index}`} className="col-sm-4">
                              <Card className="card-container" image={event.coverImageUrl} title={event.name} subtitle={`${event.addressLine1}${event.addressLine2}`} description={event.metadata.description} >
                                <a className="btn" style={{ marginRight: 10 }} onClick={() => this.goToEventDetails(event)} >
-                                 <i class="material-icons">remove_red_eye</i> View
+                                 <i class="material-icons icon" style={{ position: 'relative', top: 5 }}>remove_red_eye</i> View
                                </a>
                                <a className="btn" onClick={() => this.buyTicket(event)}>
-                                 <i class="material-icons">add_shopping_cart</i>Add to cart
+                                 <i class="material-icons icon" style={{ position: 'relative', top: 5 }}>add_shopping_cart</i>Add to cart
                                </a>
                              </Card>
                            </div>);
@@ -52,6 +52,7 @@ export default class Home extends Component {
     const { categoryId, organizerId, word } = this.state;
     await this.props.event.searchEvents(word, { limit: 40, categoryId, organizerId });
   }
+
   onSearch = word => {
     this.setState({ word }, async () => await this.searchEvents());
   };

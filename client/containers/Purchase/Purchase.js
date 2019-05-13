@@ -11,6 +11,7 @@ export default class Purchase extends Component {
 
   constructor(props) {
     super(props);
+    this.state = { formUrl: null };
   }
 
   async componentDidMount() {
@@ -99,12 +100,13 @@ export default class Purchase extends Component {
   onContinueClicked = () => window.location.replace('/');
 
   initiatePayment = async () => {
-    console.log('aaa');
-    await this.props.order.initiatePayment();
+    const formUrl = await this.props.order.initiatePayment();
+    this.setState({ formUrl }, () => this.showModalRef.click());
   };
 
   render() {
     const { customerOrder } = this.props.order;
+    const { formUrl } = this.state;
     const { orderLines = [], totalAmount = 0 } = customerOrder || {};
 
     return (<Container>
@@ -132,16 +134,17 @@ export default class Purchase extends Component {
                         </button>
                       </td>
                       <td>
-                        <button disabled={orderLines.length < 1} type="button" className="btn btn-success" data-toggle="modal" data-target="#paymentModal" onClick={this.initiatePayment}>
+                        <button disabled={orderLines.length < 1} type="button" className="btn btn-success" onClick={this.initiatePayment}>
                           Checkout <span className="glyphicon glyphicon-play"></span>
                         </button>
+                        <input ref={node => { this.showModalRef = node; }} type="hidden"  data-toggle="modal" data-target="#paymentModal"/>
                       </td>
                     </tr>
                   </tbody>
                 </table>
               </div>
             </div>
-        <PaymentDialog/>
+        <PaymentDialog src={formUrl}/>
       </Container>);
   }
 

@@ -16,13 +16,15 @@ export const encrypt = (data, customEncryptionKey, isText = false) => {
   return `${initializationVector}:${encryptedJSON}`;
 };
 
+
+
 export const decrypt = (encryptedJSON, customEncryptionKey = null, isText = false ) => {
   const { algorithm, sharedEncryptionKey, algorithmEncode, algorithmCharset, algorithmKeySize } = cryptoConfig;
   
   const encryptedParts = encryptedJSON.split(':');
   const initializationVector = encryptedParts[0];
   const encryptedText = encryptedParts[1];
-
+  console.log('customEncryptionKey', customEncryptionKey);
   const decipher = crypto.createDecipheriv(algorithm, (customEncryptionKey || sharedEncryptionKey).slice(0, algorithmKeySize), initializationVector);
   let decryptedText = decipher.update(encryptedText, algorithmEncode, algorithmCharset);
   decryptedText += decipher.final(algorithmCharset);

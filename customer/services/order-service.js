@@ -173,10 +173,10 @@ export const placeOrder = async (req, { dbContext, order }) => {
   validatePreconditions(['dbContext', 'id'], { dbContext, ...order });
   return await ((new UnitOfWork(dbContext)).transact(async (trx, resolve, reject) => {
     try {
-      const dbOrder = await getOrderById(dbContext, { orderId: order.id, trx });
-      await initiatePayment({ test: 1});
+      const { customerId, totalAmount } = await getOrderById(dbContext, { orderId: order.id, trx });
+      const formUrl = await initiatePayment({ customerId, amount: totalAmount });
      
-      resolve(true);
+      resolve({ formUrl });
     } catch (error) {
       reject(error);
     }

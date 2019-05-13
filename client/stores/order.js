@@ -61,7 +61,8 @@ class Order {
     const { order } = this;
     if(!order || order.orderLines.length < 1) return;
 
-    const result = (await makePost(`${config.customerServiceDomain}/api/orders/place`, order)) || {};
+    const { formUrl } = (await makePost(`${config.customerServiceDomain}/api/orders/place`, order)) || {};
+    return formUrl;
   }
 
 };

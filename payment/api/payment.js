@@ -28,7 +28,7 @@ export default class PaymentApi {
 
   async initiatePayment(req) {
     const { content, clientId  } = req.body;
-    return await paymentService.initiatePayment(req, clientId, content);
+    return await paymentService.initiatePayment(POSTGRES_CONTEXT, clientId, content);
   }
 
   async login(req) { return await paymentService.login(req); }

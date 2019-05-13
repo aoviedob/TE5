@@ -1,7 +1,7 @@
 import * as paymentRepo from '../dal/payment-repo';
 import { validatePreconditions } from '../helpers/validator';
 import { mapRepoEntity, mapParams } from '../helpers/mapper';
-import { decryptWithPrivateKey, decrypt, encryptWithPrivateKey, verifyToken } from './crypto-service';
+import { decryptWithPrivateKey, decrypt, encryptWithPrivateKey, verifyToken, createToken } from './crypto-service';
 import { domain, formUrl } from '../config';
 import * as CardValidate from 'credit-card-validate';
 import bunyan from 'bunyan';
@@ -13,10 +13,18 @@ export const getClientById = async (dbContext, clientId) => {
   return mapRepoEntity(await(paymentRepo.getClientById(dbContext, clientId)));
 };
 
+const isEmpty = obj => {
+  for(let key in obj) {
+      if(obj.hasOwnProperty(key))
+        return false;
+  }
+  return true;
+};
+
 const getClientPrivateKey = async(dbContext, clientId) => {
   const client = await getClientById(dbContext, clientId);
   
-  if (client == null) {
+  if (isEmpty(client)) {
     logger.error({ dbContext, clientId }, 'INCONSISTENCY_DETECTED - Client does not exist');
     const error = new Error('INCONSISTENCY_DETECTED');
     error.status = 401;
@@ -24,7 +32,7 @@ const getClientPrivateKey = async(dbContext, clientId) => {
   }
 
   const { privateKey: encryptedPrivateKey } = client;
-  return decrypt(encryptedPrivateKey, null, true).privateKey;
+  return decrypt(encryptedPrivateKey, null, true);
 };
 
 const authenticate = async(dbContext, clientId, body) => {
@@ -41,7 +49,7 @@ const authenticate = async(dbContext, clientId, body) => {
     error.status = 401;
     throw error;
   }
-  return decryptedBody;
+  return { decryptedBody, privateKey };
 };
 
 export const requestApiKey = async (dbContext, clientId, body) => {
@@ -50,15 +58,17 @@ export const requestApiKey = async (dbContext, clientId, body) => {
 };
 
 export const initiatePayment = async(dbContext, clientId, body) => {
-  const decryptedBody = await authenticate(dbContext, clientId, body);
- 
+  const { decryptedBody, privateKey } = await authenticate(dbContext, clientId, body);
+  console.log('decryptedBody', decryptedBody);
   const { invoice, customerId, amount } = decryptedBody;
   validatePreconditions(['invoice', 'customerId', 'amount'], decryptedBody);
   const token = createToken({ ...decryptedBody, clientId });
 
-  return encryptWithPrivateKey({
-    formUrl: `${domain}${formUrl}token=${token}`,
-  }, privateKey);
+  return { 
+    content: encryptWithPrivateKey({
+       formUrl: `${domain}${formUrl}token=${token}`,
+    }, privateKey)
+  };
 };
 
 export const login = async req => {

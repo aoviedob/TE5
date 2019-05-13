@@ -99,10 +99,10 @@ export default class PaymentDialog extends Component {
   }
 
   render = () => {
-
+    const { src } = this.props;
     return (
       <Modal title='Payment' id="paymentModal" modalType="modal fade">
-        <Iframe />
+        <Iframe src={src}/>
       </Modal>
     );
   };
