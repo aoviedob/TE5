@@ -124,6 +124,15 @@ export const createTransaction = async (dbContext, transaction) => {
   return (result.length && result[0]) || {};
 };
 
+export const getTransactionById = async (dbContext, transactionId) => {
+  const unitOfWork = new UnitOfWork(dbContext);
+  return await unitOfWork.getOneWhere(schema, { 
+    tableName: TRANSACTION_TABLE, 
+    columns: TRANSACTION_TABLE_COLUMNS,
+    where: unitOfWork.dbConnection.raw('id = :transactionId', { transactionId })
+  });
+};
+
 export const getClientById = async (dbContext, clientId) => {
   const unitOfWork = new UnitOfWork(dbContext);
   return await unitOfWork.getOneWhere(schema, { 

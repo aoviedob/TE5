@@ -1,4 +1,4 @@
-import MessageTypes from './queue-message-types';
+import MessageTypes from '../helpers/enums/queue-message-types';
 import { reserveTicketHandler, confirmTicketHandler } from '../services/ticket-service';
 
 export const handleQueueMapping = { 

@@ -11,19 +11,19 @@ export const receiveMessages = async () => {
   channel.assertExchange(exchange, 'topic', {durable: true});
   
   try {
-    await channel.assertQueue(name, {exclusive: true}) ;
+    await channel.assertQueue(name);
     
     channel.prefetch(1);
     
-    await channel.bindQueue(name, exchange, name);
+    await channel.bindQueue(name, exchange, 'ReserveTicket');
 
     logger.info({ name }, ' [*] Waiting for messages in %s. To exit press CTRL+C');
 
     channel.consume(name, async msg => { 
-      logger.info({ name, msg }, 'New message received');
+      logger.info({ name, t: msg }, 'New message received');
 
       const message = JSON.parse(msg.content.toString());
-      await handleQueueMapping[message.type](message.msg);
+      await handleQueueMapping[message.type](message);
 
     }, { noAck: true });
 

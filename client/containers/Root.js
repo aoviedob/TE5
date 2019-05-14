@@ -6,6 +6,7 @@ import CustomerRegister from './CustomerRegister/CustomerRegister';
 import Login from './Login/Login';
 import TicketCategoryManagement from './TicketCategoryManagement/TicketCategoryManagement';
 import Purchase from './Purchase/Purchase';
+import CustomerDashboard from './CustomerDashboard/CustomerDashboard';
 import { inject } from 'mobx-react';
 
 @inject('auth')
@@ -32,6 +33,13 @@ class Root extends Component {
                   return <Redirect to="/login" />;
                 } else {
                   return <Purchase/>;
+                }
+              }} />
+              <Route exact path='/customerDashboard' render={() => { 
+                if (!this.props.auth.isAuthenticated) {
+                  return <Redirect to="/login" />;
+                } else {
+                  return <CustomerDashboard/>;
                 }
               }} />
             </Switch>

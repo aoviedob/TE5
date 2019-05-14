@@ -13,6 +13,7 @@ import Moment from 'moment';
 import { extendMoment } from 'moment-range';
 import { createToken, decodeToken } from './crypto-service';
 import TokenErrors from '../helpers/enums/token-errors';
+import UnitOfWork from '../database/unit_of_work.js';
 
 const moment = extendMoment(Moment);
 const logger = bunyan.createLogger({ name: 'TicketService'});
@@ -51,7 +52,7 @@ export const reserveTicket = async (dbContext, ticket, userId) => {
   const msg = { ...ticket, dbContext, userId };
 
   validatePreconditions(['dbContext', 'ticketCategoryId', 'externalCustomerId', 'quantity', 'userId'], msg);
-
+  const { ticketCategoryId, couponId} = ticket;
   const category = await getTicketCategoryById(dbContext, ticketCategoryId);
   if (!category) {
     logger.error(msg, 'Category does not exist');
@@ -60,12 +61,14 @@ export const reserveTicket = async (dbContext, ticket, userId) => {
     throw error;
   }
 
-  const coupon = await getCouponById(dbContext, couponId);
-  if (!coupon) {
-    logger.error(msg, 'Coupon does not exist');
-    const error = new Error('COUPON_DOES_NOT_EXIST');
-    error.status = 412;
-    throw error;
+  if (couponId){
+    const coupon = await getCouponById(dbContext, couponId);
+    if (!coupon) {
+      logger.error(msg, 'Coupon does not exist');
+      const error = new Error('COUPON_DOES_NOT_EXIST');
+      error.status = 412;
+      throw error;
+    }
   }
 
   

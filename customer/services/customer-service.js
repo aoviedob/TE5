@@ -36,7 +36,6 @@ export const updateCustomer = async (dbContext, customerId, customer) => {
 export const createCustomer = async (dbContext, customer) => {
   validatePreconditions(['dbContext', 'email', 'fullname', 'password'], { dbContext, ...customer });
   const externalUserId = await createUser(customer);
-  console.log('externalUserId', externalUserId);
   const { id: customerId } = await customerRepo.createCustomer(dbContext, mapParams({ ...customer, externalUserId }));
   return await getCustomerById(dbContext, customerId);
 };

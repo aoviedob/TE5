@@ -4,8 +4,9 @@ import { Container } from '../../components/Container/Container';
 import Header from '../Header/Header';
 import Dropdown from '../../components/Dropdown/Dropdown';
 import PaymentDialog from './PaymentDialog';
+import './Purchase.css';
 
-@inject('auth', 'order', 'customer', 'ticketCategory', 'event', 'eventOrganizer')
+@inject('auth', 'order', 'customer', 'ticketCategory', 'event', 'eventOrganizer', 'ticket')
 @observer
 export default class Purchase extends Component {
 
@@ -78,10 +79,10 @@ export default class Purchase extends Component {
       </td>
       <td className="col-sm-1 col-md-1 text-center"><strong>${price}</strong></td>
       <td className="col-sm-1 col-md-1 text-center"><strong>${price * quantity }</strong></td>
-      <td className="col-sm-1 col-md-1">
-        <button type="button" className="btn btn-danger" onClick={() => this.onRemove(orderLine)}>
-          <span className="glyphicon glyphicon-remove"></span> Remove
-        </button>
+      <td className="col-sm-1 col-md-1" style={{ paddingTop: 0 }}>
+        <a className="btn icon" style={{ marginRight: 10 }} onClick={() => this.onRemove(orderLine)} >
+          <i class="material-icons" style={{ position: 'relative', top: 5 }}>remove_circle_outline</i> Remove
+        </a>
       </td>
     </tr>;
   });
@@ -101,6 +102,14 @@ export default class Purchase extends Component {
 
   initiatePayment = async () => {
     const formUrl = await this.props.order.initiatePayment();
+    const { customerOrder, customerId } = this.props.order;
+    const { orderLines = [] } = customerOrder;
+    
+    await Promise.all(orderLines.map(async orderLine => {
+      const { id, externalProductName, externalProductId, quantity, externalProductCategoryId } = orderLine;
+      await this.props.ticket.reserveTicket({ ticketCategoryId: externalProductCategoryId, externalCustomerId: customerId, quantity });
+    }));
+
     this.setState({ formUrl }, () => this.showModalRef.click());
   };
 
@@ -134,7 +143,7 @@ export default class Purchase extends Component {
                         </button>
                       </td>
                       <td>
-                        <button disabled={orderLines.length < 1} type="button" className="btn btn-success" onClick={this.initiatePayment}>
+                        <button disabled={orderLines.length < 1} type="button" className="btn btn-primary" onClick={this.initiatePayment}>
                           Checkout <span className="glyphicon glyphicon-play"></span>
                         </button>
                         <input ref={node => { this.showModalRef = node; }} type="hidden"  data-toggle="modal" data-target="#paymentModal"/>

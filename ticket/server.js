@@ -7,6 +7,7 @@ import { initApis } from './api/api';
 import { routerMiddleware } from './api/api-middleware';
 import { createSocketServer } from './socketIO';
 import fs from 'fs';
+import { receiveMessages } from './workers/consumer';
 
 const logger = bunyan.createLogger({ name: 'TicketServer'});
 
@@ -41,3 +42,5 @@ app.listen(3060, () => {
 });
 
 createSocketServer(app);
+
+receiveMessages();

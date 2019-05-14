@@ -43,7 +43,7 @@ export default class Payment extends Component {
 
 
   async componentWillMount() {
-  //  await this.props.payment.getAmount();
+    await this.props.payment.getAmount();
   }
   
   render() {
@@ -59,7 +59,11 @@ export default class Payment extends Component {
                         Payment 
                     </h3>
                 </div>
-                <div className="panel-body">
+                {result && <div className="panel-body">
+                  {result.isInvalid && <h4> Your card information is invalid </h4>}
+                  {!result.isInvalid && <h4> Your payment was successfull </h4>}
+                </div>}
+                {!result && <div className="panel-body">
                     <form role="form" onSubmit={this.form.onSubmit}>
                     <div className="form-group">
                         <label> Card Holder </label>
@@ -98,8 +102,7 @@ export default class Payment extends Component {
                     <br/>
                     <button type="submit" onClick={this.form.onSubmit} className="btn btn-success btn-lg btn-block" >Pay</button>
                     <button onClick={this.form.onClear} className="btn btn-lg btn-block" >Cancel</button>
-                </div>
-                       {!!result.isInvalid && <label className="label label-danger"> Your card information is invalid </label>}
+                </div>}
             </div>
         </div>
     </div>

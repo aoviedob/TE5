@@ -1,6 +1,7 @@
 import { authExternalLoginUrl, authCreateUserUrl, authExternalLoginCredentials, productUrl, initiatePaymentUrl, crypto, paymentClientId } from '../config';
 import request from 'superagent';
 import { encrypt, decrypt } from './crypto-service';
+import newId from 'uuid/v4';
 
 const getTemporalToken = async() => {
   const { email, password } = authExternalLoginCredentials;
@@ -44,17 +45,14 @@ export const getProduct = async (req, productId) => {
 
 export const initiatePayment = async ({  invoice, customerId, amount }) => {
   try {
-    const content = encrypt({ invoice: '1', customerId, amount }, crypto.paymentEncryptionKey);
-    console.log('content', content);
+    const content = encrypt({ invoice: newId(), customerId, amount }, crypto.paymentEncryptionKey);
     const result = await request
       .post(initiatePaymentUrl)
       .type('form')
       .accept('application/json')
       .send({ content, clientId: paymentClientId });
-
-      console.log('result.body', JSON.parse(result.body).content);
+    
       const { formUrl } = decrypt(JSON.parse(result.body).content, crypto.paymentEncryptionKey);
-      console.log('formUrl', formUrl);
       return formUrl;
    } catch(error) {
      throw error;

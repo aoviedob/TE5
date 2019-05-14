@@ -12,6 +12,7 @@ class Auth {
   }
 
   @action async hydrate (token) {
+    console.log('token', token);
     this.token = token;
   }
 };

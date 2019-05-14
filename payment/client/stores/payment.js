@@ -3,7 +3,7 @@ import { makeGet, makePost } from '../modules/api-client';
 import config from '../../config';
 
 class Payment {
-  @observable result = {};
+  @observable result = null;
   @observable amount = 0;
 
   @action async pay (paymentData) { 

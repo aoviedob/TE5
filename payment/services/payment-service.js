@@ -59,7 +59,6 @@ export const requestApiKey = async (dbContext, clientId, body) => {
 
 export const initiatePayment = async(dbContext, clientId, body) => {
   const { decryptedBody, privateKey } = await authenticate(dbContext, clientId, body);
-  console.log('decryptedBody', decryptedBody);
   const { invoice, customerId, amount } = decryptedBody;
   validatePreconditions(['invoice', 'customerId', 'amount'], decryptedBody);
   const token = createToken({ ...decryptedBody, clientId });
@@ -107,7 +106,6 @@ const validatePaymentData = (paymentData = {}, extraData = {}) => {
   const { cardNumber, cardHolder, securityCode, expirationDate } = paymentData;
 
   try {
-    const formattedExpDate = moment();
     let exYear;
     let exMonth;
     
@@ -120,15 +118,16 @@ const validatePaymentData = (paymentData = {}, extraData = {}) => {
       exMonth = parts[0];
       exYear = parts[1];
     }
- 
-    const [type] = creditCardFactory.find(cardNumber, formattedExpDate.month(exMonth).year(exYear).toDate(), securityCode);
-    console.log('typeHola', type);
+    const formattedExpDate = new Date(`${exYear}-${exMonth}`);
+    
+    const [type] = creditCardFactory.find(cardNumber, formattedExpDate, securityCode);
+    
     if(!type) {
       return paymentDataInvalidError({ cardNumber, cardHolder, ...extraData, isInvalid: true });
     }
 
-    const card = new CardValidate.cards[type.name](cardNumber, formattedExpDate, securityCode);
-    console.log('cardHola', card);
+    const card = new CardValidate.cards[type.constructor.name](cardNumber, formattedExpDate, securityCode);
+    
     if (!card.isValid()) {
       return paymentDataInvalidError({ cardNumber, cardHolder, ...extraData, isInvalid: true });
     }
@@ -140,9 +139,6 @@ const validatePaymentData = (paymentData = {}, extraData = {}) => {
 };
 
 export const pay = async (req, dbContext, paymentData = {}) => {
-  const t = validatePaymentData(paymentData);
-  if (!t) return { isInvalid: true };
-
   const { cardNumber, cardHolder } = paymentData;
   let tokenContent;
   try{
@@ -154,26 +150,8 @@ export const pay = async (req, dbContext, paymentData = {}) => {
     throw error;
   }
 
-  const apiKey = getApiKeyFromRequest(req);
-  const apiKeyVerification = verifyApiKey(apiKey);
-
-  if (!apiKeyVerification) {
-    logger.error({ dbContext, cardNumber, cardHolder }, 'INCONSISTENCY_DETECTED - ApiKey is not valid');
-    const error = new Error('INCONSISTENCY_DETECTED');
-    error.status = 401;
-    throw error;
-  }
-
-  const { clientId } = apiKeyVerification;
   const { clientId: tokenClientId } = tokenContent;
-
-  if (clientId !== tokenClientId) {
-    logger.error({ dbContext, tokenContent, cardHolder, cardHolder, clientId }, 'INCONSISTENCY_DETECTED - Unmatching keys');
-    const error = new Error('INCONSISTENCY_DETECTED');
-    error.status = 401;
-    throw error;
-  }
-
+  
   validatePreconditions(['invoice', 'customerId', 'amount', 'clientId', 'dbContext', 'cardNumber', 'cardHolder', 'securityCode', 'expirationDate'], { ...tokenContent, ...paymentData, dbContext });
   const { invoice, customerId, amount } = tokenContent;
 
@@ -187,6 +165,7 @@ export const pay = async (req, dbContext, paymentData = {}) => {
     return null;
   }
 
-  const { transaction } = await paymentRepo.createTransaction(dbContext, mapParams({ paymentRequestId }));
+  const { id: transactionId } = await paymentRepo.createTransaction(dbContext, mapParams({ paymentRequestId }));
+  const { transaction } = await paymentRepo.getTransactionById(dbContext, transactionId);
   return await paymentRepo.createPaymentResponse(dbContext, mapParams({ paymentRequestId, transaction, status: 'SUCCESS' }));
 };

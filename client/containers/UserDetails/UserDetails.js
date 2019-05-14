@@ -30,7 +30,7 @@ export default class UserDetails extends Component {
 					</div>
 				   <div className="row">
 					<div className="col-md-6">
-					  <button type="button" className="btn btn-dark">Dashboard</button>
+					  <button type="button" onClick={() => { window.location.href = '/customerDashboard'; }} className="btn btn-dark">Dashboard</button>
 					</div>
 					<div className="col-md-6">  
 					  <button type="button" className="btn btn-primary" onClick={() => this.logOut()}>Logout</button>

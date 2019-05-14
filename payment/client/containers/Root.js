@@ -7,14 +7,13 @@ import { inject } from 'mobx-react';
 class Root extends Component {
 
   render() {
-    if(!this.props.auth.isAuthenticated) {
+    /*if(!this.props.auth.isAuthenticated) {
       return <div>Are you lost?</div>
-    }
+    }*/
     return (
         <BrowserRouter>
           <div>
             <Route path='/' component={Payment} />
-            <Route path='/?token=:token' component={Payment} />
           </div>
         </BrowserRouter>
     );

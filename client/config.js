@@ -5,6 +5,7 @@ module.exports = {
   ticketServiceDomain: getEnvVariable('TICKET_SERVICE_DOMAIN', 'http://localhost:3060'),
   authServiceDomain: getEnvVariable('AUTH_SERVICE_DOMAIN', 'http://localhost:3000'),
   customerServiceDomain: getEnvVariable('CUSTOMER_SERVICE_DOMAIN', 'http://localhost:3030'),
+  socketIODomain: getEnvVariable('SOCKET_DOMAIN', 'http://localhost:8099'),
   authSystemLoginCredentials: {
     email: getEnvVariable('AUTH_SYSTEM_LOGIN_USER', 'andres+system@gmail.com'),
     password: getEnvVariable('AUTH_SYSTEM_LOGIN_PASSWORD', 'secret'),

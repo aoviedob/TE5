@@ -1,6 +1,6 @@
 import React from 'react';
 
-const Modal = ({ id, className, children, modalType, title, onMoldalClosed }) =>
+const Modal = ({ id, className, children, modalType, title, onMoldalClosed, contentStyle }) =>
   	
       <div id={id} className={modalType} data-backdrop="static" data-keyboard="false">
       	<div className="modal-dialog modal-dialog-centered modal-lg">
@@ -11,7 +11,7 @@ const Modal = ({ id, className, children, modalType, title, onMoldalClosed }) =>
                   <span aria-hidden="true">&times;</span>
                 </button>
             </div>
-    	      <div className="modal-body">
+    	      <div className="modal-body" style={contentStyle}>
     	        {children}
     	      </div>
         	</div>
