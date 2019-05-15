@@ -4,6 +4,7 @@ import { render } from 'react-dom';
 import { Provider } from 'mobx-react';
 import * as stores from './stores';
 import Root from './containers/Root';
+import { startListening } from './socket-listener';
 
 const getTokenInUrl = pathname => {
   const matches = pathname.match(/\?token=(.*)/);
@@ -15,12 +16,13 @@ const getTokenInUrl = pathname => {
 new Promise(async (resolve) => {
   const token = getTokenInUrl(window.location.search);
   if (!token) {
-    console.log('entra');
     await stores.auth.systemLogin(token);
   } else {
     stores.auth.hydrate(token);
   }
-resolve();
+
+  startListening(stores);
+  resolve();
 }).then(() =>
   render(
     <Provider {...stores}>

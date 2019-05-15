@@ -2,22 +2,21 @@ import React, { Component } from 'react';
 import { observer, inject } from 'mobx-react';
 import { Container } from '../../components/Container/Container';
 import Header from '../../containers/Header/Header';
+import './Dashboard.css';
 
 @observer
 export default class Dashboard extends Component {
 
   render() {
-    
+    const { items } = this.props;
+
     return (<Container>
+        <Header/>
        <div className="home">
     <div className="container-fluid display-table">
         <div className="row display-table-row">
             <div className="col-md-2 col-sm-1 hidden-xs display-table-cell v-align box" id="navigation">
-                <div className="logo">
-                    <a hef="home.html"><img src="http://jskrishna.com/work/merkury/images/logo.png" alt="merkery_logo" className="hidden-xs hidden-sm"/>
-                        <img src="http://jskrishna.com/work/merkury/images/circle-logo.png" alt="merkery_logo" className="visible-xs visible-sm circle-logo"/>
-                    </a>
-                </div>
+                {items.length > 0 && items[0].itemComponent && items[0].itemComponent()}
                 <div className="navi">
                     <ul>
                         <li className="active"><a href="#"><i className="fa fa-home" aria-hidden="true"></i><span className="hidden-xs hidden-sm">Home</span></a></li>

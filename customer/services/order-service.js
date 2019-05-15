@@ -2,10 +2,13 @@ import * as orderRepo from '../dal/order-repo';
 import { validatePreconditions } from '../helpers/validator';
 import { mapRepoEntity, mapParams } from '../helpers/mapper';
 import { getProduct, initiatePayment } from './external-service';
-import { maxAllowedProductQuantity } from '../config';
+import { maxAllowedProductQuantity, crypto } from '../config';
 import UnitOfWork from '../database/unit_of_work.js';
 import DalTypes from '../helpers/enums/dal-types';
 import bunyan from 'bunyan';
+import { decrypt } from './crypto-service';
+import { notify } from '../socketIO';
+import SockeTypes from '../helpers/enums/socket-types';
 
 const logger = bunyan.createLogger({ name: 'OrderService'});
 
@@ -108,7 +111,7 @@ export const deleteOrderLine = async (req, { dbContext, orderId, externalProduct
   }));
 };
 
-export const updateOrder = async (req, { dbContext, orderId, order }) => { 
+export const updateOrder = async (req, { dbContext, orderId, order, skipUpdateAmount = false }) => { 
   validatePreconditions(['dbContext', 'orderId', 'order'], { dbContext, orderId, order });
 
   return await ((new UnitOfWork(dbContext)).transact(async (trx, resolve, reject) => {
@@ -120,7 +123,7 @@ export const updateOrder = async (req, { dbContext, orderId, order }) => {
         await Promise.all(orderLines.map(async orderLine => await orderRepo.upsertOrderLine(dbContext, { orderId, externalProductId: orderLine.externalProductId, orderLine: mapParams({ ...orderLine, orderId }), trx })));
       }
 
-      await updateOrderAmount(req, { dbContext, orderId, trx });
+      !skipUpdateAmount && await updateOrderAmount(req, { dbContext, orderId, trx });
       resolve(true);
     } catch (error) {
       reject(error);
@@ -181,4 +184,26 @@ export const placeOrder = async (req, { dbContext, order }) => {
       reject(error);
     }
   }));
+};
+
+export const processTransaction = async(dbContext, body) => {
+  console.log('body', body);
+  const { customerId } = decrypt(JSON.parse(body).content, crypto.paymentEncryptionKey);
+  const notifyType = SockeTypes.PAYMENT_RESULT;
+
+  if (!customerId){   
+    return await notify({
+      type: notifyType,
+      msg: { success: false },
+    });
+  }
+
+  const {id: orderId } = await getOrderByStatus(dbContext, { status: DalTypes.OrderStatus.PENDING, customerId });
+  await updateOrder({}, { dbContext, orderId, order: { status: DalTypes.OrderStatus.PROCESSED }, skipUpdateAmount: true });
+  return { success: true };
+
+  return await notify({
+    type: notifyType,
+    msg: { success: true },
+  });
 };

@@ -3,6 +3,7 @@ import { makeGet, makePost } from '../modules/api-client';
 import config from '../config';
 
 class Ticket {
+  tokens = [];
 
   @action async getTicketsByCategoryId (categoryId) {
     return (await makeGet(`${config.ticketServiceDomain}/api/tickets/byCategory/${categoryId}`)) || [];
@@ -12,6 +13,25 @@ class Ticket {
     const result = (await makePost(`${config.ticketServiceDomain}/api/tickets/reserve`, ticket)) || {};
   }
 
+  @action hydrate(token) {
+  	this.tokens.push(token);
+  }
+
+  @action async releaseTickets() {
+  	await Promise.all(this.tokens.map(async token => {
+  	  await makePost(`${config.ticketServiceDomain}/api/tickets/release`, token);
+  	});
+
+  	this.tokens = [];
+  }
+
+  @action async confirmTickets() {
+    await Promise.all(this.tokens.map(async token => {
+  	  await makePost(`${config.ticketServiceDomain}/api/tickets/confirm`, token);
+  	});
+  	
+  	this.tokens = [];
+  }
 };
 
 export const ticket = new Ticket();

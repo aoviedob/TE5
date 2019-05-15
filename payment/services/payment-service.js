@@ -6,6 +6,8 @@ import { domain, formUrl } from '../config';
 import * as CardValidate from 'credit-card-validate';
 import bunyan from 'bunyan';
 import moment from 'moment';
+import request from 'superagent';
+
 const logger = bunyan.createLogger({ name: 'PaymentService'});
 
 export const getClientById = async (dbContext, clientId) => {
@@ -138,6 +140,21 @@ const validatePaymentData = (paymentData = {}, extraData = {}) => {
   return true;
 };
 
+const sendTransactionToClient = async (webhookUrl, content) => {
+  try {
+
+    const content = encryptWithPrivateKey(content, crypto.paymentEncryptionKey);
+    await request
+      .post(webhookUrl)
+      .type('form')
+      .accept('application/json')
+      .send({ content });
+
+   } catch(error) {
+     throw error;
+   }
+};
+
 export const pay = async (req, dbContext, paymentData = {}) => {
   const { cardNumber, cardHolder } = paymentData;
   let tokenContent;
@@ -165,7 +182,12 @@ export const pay = async (req, dbContext, paymentData = {}) => {
     return null;
   }
 
+  
   const { id: transactionId } = await paymentRepo.createTransaction(dbContext, mapParams({ paymentRequestId }));
   const { transaction } = await paymentRepo.getTransactionById(dbContext, transactionId);
+ 
+  const { webhookUrl } = await getClientById(dbContext, tokenClientId);
+  await sendTransactionToClient(webhookUrl, { invoice, customerId, transaction });
+
   return await paymentRepo.createPaymentResponse(dbContext, mapParams({ paymentRequestId, transaction, status: 'SUCCESS' }));
 };

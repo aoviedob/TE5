@@ -5,4 +5,5 @@ module.exports = {
   TICKET_CONFIRMED: 'TicketConfirmed',
   TICKET_CONFIRMED_ERROR: 'TicketConfirmedError',
   TICKET_RELEASED: 'TicketReleased',
+  PAYMENT_RESULT: 'PaymentResult',
 };

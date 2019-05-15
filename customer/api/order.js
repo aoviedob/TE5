@@ -18,6 +18,7 @@ export default class CustomerApi {
     app.delete('/api/orders/:orderId', authenticate, this.deleteOrder);
     app.delete('/api/orders/lines/:orderId/:productId', authenticate, this.deleteOrderLine);
     app.post('/api/orders/place', authenticate, this.placeOrder);
+    app.post('/api/orders/transaction', this.placeOrder);
   }
 
   @RequiredRole([PredefinedRole.ADMIN, PredefinedRole.CUSTOMER])
@@ -49,6 +50,12 @@ export default class CustomerApi {
     const { body } = req;
     return await orderService.placeOrder(req, { dbContext: POSTGRES_CONTEXT, order: body });
   }
+
+  async processTransaction(req) {
+    const { body } = req;
+    return await orderService.processTransaction(POSTGRES_CONTEXT, body);
+  }
+  
   
   @RequiredRole([PredefinedRole.ADMIN, PredefinedRole.CUSTOMER])
   async createOrderLine(req) {

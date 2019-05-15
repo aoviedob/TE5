@@ -166,7 +166,7 @@ export const reserveTicketHandler = async msgData => {
 
   const notification = reserved ? {
     type: SocketTypes.TICKET_RESERVED,
-    msg: { token: createToken(msgData, { expiresIn: 300 }) },
+    msg: { token: createToken(msgData, { expiresIn: 300 }), ticketCategoryId },
   } : { 
     type: SocketTypes.TICKET_RESERVED_ERROR, 
     msg: msgData,
@@ -187,7 +187,7 @@ export const releaseTicket = async req => {
     throw error;
   }
 
-  await ((new UnitOfWork(dbContext)).transact(async (trx, resolve, reject) => {
+  const result = await ((new UnitOfWork(dbContext)).transact(async (trx, resolve, reject) => {
     try {
       const { dbContext, ticketCategoryId, quantity: ticketQuantity, couponId, userId } = tokenBody;
       const { available, quantity: categoryQuantity } = await getTicketCategoryById(dbContext, ticketCategoryId);
@@ -222,10 +222,12 @@ export const releaseTicket = async req => {
     resolve(true);
   }));
   
-  return await notify({
+  await notify({
     type: SocketTypes.TICKET_RELEASED,
     msg: tokenBody,
   });
+
+  return result;
 };
 
 const handleTokenError = async(req, { body, error }) => {

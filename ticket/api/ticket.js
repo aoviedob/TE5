@@ -16,6 +16,7 @@ export default class TicketApi {
     app.get('/api/tickets/byCustomer/:customerId', authenticate, this.getTicketsByCustomerId);
     app.post('/api/tickets/reserve', authenticate, this.reserveTicket);
     app.post('/api/tickets/release', authenticate, this.releaseTicket);
+    app.post('/api/tickets/confirm', authenticate, this.confirmTicket);
   }
 
   @RequiredRole([PredefinedRole.ADMIN])
@@ -60,6 +61,11 @@ export default class TicketApi {
   @RequiredRole([PredefinedRole.ADMIN, PredefinedRole.CUSTOMER])
   async releaseTicket(req) {
     return await ticketService.releaseTicket(req);
+  }
+
+  @RequiredRole([PredefinedRole.ADMIN, PredefinedRole.CUSTOMER])
+  async confirmTicket(req) {
+    return await ticketService.confirmTicket(req);
   }
 
   @RequiredRole([PredefinedRole.ADMIN, PredefinedRole.EVENT_MANAGER])

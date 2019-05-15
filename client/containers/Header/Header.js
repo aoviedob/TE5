@@ -42,7 +42,7 @@ export default class Header extends Component {
 			            </a>
 			          </li>
 			          <li className="nav-item active">
-			            <a className="nav-link" href="/Purchase">Shopping Cart
+			            <a className="nav-link" href="/purchase">Shopping Cart
 			              <span className="sr-only">(current)</span>
 			            </a>
 			          </li>

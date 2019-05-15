@@ -70,10 +70,21 @@ class TicketCategory {
     return categories;
   }
 
+  updateStoredCategories = category => {
+    if (!this.categories.length) return;
+
+    this.categories = this.categories.map(c => {
+      if (c.id === category.id) return category;
+
+      return c;
+    });
+  };
+
   @action async getCategory (categoryId) {
     const category = (await makeGet(`${config.ticketServiceDomain}/api/categories/${categoryId}`, this.redirectOnFail, this.useSystemToken)) || {};
     if(category) {
       this.category = category;
+      this.updateStoredCategories(category);
     }
     return category;
   }

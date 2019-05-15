@@ -12,6 +12,14 @@ import { inject } from 'mobx-react';
 @inject('auth')
 class Root extends Component {
 
+  handleAuthorization = (url, Component) => {
+    if (!this.props.auth.isAuthenticated) {
+      this.props.auth.setRedirectionUrl(url);
+      return <Redirect to="/login" />;
+    }
+    return <Component/>;
+  };
+
   render() {
     return (
         <BrowserRouter>
@@ -21,27 +29,9 @@ class Root extends Component {
               <Route exact path='/eventDetails/:eventId' component={EventDetails} />
               <Route exact path='/register' component={CustomerRegister} />
               <Route exact path='/login' component={Login} />
-              <Route exact path='/ticketCategoryManagement' render={() => { 
-                if (!this.props.auth.isAuthenticated) {
-                  return <Redirect to="/login" />;
-                } else {
-                  return <TicketCategoryManagement/>;
-                }
-              }} />
-              <Route exact path='/purchase' render={() => { 
-                if (!this.props.auth.isAuthenticated) {
-                  return <Redirect to="/login" />;
-                } else {
-                  return <Purchase/>;
-                }
-              }} />
-              <Route exact path='/customerDashboard' render={() => { 
-                if (!this.props.auth.isAuthenticated) {
-                  return <Redirect to="/login" />;
-                } else {
-                  return <CustomerDashboard/>;
-                }
-              }} />
+              <Route exact path='/ticketCategoryManagement' render={() => this.handleAuthorization('/ticketCategoryManagement', TicketCategoryManagement)} />
+              <Route exact path='/purchase' render={() => this.handleAuthorization('/purchase', Purchase)} />
+              <Route exact path='/customerDashboard' render={() => this.handleAuthorization('/customerDashboard', CustomerDashboard)} />
             </Switch>
           </div>
         </BrowserRouter>

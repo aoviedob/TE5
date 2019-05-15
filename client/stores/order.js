@@ -7,13 +7,22 @@ class Order {
   @observable order = {};
   @observable newOrderLine = null;
   @observable customerId;
+  @observable alreadyPaid = false;
 
   get customerOrder() {
     return toJS(this.order);
   }
 
+   get isPaid() {
+    return this.alreadyPaid;
+  }
+
   @action setCustomerId(customerId) {
     this.customerId = customerId;
+  }
+
+  @action setPaidState(value) {
+    this.alreadyPaid = value;
   }
 
   @action setNewOrderLine(event, category) {
