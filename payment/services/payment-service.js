@@ -185,6 +185,7 @@ export const pay = async (req, dbContext, paymentData = {}) => {
   
   const { id: transactionId } = await paymentRepo.createTransaction(dbContext, mapParams({ paymentRequestId }));
   const { transaction } = await paymentRepo.getTransactionById(dbContext, transactionId);
+  console.log('transactionHOla', transaction);
  
   const { webhookUrl } = await getClientById(dbContext, tokenClientId);
   await sendTransactionToClient(webhookUrl, { invoice, customerId, transaction }, privateKey);

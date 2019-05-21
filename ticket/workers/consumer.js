@@ -20,10 +20,12 @@ export const receiveMessages = async () => {
     logger.info({ name }, ' [*] Waiting for messages in %s. To exit press CTRL+C');
 
     channel.consume(name, async msg => { 
-      logger.info({ name, t: msg }, 'New message received');
-
+      logger.info({ name, body: msg }, 'New message received');
+      const type = msg.fields.routingKey;
+      
       const message = JSON.parse(msg.content.toString());
-      await handleQueueMapping[message.type](message);
+      console.log('hola', message);
+      await handleQueueMapping[type](message);
 
     }, { noAck: true });
 

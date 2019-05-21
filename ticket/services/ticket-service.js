@@ -88,11 +88,11 @@ const notifyReserveTicketError = async (error, msg, data) => {
   });
 };
 
-export const createTicket = async (dbContext, { category, userId, trx }) => {
-  validatePreconditions(['dbContext', 'name', 'externalEventId', 'quantity', 'price', 'userId'], { dbContext, ...category, userId });
+export const createTicket = async (dbContext, { category, finalPrice, userId, trx }) => {
+  validatePreconditions(['dbContext', 'ticketCategoryId', 'externalCustomerId', 'userId'], { dbContext, ...category, userId });
 
   const auditColumns = { updatedBy: userId, createdBy: userId };
-  const { id: categoryId } = await ticketsRepo.createTicket(dbContext, mapParams({ ...category, ...auditColumns, available: category.quantity }), trx);
+  const { id: categoryId } = await ticketsRepo.createTicket(dbContext, mapParams({ ...category, finalPrice, ...auditColumns }), trx);
   return await getTicketById(dbContext, categoryId);
 };
 
@@ -252,7 +252,7 @@ export const confirmTicket = async (req) => {
   const msg = { ...msgData };
   validatePreconditions(['dbContext', 'ticketCategoryId', 'externalCustomerId', 'quantity', 'userId'], msg);
   
-  logger.info(msg, 'About to confirm ticket');
+  logger.info(msg, 'About to send confirm ticket to the queue');
   await sendQueueMessage({
     type: QueueMessageTypes.CONFIRM_TICKET,
     msg,
@@ -260,6 +260,7 @@ export const confirmTicket = async (req) => {
 };
 
 export const confirmTicketHandler = async msgData => {
+  logger.info(msgData, 'About to confirm ticket');
   validatePreconditions(['dbContext', 'ticketCategoryId', 'externalCustomerId', 'quantity', 'userId'], msgData);
   const { dbContext, ticketCategoryId,  quantity, couponId, userId } = msgData;
  
@@ -277,19 +278,20 @@ export const confirmTicketHandler = async msgData => {
   if (finalPrice < 0) {
     finalPrice = 0;
   }
-
+  
+  let tickets = [];
   const results = await ((new UnitOfWork(dbContext)).transact(async (trx, resolve, reject) => {
     try {
       if (couponId && availableCoupons === 0) {
         await updateCoupon(dbContext, { couponId, coupon: { state: DALTypes.CouponState.INACTIVE }, userId, trx });
       }
 
-      let tickets = [];
       for (let i = 0; i < quantity; i++) {
-        tickets.push(await createTicket(dbContext, { category, userId, trx }));
+
+        tickets.push(await createTicket(dbContext, { category: msgData, finalPrice, userId, trx }));
       }
     } catch (error) {
-      logger.error(tokenBody, 'An error has occurred while confirming ticket');
+      logger.error(msgData, 'An error has occurred while confirming ticket');
       reject(error);
     }
 

@@ -50,7 +50,7 @@ export const getOrderByStatus = async (dbContext, { status, customerId, trx }) =
     tableName: ORDER_TABLE, 
     columns: [...formatDBColumns(ORDER_TABLE, ORDER_TABLE_COLUMNS), `json_agg("${ORDER_LINE_TABLE}".*) as "orderLines"`],
     join: unitOfWork.dbConnection.raw('LEFT JOIN :schema:.:ORDER_LINE_TABLE: ON :ORDER_TABLE:.id = :ORDER_LINE_TABLE:.order_id', { ORDER_LINE_TABLE, ORDER_TABLE, schema }),
-    where: unitOfWork.dbConnection.raw(':ORDER_TABLE:.customer_id = :customerId AND :ORDER_TABLE:.status = status', { customerId, status, ORDER_TABLE }),
+    where: unitOfWork.dbConnection.raw(':ORDER_TABLE:.customer_id = :customerId AND :ORDER_TABLE:.status = :status', { customerId, status, ORDER_TABLE }),
     groupBy: unitOfWork.dbConnection.raw(':ORDER_TABLE:.id', { ORDER_TABLE }),
     trx,
   });

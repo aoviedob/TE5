@@ -35,6 +35,7 @@ class Order {
     this.alreadyPaid = value;
     if (value) {
       this.order = {};
+      this.newOrderLine = null;
     }
   }
 
