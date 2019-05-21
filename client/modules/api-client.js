@@ -18,8 +18,8 @@ export const makePost = async (url, payload = {}, useSystemToken = false) => {
       .type('form')
       .use(req => setHeaders(req, useSystemToken))
       .send(payload);
-
-    return JSON.parse(response.text);
+    
+    return response.text ? JSON.parse(response.text) : null;
   } catch(error) {
     console.log('eerrr', error);
     return handleApiError(error);

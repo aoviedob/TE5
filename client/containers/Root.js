@@ -8,10 +8,13 @@ import TicketCategoryManagement from './TicketCategoryManagement/TicketCategoryM
 import Purchase from './Purchase/Purchase';
 import CustomerDashboard from './CustomerDashboard/CustomerDashboard';
 import { inject } from 'mobx-react';
+import { startListening } from '../socket-listener';
 
 @inject('auth')
 class Root extends Component {
-
+  constructor(props) {
+    super(props);
+  }
   handleAuthorization = (url, Component) => {
     if (!this.props.auth.isAuthenticated) {
       this.props.auth.setRedirectionUrl(url);

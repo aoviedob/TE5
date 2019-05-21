@@ -4,14 +4,25 @@ import config from './config';
 
 const handleSocketMsgMapping = stores => ({
   ticket: { 
-    [SocketTypes.TICKET_RESERVED]: async ({ token, ticketCategoryId }) => { 
+    [SocketTypes.TICKET_RESERVED]: async ({ token, ticketCategoryId, userId }) => {
       await stores.ticketCategory.getCategory(ticketCategoryId);
       stores.ticket.hydrate(token);
+      console.log('hola');
+    },
+    [SocketTypes.RESERVE_TICKET_ERROR]: async ({ ticketCategoryId,  userId }) => {
+      const { externalEventId, name } = await stores.ticketCategory.getCategory(ticketCategoryId);
+      console.log('userId', userId);
+      console.log('stores.auth.userId', stores.auth.userId);
+      if (userId === stores.auth.userId) {
+        const { name: eventName } = await stores.event.getEvent(externalEventId);
+        stores.order.setError(`The ticket category ${name} is not available for event ${eventName}`);
+        stores.order.setShowErrorDialog(true);
+      }
     },
     [SocketTypes.TICKET_RELEASED]: ({ ticketCategoryId }) => stores.ticketCategory.getCategory(ticketCategoryId)
   },
   customer: {
-    [SocketTypes.PAYMENT_RESULT]: ({ success }) => stores.order.setPaidState(success),
+    [SocketTypes.PAYMENT_RESULT]: ({ success }) => { console.log('aaa'); stores.order.setPaidState(success);},
   }
 });
 

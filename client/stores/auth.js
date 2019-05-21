@@ -5,11 +5,13 @@ import config from '../config';
 class Auth {
   @observable token;
   @observable email;
+  @observable userId;
   @observable redirectionUrl;
 
   constructor() {
     this.token = sessionStorage.getItem('token') || null;
     this.email = sessionStorage.getItem('email') || null;
+    this.userId = sessionStorage.getItem('userId') || null;
     this.fullname = sessionStorage.getItem('fullname') || null;
   };
 
@@ -21,7 +23,7 @@ class Auth {
     this.redirectionUrl = url;
   }
 
-  @action hydrate (token, { email, fullname }) {
+  @action hydrate (token, { email, fullname, userId }) {
     this.token = token;
     sessionStorage.setItem('token', token);
     if (email) {
@@ -32,6 +34,11 @@ class Auth {
     if (fullname) {
       this.fullname = fullname;
       sessionStorage.setItem('fullname', fullname);
+    }
+
+    if (userId) {
+      this.userId = userId;
+      sessionStorage.setItem('userId', userId);
     }
   }
 
@@ -47,9 +54,9 @@ class Auth {
   }
 
   @action async login (credentials) {
-    const { token, email, fullname } = (await makePost(`${config.authServiceDomain}/api/login`, credentials)) || {};
+    const { token, email, fullname, userId } = (await makePost(`${config.authServiceDomain}/api/login`, credentials)) || {};
     if (token){
-      this.hydrate(token, { email, fullname });
+      this.hydrate(token, { email, fullname, userId });
       return true;
     }
     return false;

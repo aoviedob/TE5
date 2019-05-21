@@ -64,7 +64,7 @@ export default class Purchase extends Component {
       <td className="col-sm-12 col-md-5">
         <div className="media">
           <a className="thumbnail pull-left" href="#"> <img className="media-object" src={coverImageUrl} style={{ width: 72, height: 72 }}/> </a>
-            <div className="media-body">
+            <div className="media-body" style={{ marginLeft: 10 }}>
               <h4 className="media-heading"><a href="#">{externalProductName}</a></h4>
               <h5 className="media-heading"> by <a href="#">{organizerName}</a></h5>
               <span>Available: </span><span className="text-success"><strong>{available}</strong></span>
@@ -114,12 +114,17 @@ export default class Purchase extends Component {
   };
 
   render() {
+    const { hideHeader } = this.props;
     const { customerOrder } = this.props.order;
     const { formUrl } = this.state;
     const { orderLines = [], totalAmount = 0 } = customerOrder || {};
 
+    const { shouldShowErrorDialog, errorMsg, isPaid } = this.props.order;
+    const { reservedTickets } = this.props.ticket;
+
+
     return (<Container>
-              <Header></Header>
+              {!hideHeader && <Header></Header>}
               <div className="row">
                 <div className="col-sm-12 col-md-12 col-md-offset-1">
                   <table className="table table-hover">
@@ -153,7 +158,7 @@ export default class Purchase extends Component {
                 </table>
               </div>
             </div>
-        <PaymentDialog src={formUrl}/>
+        <PaymentDialog src={formUrl} reservedTickets={reservedTickets} shouldShowErrorDialog={shouldShowErrorDialog} errorMsg={errorMsg} isPaid={isPaid}/>
       </Container>);
   }
 

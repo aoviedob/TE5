@@ -1,9 +1,13 @@
-import { action } from 'mobx';
+import { action, observable, toJS } from 'mobx';
 import { makeGet, makePost } from '../modules/api-client';
 import config from '../config';
 
 class Ticket {
-  tokens = [];
+  @observable tokens = [];
+
+  get reservedTickets() {
+    return toJS(this.tokens);
+  }
 
   @action async getTicketsByCategoryId (categoryId) {
     return (await makeGet(`${config.ticketServiceDomain}/api/tickets/byCategory/${categoryId}`)) || [];
@@ -19,16 +23,16 @@ class Ticket {
 
   @action async releaseTickets() {
   	await Promise.all(this.tokens.map(async token => {
-  	  await makePost(`${config.ticketServiceDomain}/api/tickets/release`, token);
-  	});
+  	  await makePost(`${config.ticketServiceDomain}/api/tickets/release`, { token });
+  	}));
 
   	this.tokens = [];
   }
 
   @action async confirmTickets() {
     await Promise.all(this.tokens.map(async token => {
-  	  await makePost(`${config.ticketServiceDomain}/api/tickets/confirm`, token);
-  	});
+  	  await makePost(`${config.ticketServiceDomain}/api/tickets/confirm`, { token });
+  	}));
   	
   	this.tokens = [];
   }

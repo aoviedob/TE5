@@ -188,7 +188,7 @@ export const placeOrder = async (req, { dbContext, order }) => {
 
 export const processTransaction = async(dbContext, body) => {
   console.log('body', body);
-  const { customerId } = decrypt(JSON.parse(body).content, crypto.paymentEncryptionKey);
+  const { customerId } = decrypt(body.content, crypto.paymentEncryptionKey);
   const notifyType = SockeTypes.PAYMENT_RESULT;
 
   if (!customerId){   
@@ -200,7 +200,6 @@ export const processTransaction = async(dbContext, body) => {
 
   const {id: orderId } = await getOrderByStatus(dbContext, { status: DalTypes.OrderStatus.PENDING, customerId });
   await updateOrder({}, { dbContext, orderId, order: { status: DalTypes.OrderStatus.PROCESSED }, skipUpdateAmount: true });
-  return { success: true };
 
   return await notify({
     type: notifyType,

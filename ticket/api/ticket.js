@@ -60,12 +60,14 @@ export default class TicketApi {
 
   @RequiredRole([PredefinedRole.ADMIN, PredefinedRole.CUSTOMER])
   async releaseTicket(req) {
-    return await ticketService.releaseTicket(req);
+    const { body } = req;
+    return await ticketService.releaseTicket(body);
   }
 
   @RequiredRole([PredefinedRole.ADMIN, PredefinedRole.CUSTOMER])
   async confirmTicket(req) {
-    return await ticketService.confirmTicket(req);
+    const { body } = req;
+    return await ticketService.confirmTicket(body);
   }
 
   @RequiredRole([PredefinedRole.ADMIN, PredefinedRole.EVENT_MANAGER])

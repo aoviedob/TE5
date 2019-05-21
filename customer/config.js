@@ -7,7 +7,7 @@ module.exports = {
   authCreateUserUrl: getEnvVariable('AUTH_CREATE_USER_URL', 'http://localhost:3000/api/users'),
   productUrl: getEnvVariable('PRODUCT_URL', 'http://localhost:3060/api/categories'),
   initiatePaymentUrl: getEnvVariable('INITIATE_PAYMENT_PROVIDER_DOMAIN', 'http://localhost:4550/api/payment/initiate'),
-  paymentClientId: '33eaa3b7-019c-4080-8f55-4ccfa2b9a076',
+  paymentClientId: '6b4fc32e-f873-4a79-904b-afdc37d6e70b',
   crypto: {
     sharedEncryptionKey: getEnvVariable('SHARED_ENCRYPTION_KEY', '4&//#@.c9Cb%*|44_<kl[<CI?u|5WW5->='),
     paymentEncryptionKey: getEnvVariable('PAYMENT_ENCRYPTION_KEY', '**&~$]yGka%n^_^_b,&g7_)l7cskUu@_@-&@9'),

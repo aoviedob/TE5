@@ -80,11 +80,11 @@ export const reserveTicket = async (dbContext, ticket, userId) => {
 };
 
 const notifyReserveTicketError = async (error, msg, data) => {
-  logger.info(data, error);
+  logger.info({ data, msg}, error);
   
   return await notify({
     type: SocketTypes.RESERVE_TICKET_ERROR,
-    msg,
+    msg: data,
   });
 };
 
@@ -138,7 +138,7 @@ export const reserveTicketHandler = async msgData => {
   const category = await getTicketCategoryById(dbContext, ticketCategoryId);
 
   const { available } = category;
-  if (quantity > available) {
+  if (parseInt(quantity) > parseInt(available)) {
     return await notifyReserveTicketError('Not enough tickets available', 'NOT_ENOUGH_TICKETS', msgData);
   }
 
@@ -149,16 +149,16 @@ export const reserveTicketHandler = async msgData => {
 
   const reserved = await ((new UnitOfWork(dbContext)).transact(async (trx, resolve, reject) => {
     try {
-      await updateTicketCategory(dbContext, { categoryId: ticketCategoryId, category: { available: available - quantity }, userId, trx });
+      await updateTicketCategory(dbContext, { categoryId: ticketCategoryId, category: { available: parseInt(available) - parseInt(quantity) }, userId, trx });
 
       if (couponId) {
         const { available: availableCoupons } = await getCouponById(dbContext, couponId);
-        await updateCoupon(dbContext, { couponId, coupon: { available: availableCoupons - quantity }, userId, trx });
+        await updateCoupon(dbContext, { couponId, coupon: { available: parseInt(availableCoupons) - parseInt(quantity) }, userId, trx });
       }
 
     } catch (error) {
-      logger.error(tokenBody, 'An error has occurred in reserve handler');
-      reject(error);
+      logger.error({ tokenBody, error }, 'An error has occurred in reserve handler');
+      resolve(false);
     }
 
     resolve(true);
@@ -186,32 +186,32 @@ export const releaseTicket = async req => {
     error.status = 412;
     throw error;
   }
-
+  const { dbContext, ticketCategoryId, quantity: ticketQuantity, couponId, userId } = tokenBody;
+  
   const result = await ((new UnitOfWork(dbContext)).transact(async (trx, resolve, reject) => {
     try {
-      const { dbContext, ticketCategoryId, quantity: ticketQuantity, couponId, userId } = tokenBody;
       const { available, quantity: categoryQuantity } = await getTicketCategoryById(dbContext, ticketCategoryId);
-      
-      if (available + ticketQuantity > categoryQuantity) {
+
+      if (parseInt(available) + parseInt(ticketQuantity) > parseInt(categoryQuantity)) {
         logger.error({ ...tokenBody, categoryQuantity, available }, 'The available tickets is higher than the original quantity');
         const error = new Error('INCONSISTENCY_DETECTED');
         error.status = 412;
         throw error;
       }
 
-      await updateTicketCategory(dbContext, { categoryId: ticketCategoryId, category: { available: available + ticketQuantity }, userId, trx });
+      await updateTicketCategory(dbContext, { categoryId: ticketCategoryId, category: { available: parseInt(available) + parseInt(ticketQuantity) }, userId, trx });
 
       if (couponId) {
         const { available: availableCoupons, quantity: couponQuantity } = await getCouponById(dbContext, couponId);
 
-        if (availableCoupons + ticketQuantity > couponQuantity) {
+        if (parseInt(availableCoupons) + parseInt(ticketQuantity) > parseInt(couponQuantity)) {
           logger.error({ ...tokenBody, categoryQuantity, available }, 'The available coupons is higher than the original quantity');
           const error = new Error('INCONSISTENCY_DETECTED');
           error.status = 412;
           throw error;
         }
 
-        await updateCoupon(dbContext, { couponId, coupon: { available: availableCoupons + ticketQuantity }, userId, trx });
+        await updateCoupon(dbContext, { couponId, coupon: { available: parseInt(availableCoupons) + parseInt(ticketQuantity) }, userId, trx });
       }
 
     } catch (error) {

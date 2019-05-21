@@ -2,7 +2,7 @@ import * as paymentRepo from '../dal/payment-repo';
 import { validatePreconditions } from '../helpers/validator';
 import { mapRepoEntity, mapParams } from '../helpers/mapper';
 import { decryptWithPrivateKey, decrypt, encryptWithPrivateKey, verifyToken, createToken } from './crypto-service';
-import { domain, formUrl } from '../config';
+import { domain, formUrl, crypto } from '../config';
 import * as CardValidate from 'credit-card-validate';
 import bunyan from 'bunyan';
 import moment from 'moment';
@@ -140,10 +140,10 @@ const validatePaymentData = (paymentData = {}, extraData = {}) => {
   return true;
 };
 
-const sendTransactionToClient = async (webhookUrl, content) => {
+const sendTransactionToClient = async (webhookUrl, body, privateKey) => {
   try {
 
-    const content = encryptWithPrivateKey(content, crypto.paymentEncryptionKey);
+    const content = encryptWithPrivateKey(body, privateKey);
     await request
       .post(webhookUrl)
       .type('form')
@@ -187,7 +187,7 @@ export const pay = async (req, dbContext, paymentData = {}) => {
   const { transaction } = await paymentRepo.getTransactionById(dbContext, transactionId);
  
   const { webhookUrl } = await getClientById(dbContext, tokenClientId);
-  await sendTransactionToClient(webhookUrl, { invoice, customerId, transaction });
+  await sendTransactionToClient(webhookUrl, { invoice, customerId, transaction }, privateKey);
 
   return await paymentRepo.createPaymentResponse(dbContext, mapParams({ paymentRequestId, transaction, status: 'SUCCESS' }));
 };

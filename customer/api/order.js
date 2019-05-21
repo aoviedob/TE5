@@ -18,7 +18,7 @@ export default class CustomerApi {
     app.delete('/api/orders/:orderId', authenticate, this.deleteOrder);
     app.delete('/api/orders/lines/:orderId/:productId', authenticate, this.deleteOrderLine);
     app.post('/api/orders/place', authenticate, this.placeOrder);
-    app.post('/api/orders/transaction', this.placeOrder);
+    app.post('/api/orders/transaction', this.processTransaction);
   }
 
   @RequiredRole([PredefinedRole.ADMIN, PredefinedRole.CUSTOMER])

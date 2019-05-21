@@ -2,7 +2,7 @@ import { getTokenFromRequest } from '../helpers/request';
 import bunyan from 'bunyan';
 const logger = bunyan.createLogger({ name: 'CustomerApiMiddleware'});
 
-const unprotectedApis = [];
+const unprotectedApis = ['/api/orders/transaction'];
 
 export const requestHandler = (route, action) =>
   async (req, res, next) => {

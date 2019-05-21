@@ -8,13 +8,23 @@ class Order {
   @observable newOrderLine = null;
   @observable customerId;
   @observable alreadyPaid = false;
+  @observable showErrorDialog = false;
+  @observable error = '';
 
   get customerOrder() {
     return toJS(this.order);
   }
 
-   get isPaid() {
+  get isPaid() {
     return this.alreadyPaid;
+  }
+
+  get shouldShowErrorDialog() {
+    return this.showErrorDialog;
+  }
+
+  get errorMsg() {
+    return this.error;
   }
 
   @action setCustomerId(customerId) {
@@ -23,6 +33,17 @@ class Order {
 
   @action setPaidState(value) {
     this.alreadyPaid = value;
+    if (value) {
+      this.order = {};
+    }
+  }
+
+  @action setShowErrorDialog(value) {
+    this.showErrorDialog = value;
+  }
+
+  @action setError(error) {
+    this.error = error;
   }
 
   @action setNewOrderLine(event, category) {

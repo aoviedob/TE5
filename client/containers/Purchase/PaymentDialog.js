@@ -7,34 +7,43 @@ import { observer, inject } from 'mobx-react';
 @observer
 export default class PaymentDialog extends Component {
 
-  async checkPayment() {
-    const { isPaid } = this.props.order;
-    if (!isPaid) return;
+  constructor(props) {
+    super(props);
+  }
 
+  async checkPayment() {
+    const { isPaid } = this.props;
+    if (!isPaid) return;
     await this.props.ticket.confirmTickets();
   }
 
-  async componentDidUpdate() {
-    await this.checkPayment();
+  async componentDidUpdate(prevProps) {
+    if (prevProps.isPaid !== this.props.isPaid) {
+      await this.checkPayment();
+    }
   }
 
   onMoldalClosed = async() => {
-    const { isPaid } = this.props;
-    if (!isPaid) await this.props.ticket.releaseTickets();
+    const { shouldShowErrorDialog, isPaid } = this.props;
+    if (!shouldShowErrorDialog && !isPaid) await this.props.ticket.releaseTickets();
+
+    this.props.order.setShowErrorDialog(false);
   }
 
   render = () => {
-    const { src } = this.props;
+    const { src, shouldShowErrorDialog, errorMsg, reservedTickets } = this.props;
+
     return (
       <Modal title="" id="paymentModal" modalType="modal fade" contentStyle={{ width: '100%', height: 0, paddingBottom: '56%', position: 'relative' }} onMoldalClosed={this.onMoldalClosed}>
-        <Iframe style={{  
+        {!shouldShowErrorDialog && reservedTickets.length > 0 && <Iframe style={{  
           width: '100%',
           height: '100%',
           position: 'absolute',
           display: 'block',
           top: 0,
           left: 0}} 
-          src={src} />
+          src={src} />}
+        {shouldShowErrorDialog && <h4>{errorMsg}</h4>}
       </Modal>
     );
   };

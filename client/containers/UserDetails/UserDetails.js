@@ -11,7 +11,7 @@ export default class UserDetails extends Component {
   }
 
   render() {
-  	const { auth } = this.props;
+  	const { auth, hideActions } = this.props;
   	const { email, fullname} = auth;
     return <div className="container">
 		     <div className="row">
@@ -28,14 +28,14 @@ export default class UserDetails extends Component {
 						  {email}
 						</div>
 					</div>
-				   <div className="row">
-					<div className="col-md-6">
-					  <button type="button" onClick={() => { window.location.href = '/customerDashboard'; }} className="btn btn-dark">Dashboard</button>
-					</div>
-					<div className="col-md-6">  
-					  <button type="button" className="btn btn-primary" onClick={() => this.logOut()}>Logout</button>
-					</div>
-					</div>
+				   {!hideActions && <div className="row">
+					 <div className="col-md-6">
+					   <button type="button" onClick={() => { window.location.href = '/customerDashboard'; }} className="btn btn-dark">Dashboard</button>
+					 </div>
+					 <div className="col-md-6">  
+					   <button type="button" className="btn btn-primary" onClick={() => this.logOut()}>Logout</button>
+					 </div>
+				   </div>}
 			     
 			    </div>
 			  </div>
