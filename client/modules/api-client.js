@@ -21,7 +21,6 @@ export const makePost = async (url, payload = {}, useSystemToken = false) => {
     
     return response.text ? JSON.parse(response.text) : null;
   } catch(error) {
-    console.log('eerrr', error);
     return handleApiError(error);
   }
 };

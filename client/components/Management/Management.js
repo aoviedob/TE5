@@ -114,7 +114,7 @@ export default class Management extends Component {
   render() {
   	const { rows, model, submitLabel, deleteLabel, headers, modalTitle, deleteDescription, isDeleteModalOpened, onMoldalClosed } = this.props;
 
-    return (<div>
+    return (<div style={{padding: 10}}>
     		      {rows.length > 0 && <Table headers={headers}>
     		        {this.renderRows(rows)}
     		      </Table>}

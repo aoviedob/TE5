@@ -11,14 +11,16 @@ export default class UserDetails extends Component {
   }
 
   render() {
-  	const { auth, hideActions } = this.props;
+  	const { auth, hideActions, light } = this.props;
   	const { email, fullname} = auth;
+  	const iconStyle = light ? { color: 'white', fontSize: 55 }: { fontSize: 55 };
+
     return <div className="container">
 		     <div className="row">
 			   <div className="col-md-12">
 			     
 				   <div className="d-flex justify-content-center">
-					  <i className="material-icons" style={{ fontSize: 55 }}>account_circle</i>
+					  <i className="material-icons" style={iconStyle}>account_circle</i>
 					</div>
 				    <div className="profile-usertitle">
 					    <div className="profile-usertitle-name">

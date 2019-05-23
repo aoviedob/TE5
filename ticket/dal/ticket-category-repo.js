@@ -33,12 +33,21 @@ export const getTicketCategoryById = async (dbContext, categoryId) => {
   });
 };
 
-export const getTicketCategoriesByEventId = async (dbContext, eventId) => { 
+export const getTicketCategoriesByIds = async (dbContext, categoryIds) => { 
   const unitOfWork = new UnitOfWork(dbContext);
   return await unitOfWork.getAllWhere(schema, { 
   	tableName: TICKET_CATEGORY_TABLE, 
   	columns: TICKET_CATEGORY_TABLE_COLUMNS,
-  	where: unitOfWork.dbConnection.raw('external_event_id = :eventId', { eventId })
+  	where: unitOfWork.dbConnection.raw(`id = ANY (string_to_array(:categoryIds, ',')::uuid[])`, { categoryIds: categoryIds.toString() })
+  });
+};
+
+export const getTicketCategoriesByEventId = async (dbContext, eventId) => { 
+  const unitOfWork = new UnitOfWork(dbContext);
+  return await unitOfWork.getAllWhere(schema, { 
+    tableName: TICKET_CATEGORY_TABLE, 
+    columns: TICKET_CATEGORY_TABLE_COLUMNS,
+    where: unitOfWork.dbConnection.raw('external_event_id = :eventId', { eventId })
   });
 };
 

@@ -16,6 +16,7 @@ export default class TicketCategoryApi {
     app.post('/api/categories', authenticate, this.createCategory);
     app.put('/api/categories/:categoryId', authenticate, this.updateCategory);
     app.delete('/api/categories/:categoryId', authenticate, this.deleteCategory);
+    app.post('/api/categories/byIds', authenticate, this.getCategoriesByIds);
   }
 
   @RequiredRole([PredefinedRole.ADMIN, PredefinedRole.CUSTOMER])
@@ -25,6 +26,12 @@ export default class TicketCategoryApi {
   async getCategoryById(req) {
     const { categoryId } = req.params || {};
     return await categoryService.getTicketCategoryById(POSTGRES_CONTEXT, categoryId);
+  }
+
+  @RequiredRole([PredefinedRole.ADMIN, PredefinedRole.EVENT_MANAGER, PredefinedRole.AGENT, PredefinedRole.CUSTOMER])
+  async getCategoriesByIds(req) {
+    const { categoryIds } = req.body || {};
+    return await categoryService.getTicketCategoriesByIds(POSTGRES_CONTEXT, categoryIds);
   }
 
   @RequiredRole([PredefinedRole.ADMIN, PredefinedRole.EVENT_MANAGER, PredefinedRole.AGENT, PredefinedRole.SYSTEM])

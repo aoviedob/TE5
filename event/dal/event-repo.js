@@ -65,6 +65,15 @@ export const getEventsByCategoryId = async (dbContext, categoryId, limitResults)
   });
 };
 
+export const getEventsByIds = async (dbContext, eventIds) => { 
+  const unitOfWork = new UnitOfWork(dbContext);
+  return await unitOfWork.getAllWhere(schema, { 
+    tableName: EVENT_TABLE,
+    columns: EVENT_TABLE_COLUMNS,
+    where: unitOfWork.dbConnection.raw(`id = ANY(string_to_array(:eventIds, ',')::uuid[])`, { eventIds }),
+  });
+};
+
 export const getEventsByOrganizerId = async (dbContext, organizerId, limitResults) => { 
   const unitOfWork = new UnitOfWork(dbContext);
   return await unitOfWork.getAllWhere(schema, { 
@@ -81,7 +90,7 @@ export const getEventsByName = async (dbContext, { name = '', categoryId, organi
   return await unitOfWork.getAllWhere(schema, { 
     tableName: EVENT_TABLE, 
     columns: EVENT_TABLE_COLUMNS,
-    where: unitOfWork.dbConnection.raw(`name LIKE :name ${(categoryId ? 'AND event_category_id = :categoryId': '')} ${(organizerId ? 'AND event_organizer_id = :organizerId': '')}`, { name: `%${name}%`, categoryId, organizerId }),
+    where: unitOfWork.dbConnection.raw(`LOWER(name) LIKE LOWER(:name) ${(categoryId ? 'AND event_category_id = :categoryId': '')} ${(organizerId ? 'AND event_organizer_id = :organizerId': '')}`, { name: `%${name}%`, categoryId, organizerId }),
     limit,
   });
 };

@@ -50,6 +50,11 @@ class Event {
     return event;
   }
 
+  @action async getEventByIds (eventIds) {
+    console.log('eventIds', eventIds);
+    return (await makePost(`${config.eventServiceDomain}/api/events/byIds`, { eventIds })) || {};
+  }
+  
   @action async getEventsByOrganizer (organizerId, limit) {
     let queryParams = limit ? `?limit=${limit}` : '';
     return (await makeGet(`${config.eventServiceDomain}/api/events/byOrganizer/${organizerId}${queryParams}`, this.redirectOnFail, this.useSystemToken)) || [];

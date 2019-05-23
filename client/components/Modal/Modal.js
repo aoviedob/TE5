@@ -1,8 +1,8 @@
 import React from 'react';
 
-const Modal = ({ id, className, children, modalType, title, onMoldalClosed, contentStyle }) =>
+const Modal = ({ id, className, children, modalType, title, onMoldalClosed, contentStyle, ref }) =>
   	
-      <div id={id} className={modalType} data-backdrop="static" data-keyboard="false">
+      <div id={id} className={modalType} data-backdrop="static" data-keyboard="false" ref={ref}>
       	<div className="modal-dialog modal-dialog-centered modal-lg">
           <div className="modal-content">
         	  <div className="modal-header">

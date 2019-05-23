@@ -23,9 +23,9 @@ export const getTickets = async dbContext => {
   return (await ticketsRepo.getTickets(dbContext)).map(ticket => mapRepoEntity(ticket));
 };
 
-export const getTicketById = async (dbContext, ticketId) => {
+export const getTicketById = async (dbContext, ticketId, trx) => {
   validatePreconditions(['dbContext', 'ticketId'], { dbContext, ticketId });
-  return mapRepoEntity((await ticketsRepo.getTicketById(dbContext, ticketId)));
+  return mapRepoEntity((await ticketsRepo.getTicketById(dbContext, ticketId, trx)));
 };
 
 export const getTicketByInvoiceId = async (dbContext, invoiceId) => {
@@ -45,7 +45,7 @@ export const getTicketsByCouponId = async (dbContext, couponId) => {
 
 export const getTicketsByCustomerId = async (dbContext, customerId) => {
   validatePreconditions(['dbContext', 'customerId'], { dbContext, customerId });
-  return (await ticketsRepo.getTicketsByCouponId(dbContext, customerId)).map(ticket => mapRepoEntity(ticket));
+  return (await ticketsRepo.getTicketsByCustomerId(dbContext, customerId)).map(ticket => mapRepoEntity(ticket));
 };
 
 export const reserveTicket = async (dbContext, ticket, userId) => {
@@ -92,8 +92,8 @@ export const createTicket = async (dbContext, { category, finalPrice, userId, tr
   validatePreconditions(['dbContext', 'ticketCategoryId', 'externalCustomerId', 'userId'], { dbContext, ...category, userId });
 
   const auditColumns = { updatedBy: userId, createdBy: userId };
-  const { id: categoryId } = await ticketsRepo.createTicket(dbContext, mapParams({ ...category, finalPrice, ...auditColumns }), trx);
-  return await getTicketById(dbContext, categoryId);
+  const { id: ticketId } = await ticketsRepo.createTicket(dbContext, mapParams({ ...category, finalPrice, ...auditColumns }), trx);
+  return await getTicketById(dbContext, ticketId, trx);
 };
 
 const validateCoupon = async (dbContext, ticket) => {
@@ -287,8 +287,9 @@ export const confirmTicketHandler = async msgData => {
       }
 
       for (let i = 0; i < quantity; i++) {
-
-        tickets.push(await createTicket(dbContext, { category: msgData, finalPrice, userId, trx }));
+        const dbTicket = await createTicket(dbContext, { category: msgData, finalPrice, userId, trx });
+        console.log('dbTicket', dbTicket);
+        tickets.push(dbTicket);
       }
     } catch (error) {
       logger.error(msgData, 'An error has occurred while confirming ticket');

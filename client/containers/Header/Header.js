@@ -9,7 +9,7 @@ export default class Header extends Component {
 
   render() {
   	const { auth, history } = this.props;
-    return <div className="col-sm-12">
+    return <div className="col-sm-12" style={{ padding: 0, margin: 0 }}>
 			  <header className="topbar">
 			      <div className="container">
 			        <div className="row">

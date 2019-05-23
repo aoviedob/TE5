@@ -9,8 +9,9 @@ import EventFilter from '../EventFilter/EventFilter';
 import './Home.css';
 import { Pager } from '../../components/Pager/Pager';
 import { Page } from '../../components/Pager/Page';
+import Modal from '../../components/Modal/Modal';
 
-@inject('event')
+@inject('event', 'auth', 'ticketCategory', 'order')
 @observer
 export default class Home extends Component {
   pagesChunkSize = 9;
@@ -34,7 +35,23 @@ export default class Home extends Component {
     this.props.history.push(`/eventDetails/${event.id}`);
   };
   
-  buyTicket = event => {};
+  buyTicket = async event => {
+
+    if (!this.props.auth.isAuthenticated) {
+      this.props.auth.setRedirectionUrl('/purchase');
+      return this.props.history.push('/register');
+    }
+    
+    const dbEvent = await this.props.event.getEvent(event.id);
+    const categories = await this.props.ticketCategory.getCategoriesByEvent(event.id);
+    if (!categories.length) {
+      this.showModalRef.click();
+      return;
+    }
+
+    this.props.order.setNewOrderLine(dbEvent, categories[0]);
+    return this.props.history.push('/purchase');
+  };
 
   renderEvents = events => events.map((event, index) =>
                            <div key={`${event.name}${index}`} className="col-sm-4">
@@ -42,7 +59,7 @@ export default class Home extends Component {
                                <a className="btn" style={{ marginRight: 10 }} onClick={() => this.goToEventDetails(event)} >
                                  <i class="material-icons icon" style={{ position: 'relative', top: 5 }}>remove_red_eye</i> View
                                </a>
-                               <a className="btn" onClick={() => this.buyTicket(event)}>
+                               <a className="btn" onClick={async() => await this.buyTicket(event)}>
                                  <i class="material-icons icon" style={{ position: 'relative', top: 5 }}>add_shopping_cart</i>Add to cart
                                </a>
                              </Card>
@@ -116,6 +133,10 @@ export default class Home extends Component {
              <div className="row justify-content-center pages">
                 <Pager>{this.renderPages(events)}</Pager>
              </div>
+             <Modal title="" id="cantBuyTicketModal" modalType="modal fade" onMoldalClosed={this.onMoldalClosed}>
+               <h4>There are not longer more tickets available</h4>
+             </Modal>
+             <input ref={node => { this.showModalRef = node; }} type="hidden"  data-toggle="modal" data-target="#cantBuyTicketModal"/>
   	       </Container>;
   }
 

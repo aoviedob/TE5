@@ -18,8 +18,12 @@ class Ticket {
     return toJS(this.tickets);
   }
 
+  @action clearTickets() {
+  	this.tickets = [];
+  	sessionStorage.setItem('tickets', JSON.stringify(this.tickets));
+  }
+
   @action addTicket(ticket) {
-    console.log('ticketHola', ticket);
     this.tickets.push(ticket);
     sessionStorage.setItem('tickets', JSON.stringify(this.tickets));
   }
@@ -51,6 +55,11 @@ class Ticket {
   	
   	this.tokens = [];
   }
+
+  @action async getTicketsByCustomerId(customerId) {
+    return (await makeGet(`${config.ticketServiceDomain}/api/tickets/byCustomer/${customerId}`)) || {};
+  }
+  
 };
 
 export const ticket = new Ticket();

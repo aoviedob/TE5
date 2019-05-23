@@ -15,6 +15,7 @@ export default class EventApi {
     app.get('/api/events/byName/:name', authenticate, this.getEventsByName);
     app.get('/api/events/salesTargets/:eventId', authenticate, this.getSalesTargetByEventId);
     app.post('/api/events', authenticate, this.createEvent);
+    app.post('/api/events/byIds', authenticate, this.getEventsByIds);
     app.put('/api/events/:eventId', authenticate, this.updateEvent);
     app.delete('/api/events/:eventId', authenticate, this.deleteEvent);
   }
@@ -23,6 +24,12 @@ export default class EventApi {
   async getEvents(req) { 
     const { limit } = req.query || {};
     return await eventService.getEvents(POSTGRES_CONTEXT, limit);
+  }
+
+  @RequiredRole([PredefinedRole.ADMIN, PredefinedRole.SYSTEM, PredefinedRole.CUSTOMER])
+  async getEventsByIds(req) { 
+    const { eventIds } = req.body || {};
+    return await eventService.getEventsByIds(POSTGRES_CONTEXT, eventIds);
   }
 
   @RequiredRole([PredefinedRole.ADMIN, PredefinedRole.SYSTEM])

@@ -116,7 +116,7 @@ export default class TicketCategoryManagement extends Component {
 
     return (<Container>
     		 <Header/>
-             <div className="row">
+             <div className="row" style={{padding: 10}}>
                <div className="col-sm-4 organizer-selector">
                  {eventOrganizers.length > 0 && <Dropdown items={eventOrganizers} onOptionSelected={this.onOrganizerSelected} defaultItem={{name: 'Select Organizer' }} />}
                </div>

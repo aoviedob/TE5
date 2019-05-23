@@ -7,6 +7,13 @@ export default class SearchBox extends Component {
     onSearch && onSearch(this.input.value);
   }
 
+  handleKeyPress = event => {
+    if(event.key == 'Enter'){
+      event.preventDefault();
+      this.handleOnSearch();
+    }
+  }
+
   render() {
     const { placeholder } = this.props;
     return  <div className="justify-content-center">
@@ -14,7 +21,7 @@ export default class SearchBox extends Component {
                     <form className="card card-sm radius">
                         <div className="row no-gutters align-items-center radius">
                             <div className="col">
-                              <input ref={node => { this.input = node; } } className="form-control form-control-lg form-control-borderless" type="search" placeholder={placeholder}/>
+                              <input onKeyPress={this.handleKeyPress} ref={node => { this.input = node; } } className="form-control form-control-lg form-control-borderless" type="search" placeholder={placeholder}/>
                             </div>
                              <div style={{paddingLeft: 10, paddingRight: 10, cursor: 'pointer' }} className="col-auto">
                              <i onClick={this.handleOnSearch} className="material-icons">search</i>

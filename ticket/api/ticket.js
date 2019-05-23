@@ -46,7 +46,7 @@ export default class TicketApi {
     return await ticketService.getTicketsByCouponId(POSTGRES_CONTEXT, couponId);
   }
 
-  @RequiredRole([PredefinedRole.ADMIN, PredefinedRole.EVENT_MANAGER, PredefinedRole.AGENT])
+  @RequiredRole([PredefinedRole.ADMIN, PredefinedRole.EVENT_MANAGER, PredefinedRole.AGENT, PredefinedRole.CUSTOMER])
   async getTicketsByCustomerId(req) {
     const { customerId } = req.params || {};
     return await ticketService.getTicketsByCustomerId(POSTGRES_CONTEXT, customerId);

@@ -1,7 +1,9 @@
 import React, { Component } from 'react';
 import { observer, inject } from 'mobx-react';
+import moment from 'moment';
+import './Invoice.css';
 
-@inject('ticketCategory', 'event', 'customer')
+@inject('ticketCategory', 'event', 'customer', 'eventOrganizer')
 @observer
 export default class Invoice extends Component {
 
@@ -12,7 +14,6 @@ export default class Invoice extends Component {
 
   async componentWillMount() {
     const { ticket } = this.props;
-    console.log('ticket', ticket);
     const { invoiceId, ticketCategoryId, externalCustomerId, couponId, finalPrice, createdAt  } = ticket;
     
     const { name: categoryName, price: categoryPrice, externalEventId } = await this.props.ticketCategory.getCategoryById(ticketCategoryId);
@@ -35,10 +36,15 @@ export default class Invoice extends Component {
         customerEmail,
         finalPrice
       },
+    }, () => {
+      if(!this.props.showPrint) return;
+      
+      window.print();
     });
   }
 
   render = () => {
+
     const { invoice } = this.state;
     const { id, startDate, endDate, coverImageUrl, createdAt, eventName, eventOrganizerName, customerName, customerEmail, categoryName, categoryPrice, finalPrice } = invoice;
 
@@ -49,12 +55,12 @@ export default class Invoice extends Component {
                 <div className="card-body p-0">
                     <div className="row p-5">
                         <div className="col-md-6">
-                            <img src={coverImageUrl}/>
+                            <img src={coverImageUrl} className="d-block img-fluid" />
                         </div>
 
                         <div className="col-md-6 text-right">
                             <p className="font-weight-bold mb-1">{`Invoice #${id}`}</p>
-                            <p className="text-muted">{`Due to: ${createdAt}`}</p>
+                            <p className="text-muted">{`Due to: ${moment(createdAt).format('llll')}`}</p>
                         </div>
                     </div>
 
@@ -63,16 +69,16 @@ export default class Invoice extends Component {
                     <div className="row pb-5 p-5">
                         <div className="col-md-6">
                           <p className="font-weight-bold mb-4">Event Details</p>
-                          <p className="mb-1"><span className="text-muted">Name: </span>{eventName}</p>
-                          <p className="mb-1"><span className="text-muted">Organizer: </span>{eventOrganizerName}</p>
-                          <p className="mb-1"><span className="text-muted">Start Date: </span>{startDate}</p>
-                          <p className="mb-1"><span className="text-muted">End Date: </span>{endDate}</p>
+                          <p className="mb-1 invoice-text"><span className="text-muted ">Name: </span>{eventName}</p>
+                          <p className="mb-1 invoice-text"><span className="text-muted">Organizer: </span>{eventOrganizerName}</p>
+                          <p className="mb-1 invoice-text"><span className="text-muted">Start Date: </span>{moment(startDate).format('llll')}</p>
+                          <p className="mb-1 invoice-text"><span className="text-muted">End Date: </span>{moment(endDate).format('llll')}</p>
                         </div>
 
                         <div className="col-md-6 text-right">
                           <p className="font-weight-bold mb-4">Client Information</p>
-                          <p className="mb-1">{customerName}</p>
-                          <p className="mb-1">{customerEmail}</p>
+                          <p className="mb-1 invoice-text">{customerName}</p>
+                          <p className="mb-1 invoice-text">{customerEmail}</p>
                         </div>
                     </div>
 
@@ -100,19 +106,19 @@ export default class Invoice extends Component {
                     </div>
 
                     <div className="d-flex flex-row-reverse bg-dark text-white p-4">
-                        <div className="py-3 px-5 text-right">
+                        <div className="py-2 px-2 text-right">
                             <div className="mb-2">Grand Total</div>
-                            <div className="h2 font-weight-light">{finalPrice}</div>
+                            <div className="h3 font-weight-light">{finalPrice}</div>
                         </div>
 
-                        <div className="py-3 px-5 text-right">
+                        <div className="py-2 px-2 text-right">
                             <div className="mb-2">Discount</div>
-                            <div className="h2 font-weight-light">10%</div>
+                            <div className="h3 font-weight-light">10%</div>
                         </div>
 
-                        <div className="py-3 px-5 text-right">
+                        <div className="py-2 px-2 text-right">
                             <div className="mb-2">Sub - Total amount</div>
-                            <div className="h2 font-weight-light">{categoryPrice}</div>
+                            <div className="h3 font-weight-light">{categoryPrice}</div>
                         </div>
                     </div>
                 </div>

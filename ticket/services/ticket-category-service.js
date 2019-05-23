@@ -15,6 +15,11 @@ export const getTicketCategoryById = async (dbContext, ticketCategoryId) => {
   return mapRepoEntity((await ticketCategoryRepo.getTicketCategoryById(dbContext, ticketCategoryId)));
 };
 
+export const getTicketCategoriesByIds = async (dbContext, categoryIds) => {
+  validatePreconditions(['dbContext', 'categoryIds'], { dbContext, categoryIds });
+  return (await ticketCategoryRepo.getTicketCategoriesByIds(dbContext, categoryIds)).map(ticketCategory => mapRepoEntity(ticketCategory));
+};
+
 export const getTicketCategoriesByEventId = async (dbContext, eventId) => {
   validatePreconditions(['dbContext', 'eventId'], { dbContext, eventId });
   return (await ticketCategoryRepo.getTicketCategoriesByEventId(dbContext, eventId)).map(ticketCategory => mapRepoEntity(ticketCategory));

@@ -21,7 +21,7 @@ export default class CustomerApi {
   @RequiredRole([PredefinedRole.ADMIN])
   async getCustomers(req) { return await customerService.getCustomers(POSTGRES_CONTEXT); }
 
-  @RequiredRole([PredefinedRole.ADMIN])
+  @RequiredRole([PredefinedRole.ADMIN, PredefinedRole.CUSTOMER])
   async getCustomerById(req) {
     const { customerId } = req.params || {};
     return await customerService.getCustomerById(POSTGRES_CONTEXT, customerId);

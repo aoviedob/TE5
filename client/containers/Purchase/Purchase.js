@@ -18,7 +18,9 @@ export default class Purchase extends Component {
   async componentDidMount() {
     const customer = await this.props.customer.getCustomerByEmail(this.props.auth.email);
     await this.props.order.setCustomerId(customer.id);
-    await this.props.order.getPendingOrder();
+    const isThereAPendingOrder = await this.props.order.getPendingOrder();
+    if (!isThereAPendingOrder) this.props.ticket.clearTickets();
+
   	await this.props.ticketCategory.getCategories();
     await this.props.event.getAllEvents();
     await this.props.eventOrganizer.getEventOrganizers();

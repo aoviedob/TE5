@@ -33,12 +33,13 @@ export const getTickets = async dbContext =>
   	columns: TICKET_TABLE_COLUMNS 
   }));
 
-export const getTicketById = async (dbContext, ticketId) => { 
+export const getTicketById = async (dbContext, ticketId, trx) => { 
   const unitOfWork = new UnitOfWork(dbContext);
   return await unitOfWork.getOneWhere(schema, { 
   	tableName: TICKET_TABLE, 
   	columns: TICKET_TABLE_COLUMNS,
-  	where: unitOfWork.dbConnection.raw('id = :ticketId', { ticketId })
+  	where: unitOfWork.dbConnection.raw('id = :ticketId', { ticketId }),
+    trx
   });
 };
 

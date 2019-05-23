@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { observer, inject } from 'mobx-react';
+import { observer } from 'mobx-react';
 import { Container } from '../../components/Container/Container';
 import SearchBox from '../SearchBox/SearchBox';
 import Header from '../../containers/Header/Header';
@@ -15,7 +15,13 @@ export default class Dashboard extends Component {
         index: 0,
         renderComponent: () => <div></div>,
       } 
-    }
+    };
+  }
+
+  componentDidMount(prevProps) {
+    this.setState({
+      activeItem: this.props.activeItem,
+    });
   }
 
   setActiveItem = (item, index) => this.setState({ activeItem: { index, renderComponent: item.renderComponent } });

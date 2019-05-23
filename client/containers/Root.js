@@ -35,7 +35,7 @@ class Root extends Component {
               <Route exact path='/login' component={Login} />
               <Route exact path='/ticketCategoryManagement' render={() => this.handleAuthorization('/ticketCategoryManagement', TicketCategoryManagement)} />
               <Route exact path='/purchase' render={({history}) => this.handleAuthorization('/purchase', Purchase, history)} />
-              <Route exact path='/customerDashboard' render={() => this.handleAuthorization('/customerDashboard', CustomerDashboard)} />
+              <Route exact path='/customerDashboard' render={({ history }) => this.handleAuthorization('/customerDashboard', CustomerDashboard, history)} />
               <Route exact path='/invoices' render={() => this.handleAuthorization('/invoices', InvoicesHolder)} />
             </Switch>
           </div>

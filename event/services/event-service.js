@@ -9,6 +9,11 @@ export const getEvents = async (dbContext, limit) => {
   return (await eventRepo.getEvents(dbContext, limitResults)).map(event => mapRepoEntity(event));
 };
 
+export const getEventsByIds = async (dbContext, eventIds) => { 
+  validatePreconditions(['dbContext', 'eventIds'], { dbContext, eventIds });
+  return (await eventRepo.getEventsByIds(dbContext, eventIds)).map(event => mapRepoEntity(event));
+};
+
 export const getEventById = async (dbContext, eventId) => {
   validatePreconditions(['dbContext', 'eventId'], { dbContext, eventId });
   return mapRepoEntity((await eventRepo.getEventById(dbContext, eventId)));
