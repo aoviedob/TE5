@@ -9,18 +9,19 @@ import Purchase from './Purchase/Purchase';
 import CustomerDashboard from './CustomerDashboard/CustomerDashboard';
 import { inject } from 'mobx-react';
 import { startListening } from '../socket-listener';
+import InvoicesHolder from './Invoice/InvoicesHolder';
 
 @inject('auth')
 class Root extends Component {
   constructor(props) {
     super(props);
   }
-  handleAuthorization = (url, Component) => {
+  handleAuthorization = (url, Component, history) => {
     if (!this.props.auth.isAuthenticated) {
       this.props.auth.setRedirectionUrl(url);
       return <Redirect to="/login" />;
     }
-    return <Component/>;
+    return <Component history={history}/>;
   };
 
   render() {
@@ -33,8 +34,9 @@ class Root extends Component {
               <Route exact path='/register' component={CustomerRegister} />
               <Route exact path='/login' component={Login} />
               <Route exact path='/ticketCategoryManagement' render={() => this.handleAuthorization('/ticketCategoryManagement', TicketCategoryManagement)} />
-              <Route exact path='/purchase' render={() => this.handleAuthorization('/purchase', Purchase)} />
+              <Route exact path='/purchase' render={({history}) => this.handleAuthorization('/purchase', Purchase, history)} />
               <Route exact path='/customerDashboard' render={() => this.handleAuthorization('/customerDashboard', CustomerDashboard)} />
+              <Route exact path='/invoices' render={() => this.handleAuthorization('/invoices', InvoicesHolder)} />
             </Switch>
           </div>
         </BrowserRouter>

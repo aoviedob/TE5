@@ -14,6 +14,11 @@ class Customer {
     const result = (await makeGet(`${config.customerServiceDomain}/api/customers/byEmail/${email}`)) || {};
     return result;
   }
+
+  @action async getCustomerById (customerId) {
+    const result = (await makeGet(`${config.customerServiceDomain}/api/customers/${customerId}`)) || {};
+    return result;
+  }
 };
 
 

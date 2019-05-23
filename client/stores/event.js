@@ -45,6 +45,11 @@ class Event {
     return event;
   }
 
+  @action async getEventById (eventId) {
+    const event = (await makeGet(`${config.eventServiceDomain}/api/events/${eventId}`, this.redirectOnFail, this.useSystemToken)) || {};
+    return event;
+  }
+
   @action async getEventsByOrganizer (organizerId, limit) {
     let queryParams = limit ? `?limit=${limit}` : '';
     return (await makeGet(`${config.eventServiceDomain}/api/events/byOrganizer/${organizerId}${queryParams}`, this.redirectOnFail, this.useSystemToken)) || [];

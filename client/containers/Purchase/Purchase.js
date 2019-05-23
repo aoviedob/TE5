@@ -114,7 +114,7 @@ export default class Purchase extends Component {
   };
 
   render() {
-    const { hideHeader } = this.props;
+    const { hideHeader, history } = this.props;
     const { customerOrder } = this.props.order;
     const { formUrl } = this.state;
     const { orderLines = [], totalAmount = 0 } = customerOrder || {};
@@ -158,7 +158,7 @@ export default class Purchase extends Component {
                 </table>
               </div>
             </div>
-        <PaymentDialog src={formUrl} reservedTickets={reservedTickets} shouldShowErrorDialog={shouldShowErrorDialog} errorMsg={errorMsg} isPaid={isPaid}/>
+        <PaymentDialog history={history} src={formUrl} reservedTickets={reservedTickets} shouldShowErrorDialog={shouldShowErrorDialog} errorMsg={errorMsg} isPaid={isPaid}/>
       </Container>);
   }
 

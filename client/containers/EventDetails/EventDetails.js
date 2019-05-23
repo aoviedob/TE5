@@ -91,7 +91,7 @@ export default class EventDetails extends Component {
           </div>;
       };
 
-  renderTicketCategories = categories => categories.map(category =>
+  renderTicketCategories = categories => categories.filter(({ available }) => available > 0).map(category =>
       <div className="col-lg-6">
         <div className="card mb-5 mb-lg-0">
           <div className="card-body">

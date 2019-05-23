@@ -300,9 +300,10 @@ export const confirmTicketHandler = async msgData => {
 
   const notifyType = results.length ? SocketTypes.TICKET_CONFIRMED : SocketTypes.TICKET_CONFIRMED_ERROR;
 
+  console.log('ticketsHOla', tickets);
   return await notify({
     type: notifyType,
-    msg: { msgData, tickets: results },
+    msg: { msgData, tickets, userId },
   });
 };
 

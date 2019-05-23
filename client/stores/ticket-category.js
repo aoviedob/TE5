@@ -89,6 +89,11 @@ class TicketCategory {
     return category;
   }
 
+  @action async getCategoryById (categoryId) {
+    const category = (await makeGet(`${config.ticketServiceDomain}/api/categories/${categoryId}`, this.redirectOnFail, this.useSystemToken)) || {};
+    return category;
+  }
+
   @action async getCategories () {
      const categories = (await makeGet(`${config.ticketServiceDomain}/api/categories`, this.redirectOnFail, this.useSystemToken)) || [];
     this.categories = categories;
