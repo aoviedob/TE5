@@ -15,7 +15,7 @@ export default class CustomerRegister extends Component {
       dvr: dvr(validatorjs)
     };
 
-    const { profile } = props;
+    const { profile = {} } = props;
     console.log('profile', profile);
 
     const fields = [{
@@ -28,7 +28,7 @@ export default class CustomerRegister extends Component {
       rules: 'required|email',
       placeholder: 'Email *',
       value: profile.email,
-      disabled: true,
+      disabled: profile.email ? true : false,
     },
     {
       name: 'phone',

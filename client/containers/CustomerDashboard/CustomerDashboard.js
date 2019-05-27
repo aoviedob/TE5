@@ -12,7 +12,7 @@ import { Table } from '../../components/Table/Table';
 import { Row } from '../../components/Table/Row';
 import { Column } from '../../components/Table/Column';
 
-@inject('event', 'customer', 'auth', 'ticket', 'ticketCategory')
+@inject('event', 'customer', 'auth', 'ticket', 'ticketCategory', 'order')
 @observer
 export default class CustomerDashboard extends Component {
 
@@ -38,6 +38,7 @@ export default class CustomerDashboard extends Component {
   async componentWillMount() {
     const profile = await this.props.customer.getCustomerByEmail(this.props.auth.email);
     const allNextEvents = await this.getAllNextEvents(profile.id);
+  //  const processedOrdes = await this.props.order.getProcessedOrders();
     this.setState({ profile, allNextEvents });
   }
 

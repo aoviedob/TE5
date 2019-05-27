@@ -69,6 +69,10 @@ class Order {
     return isThereAPendingOrder;
   }
 
+  @action async getProcessedOrders() {
+    return (await makeGet(`${config.customerServiceDomain}/api/orders/${this.customerId}/byStatus/${DALTypes.OrderStatus.PROCESSED}`)) || [];
+  }
+
   @action async updateOrderLine(orderLine) {
     const result = (await makePut(`${config.customerServiceDomain}/api/orders/lines/${this.order.id}/${orderLine.externalProductId}`, orderLine)) || {};
     const order = await makeGet(`${config.customerServiceDomain}/api/orders/${this.order.id}`) || {};

@@ -70,7 +70,7 @@ export const getEventsByIds = async (dbContext, eventIds) => {
   return await unitOfWork.getAllWhere(schema, { 
     tableName: EVENT_TABLE,
     columns: EVENT_TABLE_COLUMNS,
-    where: unitOfWork.dbConnection.raw(`id = ANY(string_to_array(:eventIds, ',')::uuid[])`, { eventIds }),
+    where: unitOfWork.dbConnection.raw(`id = ANY(:eventIds ::uuid[])`, { eventIds }),
   });
 };
 
