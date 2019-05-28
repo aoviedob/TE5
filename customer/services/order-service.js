@@ -22,9 +22,9 @@ export const getOrderById = async (dbContext, { orderId, trx }) => {
   return mapRepoEntity((await orderRepo.getOrderById(dbContext, { orderId, trx })));
 };
 
-export const getOrderByStatus = async (dbContext, { status, customerId }) => {
+export const getOrdersByStatus = async (dbContext, { status, customerId }) => {
   validatePreconditions(['dbContext', 'status'], { dbContext, status, customerId });
-  return mapRepoEntity((await orderRepo.getOrderByStatus(dbContext, { status, customerId })));
+  return(await orderRepo.getOrdersByStatus(dbContext, { status, customerId })).map(order => mapRepoEntity(order));
 };
 
 const validateProductQuantity = (req, orderLine) => {

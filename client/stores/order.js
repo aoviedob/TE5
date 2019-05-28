@@ -58,10 +58,13 @@ class Order {
 
   @action async getPendingOrder() {
     let isThereAPendingOrder = true;
-    let order = (await makeGet(`${config.customerServiceDomain}/api/orders/${this.customerId}/byStatus/${DALTypes.OrderStatus.PENDING}`));
-    if (Object.keys(order).length === 0) {
+    const orders = (await makeGet(`${config.customerServiceDomain}/api/orders/${this.customerId}/byStatus/${DALTypes.OrderStatus.PENDING}`)) || [];
+    let order;
+    if (orders.length === 0) {
       order = (await makePost(`${config.customerServiceDomain}/api/orders`, { customerId: this.customerId })) || {};
       isThereAPendingOrder = false;
+    } else {
+      order = orders[0];
     }
 
     this.order = order;

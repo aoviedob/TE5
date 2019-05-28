@@ -52,7 +52,7 @@ class Event {
 
   @action async getEventByIds (eventIds) {
     console.log('eventIds', eventIds);
-    return (await makePost(`${config.eventServiceDomain}/api/events/byIds`, { eventIds })) || {};
+    return (await makePost(`${config.eventServiceDomain}/api/events/byIds`, { eventIds: JSON.stringify(eventIds) })) || {};
   }
   
   @action async getEventsByOrganizer (organizerId, limit) {

@@ -8,9 +8,8 @@ import { CardDeck } from '../../components/CardDeck/CardDeck';
 import Card from '../../components/Card/Card';
 import { Pager } from '../../components/Pager/Pager';
 import { Page } from '../../components/Pager/Page';
-import { Table } from '../../components/Table/Table';
-import { Row } from '../../components/Table/Row';
-import { Column } from '../../components/Table/Column';
+import { List } from '../../components/List/List';
+import { ListItem } from '../../components/List/ListItem';
 
 @inject('event', 'customer', 'auth', 'ticket', 'ticketCategory', 'order')
 @observer
@@ -36,10 +35,12 @@ export default class CustomerDashboard extends Component {
   };
 
   async componentWillMount() {
+    const customer = await this.props.customer.getCustomerByEmail(this.props.auth.email);
+    await this.props.order.setCustomerId(customer.id);
     const profile = await this.props.customer.getCustomerByEmail(this.props.auth.email);
     const allNextEvents = await this.getAllNextEvents(profile.id);
-  //  const processedOrdes = await this.props.order.getProcessedOrders();
-    this.setState({ profile, allNextEvents });
+    const processedOrders = await this.props.order.getProcessedOrders();
+    this.setState({ profile, allNextEvents, processedOrders });
   }
 
   renderUserDetails = () => <UserDetails hideActions={true} light={true}/>;
@@ -85,6 +86,13 @@ export default class CustomerDashboard extends Component {
     return <CustomerRegister isProfile={true} title={'Profile'} profile={profile}/>
   };
 
+  renderProcessedOrders = processedOrders => processedOrders.map(order => 
+    <ListItem id={order.id} item={`Order: #${order.id}`}>
+      <ul>
+       {orderLines.map(orderLine => <li> </li>)}
+      </ul>
+    </ListItem>);
+
   formatDashboardItems = () => [
   	{
   	  name: 'My Profile',
@@ -107,10 +115,10 @@ export default class CustomerDashboard extends Component {
   	  name: 'My Purchases',
   	  icon: <i className="material-icons">account_balance_wallet</i>,
   	  renderComponent: () => <div>
-                              {this.state.tickets.length > 0 && 
-                                <Table headers={[]}>
-                                  {this.renderRows(rows)}
-                                </Table>
+                              {this.state.processedOrders.length > 0 && 
+                                <List>
+                                  {this.renderProcessedOrders(this.state.processedOrders)}
+                                </List>
                               }
                             </div>,
   	},

@@ -34,7 +34,9 @@ export default class Dropdown extends Component {
     const filteredItems = searchValue ? this.filterItems(items, searchValue) : items;
 
     return <div className="dropdown" {...rest} value={selectedItem.id}>
-            <a className="dropdown-button btn btn-light white grey-text btn-block" type="button" data-toggle="dropdown" href="#">{selectedItem.name || defaultItem.name}</a>
+            <a className="dropdown-button btn btn-light white grey-text btn-block" type="button" data-toggle="dropdown" href="#" style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center'}}>{selectedItem.name || defaultItem.name}
+              <i class="material-icons">keyboard_arrow_down</i>
+            </a>
               <div className="dropdown-menu full-width  btn-block">
                 <input type="text" className="form-control" placeholder="Search" onChange={this.handleOnSearch} value={searchValue}/>
                 {filteredItems.length > 0 && <a className="dropdown-item" key={`${defaultItem.name}`} onClick={() => this.handleOnChange(defaultItem)}>{defaultItem.name}</a>}

@@ -10,7 +10,7 @@ export default class CustomerApi {
   constructor(app) {
     app.get('/api/orders/byCustomer/:customerId', authenticate, this.getOrdersByCustomerId);
     app.get('/api/orders/:orderId', authenticate, this.getOrderById);
-    app.get('/api/orders/:customerId/byStatus/:status', authenticate, this.getOrderByStatus);
+    app.get('/api/orders/:customerId/byStatus/:status', authenticate, this.getOrdersByStatus);
     app.post('/api/orders', authenticate, this.createOrder);
     app.post('/api/orders/lines',authenticate,  this.createOrderLine);
     app.put('/api/orders/:orderId',authenticate,  this.updateOrder);
@@ -34,9 +34,9 @@ export default class CustomerApi {
   }
 
   @RequiredRole([PredefinedRole.ADMIN, PredefinedRole.CUSTOMER])
-  async getOrderByStatus(req) {
+  async getOrdersByStatus(req) {
     const { status, customerId } = req.params || {};
-    return await orderService.getOrderByStatus(POSTGRES_CONTEXT, { status, customerId });
+    return await orderService.getOrdersByStatus(POSTGRES_CONTEXT, { status, customerId });
   }
   
   @RequiredRole([PredefinedRole.ADMIN, PredefinedRole.CUSTOMER])

@@ -29,6 +29,7 @@ export default class EventApi {
   @RequiredRole([PredefinedRole.ADMIN, PredefinedRole.SYSTEM, PredefinedRole.CUSTOMER])
   async getEventsByIds(req) { 
     const { eventIds } = req.body || {};
+    console.log('eventIds', eventIds);
     return await eventService.getEventsByIds(POSTGRES_CONTEXT, eventIds);
   }
 

@@ -39,12 +39,14 @@ const SALES_TARGET_TABLE_COLUMNS = [
   'updated_at'
 ];
 
-export const getEvents = async (dbContext, limitResults) => 
-  await(new UnitOfWork(dbContext).getAll(schema, { 
+export const getEvents = async (dbContext, limitResults) => {
+  return await(new UnitOfWork(dbContext).getAll(schema, { 
   	tableName: EVENT_TABLE, 
   	columns: EVENT_TABLE_COLUMNS,
     limit: limitResults,
+    where: 
   }));
+}
 
 export const getEventById = async (dbContext, eventId) => { 
   const unitOfWork = new UnitOfWork(dbContext);
@@ -65,12 +67,12 @@ export const getEventsByCategoryId = async (dbContext, categoryId, limitResults)
   });
 };
 
-export const getEventsByIds = async (dbContext, eventIds) => { 
+export const getEventsByIds = async (dbContext, eventIds) => {
   const unitOfWork = new UnitOfWork(dbContext);
   return await unitOfWork.getAllWhere(schema, { 
     tableName: EVENT_TABLE,
     columns: EVENT_TABLE_COLUMNS,
-    where: unitOfWork.dbConnection.raw(`id = ANY(:eventIds ::uuid[])`, { eventIds }),
+    where: unitOfWork.dbConnection.raw(`id = ANY(:eventIds ::uuid[]) AND start_date >= NOW()`, { eventIds: `{${JSON.parse(eventIds).map(eventId => `"${eventId}"`).join(',')}}`  }),
   });
 };
 
