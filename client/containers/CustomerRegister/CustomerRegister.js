@@ -15,10 +15,10 @@ export default class CustomerRegister extends Component {
       dvr: dvr(validatorjs)
     };
 
-    const { profile = {} } = props;
-    console.log('profile', profile);
+    const { profile = {}, isProfile } = props;
+    console.log('isProfile', isProfile);
 
-    const fields = [{
+    const fields = !isProfile ? [{
       name: 'fullname',
       rules: 'required|string',
       placeholder: 'Fullname *',
@@ -49,21 +49,49 @@ export default class CustomerRegister extends Component {
       name: 'confirmPassword',
       rules: 'required|between:8,25',
       placeholder: 'Confirm Password *'
+    }] : [{
+      name: 'fullname',
+      rules: 'required|string',
+      placeholder: 'Fullname *',
+      value: profile.fullname,
+    }, {
+      name: 'email',
+      rules: 'required|email',
+      placeholder: 'Email *',
+      value: profile.email,
+      disabled: profile.email ? true : false,
+    },
+    {
+      name: 'phone',
+      rules: 'numeric',
+      placeholder: 'Phone',
+      value: profile.phone,
+    },
+    {
+      name: 'alias',
+      rules: 'string',
+      placeholder: 'Alias',
+      value: profile.alias,
     }];
     
     const ctx = this;
     const hooks = {
       async onSuccess(form) {
-        const { password, confirmPassword } = form.values();
-        if (password !== confirmPassword) {
-          return ctx.setState({unmatchingPasswords: true});
+        if (!isProfile) {
+          console.log('hola');
+          const { password, confirmPassword } = form.values();
+          if (password !== confirmPassword) {
+            return ctx.setState({unmatchingPasswords: true});
+          }
+
+          const result = await props.customer.registerCustomer(form.values());
+          if (result.error && result.error.status === 409 ) {
+             return ctx.setState({userAlreadyExists: true});
+          }
+          return ctx.props.history.push(`/login`);
         }
 
-        const result = await props.customer.registerCustomer(form.values());
-        if (result.error && result.error.status === 409 ) {
-           return ctx.setState({userAlreadyExists: true});
-        }
-        return ctx.props.history.push(`/login`);
+        const result = await props.customer.updateCustomer({ id: profile.id, ...form.values()});
       }
     };
 

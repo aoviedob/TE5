@@ -106,10 +106,10 @@ export default class Purchase extends Component {
     const formUrl = await this.props.order.initiatePayment();
     const { customerOrder, customerId } = this.props.order;
     const { orderLines = [] } = customerOrder;
-    
+        
     await Promise.all(orderLines.map(async orderLine => {
       const { id, externalProductName, externalProductId, quantity, externalProductCategoryId } = orderLine;
-      await this.props.ticket.reserveTicket({ ticketCategoryId: externalProductCategoryId, externalCustomerId: customerId, quantity });
+      await this.props.ticket.reserveTicket({ ticketCategoryId: externalProductCategoryId, externalCustomerId: customerId, quantity, externalOrderId: customerOrder.id });
     }));
 
     this.setState({ formUrl }, () => this.showModalRef.click());

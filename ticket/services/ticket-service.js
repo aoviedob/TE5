@@ -51,7 +51,7 @@ export const getTicketsByCustomerId = async (dbContext, customerId) => {
 export const reserveTicket = async (dbContext, ticket, userId) => {
   const msg = { ...ticket, dbContext, userId };
 
-  validatePreconditions(['dbContext', 'ticketCategoryId', 'externalCustomerId', 'quantity', 'userId'], msg);
+  validatePreconditions(['dbContext', 'ticketCategoryId', 'externalCustomerId', 'quantity', 'userId', 'externalOrderId'], msg);
   const { ticketCategoryId, couponId} = ticket;
   const category = await getTicketCategoryById(dbContext, ticketCategoryId);
   if (!category) {
@@ -89,7 +89,7 @@ const notifyReserveTicketError = async (error, msg, data) => {
 };
 
 export const createTicket = async (dbContext, { category, finalPrice, userId, trx }) => {
-  validatePreconditions(['dbContext', 'ticketCategoryId', 'externalCustomerId', 'userId'], { dbContext, ...category, userId });
+  validatePreconditions(['dbContext', 'ticketCategoryId', 'externalCustomerId', 'userId', 'externalOrderId'], { dbContext, ...category, userId });
 
   const auditColumns = { updatedBy: userId, createdBy: userId };
   const { id: ticketId } = await ticketsRepo.createTicket(dbContext, mapParams({ ...category, finalPrice, ...auditColumns }), trx);
@@ -133,7 +133,7 @@ const validateCoupon = async (dbContext, ticket) => {
 };
 
 export const reserveTicketHandler = async msgData => {
-  validatePreconditions(['dbContext', 'ticketCategoryId', 'externalCustomerId', 'quantity', 'userId'], msgData);
+  validatePreconditions(['dbContext', 'ticketCategoryId', 'externalCustomerId', 'quantity', 'userId', 'externalOrderId'], msgData);
   const { dbContext, ticketCategoryId,  quantity, couponId, userId } = msgData;
   const category = await getTicketCategoryById(dbContext, ticketCategoryId);
 
@@ -250,7 +250,7 @@ export const confirmTicket = async (req) => {
 
   const { body: msgData } = decodedToken;
   const msg = { ...msgData };
-  validatePreconditions(['dbContext', 'ticketCategoryId', 'externalCustomerId', 'quantity', 'userId'], msg);
+  validatePreconditions(['dbContext', 'ticketCategoryId', 'externalCustomerId', 'quantity', 'userId', 'externalOrderId'], msg);
   
   logger.info(msg, 'About to send confirm ticket to the queue');
   await sendQueueMessage({
@@ -261,7 +261,7 @@ export const confirmTicket = async (req) => {
 
 export const confirmTicketHandler = async msgData => {
   logger.info(msgData, 'About to confirm ticket');
-  validatePreconditions(['dbContext', 'ticketCategoryId', 'externalCustomerId', 'quantity', 'userId'], msgData);
+  validatePreconditions(['dbContext', 'ticketCategoryId', 'externalCustomerId', 'quantity', 'userId', 'externalOrderId'], msgData);
   const { dbContext, ticketCategoryId,  quantity, couponId, userId } = msgData;
  
   const category = await getTicketCategoryById(dbContext, ticketCategoryId);

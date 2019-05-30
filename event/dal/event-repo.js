@@ -44,7 +44,6 @@ export const getEvents = async (dbContext, limitResults) => {
   	tableName: EVENT_TABLE, 
   	columns: EVENT_TABLE_COLUMNS,
     limit: limitResults,
-    where: 
   }));
 }
 

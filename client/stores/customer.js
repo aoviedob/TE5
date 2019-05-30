@@ -1,5 +1,5 @@
 import { action } from 'mobx';
-import { makePost, makeGet } from '../modules/api-client';
+import { makePost, makeGet, makePut } from '../modules/api-client';
 import config from '../config';
 
 class Customer {
@@ -7,6 +7,11 @@ class Customer {
 
   @action async registerCustomer (customer) {
     const result = (await makePost(`${config.customerServiceDomain}/api/customers`, customer, this.useSystemToken)) || {};
+    return result;
+  }
+
+  @action async updateCustomer (customer) {
+    const result = (await makePut(`${config.customerServiceDomain}/api/customers/${customer.id}`, customer)) || {};
     return result;
   }
 

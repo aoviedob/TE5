@@ -4,7 +4,7 @@ import { auth } from '../stores/auth';
 const setHeaders = (req, useSystemToken) => req.set('authorization', `Bearer ${useSystemToken ? auth.systemToken || auth.token : auth.token}`).accept('application/json');
 const handleApiError = error => {
   if(error.status === 401 || error.status === 403) {
-    window.location = '/login';
+  //  window.location = '/login';
     return;
   }
   return { error: { status: error.status }};

@@ -48,12 +48,7 @@ export default class Dashboard extends Component {
                     </ul>
                 </div>
             </div>
-            <div className="col-md-9 col-sm-10 display-table-cell v-align">
-                <div className="row">
-                  <div className="col-md-12" style={{ marginTop: 10 }}>
-                    <SearchBox />  
-                  </div>
-                </div>
+            <div className="col-md-9 col-sm-10 display-table-cell v-align" style={{padding: 0}}>
                 <div className="user-dashboard">
                    {activeItem.renderComponent()}
                 </div>

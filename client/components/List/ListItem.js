@@ -1,14 +1,39 @@
-import React from 'react';
+import React, { Component }  from 'react';
 
-export const List = ({ id, item, children, ...rest }) => 
-  <li className="list-group-item px-0" {...rest}>
-    <a className="btn-list-item collapsed a-item" data-toggle="collapse" href={`#item-${id}`} role="button" aria-expanded="true" aria-controls="collapseExample1">
-       {item}
-    </a>
-    <div className="collapse" id={`#item-${id}`}>
-      <div className="card card-body mt-2">
-        {children}
-      </div>
-    </div>
-  </li>;
+export default class ListItem extends Component {
+  constructor(props) {
+    super(props);
+
+    this.state = {
+      selected: false,
+    };    
+  }
+
+  handleOnClick = () => {
+  	this.setState({selected: !this.state.selected });
+  	const { onClick } = this.props;
+  	onClick && onClick();
+  }
+
+  render() { 
+  	const { id, item, children, ...rest } = this.props;
+  	const { selected } = this.state;
+
+	  return <div className="card" {...rest} onClick={this.handleOnClick}>
+	    <div className="card-header">
+	      <h5 className="mb-0">
+	        <button className="btn w-100" data-toggle="collapse" data-target={`#item-${id}`} aria-expanded="true" aria-controls="collapseOne">
+	           {item}
+	        </button>
+	      </h5>
+	    </div>
+
+	    {selected && <div id={`#item-${id}`} className="collapse show" data-parent="#accordion">
+	      <div className="card-body">
+	          {children}
+	      </div>
+	    </div>}
+	  </div>;
+  }
+};
 

@@ -52,7 +52,7 @@ export default class CustomerApi {
     return await customerService.createCustomer(POSTGRES_CONTEXT, body);
   }
 
-  @RequiredRole([PredefinedRole.ADMIN, PredefinedRole.SYSTEM])
+  @RequiredRole([PredefinedRole.ADMIN, PredefinedRole.SYSTEM, PredefinedRole.CUSTOMER])
   async updateCustomer(req) {
     const { body, params = {} } = req;
     return await customerService.updateCustomer(POSTGRES_CONTEXT, params.customerId, body);

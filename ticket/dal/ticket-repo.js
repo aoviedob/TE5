@@ -12,6 +12,7 @@ const TICKET_TABLE_COLUMNS = [
   'external_customer_id',
   'coupon_id',
   'final_price',
+  'external_order_id',
   'created_by',
   'updated_by',
   'created_at',

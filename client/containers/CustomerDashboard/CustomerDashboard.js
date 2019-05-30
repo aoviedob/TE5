@@ -9,7 +9,8 @@ import Card from '../../components/Card/Card';
 import { Pager } from '../../components/Pager/Pager';
 import { Page } from '../../components/Pager/Page';
 import { List } from '../../components/List/List';
-import { ListItem } from '../../components/List/ListItem';
+import ListItem from '../../components/List/ListItem';
+import moment from 'moment';
 
 @inject('event', 'customer', 'auth', 'ticket', 'ticketCategory', 'order')
 @observer
@@ -86,12 +87,45 @@ export default class CustomerDashboard extends Component {
     return <CustomerRegister isProfile={true} title={'Profile'} profile={profile}/>
   };
 
-  renderProcessedOrders = processedOrders => processedOrders.map(order => 
-    <ListItem id={order.id} item={`Order: #${order.id}`}>
+  getOrderLinesInfo = async(orderLines) => { 
+    const formattedOrderLines = await Promise.all(orderLines.map(async orderLine => {
+      const { externalProductName, externalProductCategoryId, quantity } = orderLine;
+      const { price } = await this.props.ticketCategory.getCategoryById(externalProductCategoryId);
+      return { productName: externalProductName, price, quantity };
+    }));
+
+    return this.setState({ formattedOrderLines });
+  };
+
+  renderProcessedOrders = processedOrders => processedOrders.map(order => {
+    const { id, updatedAt, orderLines, totalAmount } = order;
+    const { formattedOrderLines = [] } = this.state;
+    const item = <div className="row">
+                  
+                     <div className="col-sm-6">{`Order: #${id}`}</div>
+                     <div className="col-sm-4">{moment(updatedAt).format('llll')}</div>
+                     <div className="col-sm-2">{`$${totalAmount}`}</div>
+                   
+                 </div>;
+
+    return <ListItem id={id} item={item} onClick={() => this.getOrderLinesInfo(orderLines) }>
       <ul>
-       {orderLines.map(orderLine => <li> </li>)}
+       {formattedOrderLines.map(({productName, quantity, price}) => 
+         <li>
+           <div className="row navbar navbar-light bg-light">
+             <div className="col-sm-6"><h5>Event</h5></div>
+             <div className="col-sm-4"><h5>Quantity</h5></div>
+             <div className="col-sm-2"><h5>Price</h5></div>
+           </div>
+           <div className="row">
+             <div className="col-sm-6">{productName}</div>
+             <div className="col-sm-4">{quantity}</div>
+             <div className="col-sm-2">{price}</div>
+           </div>
+         </li>)}
       </ul>
-    </ListItem>);
+    </ListItem>;
+  });
 
   formatDashboardItems = () => [
   	{
@@ -107,7 +141,7 @@ export default class CustomerDashboard extends Component {
         const nextEvents = this.getNextEvents(allNextEvents);
         return <div>
                  <CardDeck>{this.renderNextEvents(nextEvents)}</CardDeck>
-                 <Pager>{this.renderNextEventPages(allNextEvents)}</Pager>
+                 <div className="row justify-content-center"><Pager>{this.renderNextEventPages(allNextEvents)}</Pager></div>
                </div>; 
       },
   	},
@@ -126,16 +160,6 @@ export default class CustomerDashboard extends Component {
   	  name: 'My Shopping Cart',
   	  icon: <i className="material-icons">shopping_cart</i>,
   	  renderComponent: () => <Purchase hideHeader={true}/>,
-  	},
-  	{
-  	  name: 'My Wish List',
-  	  icon: <i className="material-icons">favorite</i>,
-  	  renderComponent: <div></div>,
-  	},
-  	{
-  	  name: 'My Coupons',
-  	  icon: <i className="material-icons">label_important</i>,
-  	  renderComponent: <div></div>,
   	},
   ];
 
