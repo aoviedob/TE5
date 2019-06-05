@@ -2,6 +2,7 @@ const { getEnvVariable } = require('./helpers/environment');
 
 module.exports = {
   eventServiceDomain: getEnvVariable('EVENT_SERVICE_DOMAIN', 'http://localhost:3050'),
+  commServiceDomain: getEnvVariable('COMM_SERVICE_DOMAIN', 'http://localhost:3065'),
   ticketServiceDomain: getEnvVariable('TICKET_SERVICE_DOMAIN', 'http://localhost:3060'),
   authServiceDomain: getEnvVariable('AUTH_SERVICE_DOMAIN', 'http://localhost:3000'),
   customerServiceDomain: getEnvVariable('CUSTOMER_SERVICE_DOMAIN', 'http://localhost:3030'),

@@ -4,10 +4,7 @@
   "description": "",
   "main": "server.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "ticket-start": "babel-node server.js",
-    "migrate-test": "babel-node --extensions '.ts,.js,.json' ./node_modules/knex/bin/cli.js migrate:latest --knexfile  ./database/connections/pg_test_knexfile.js",
-    "migrate": "babel-node --extensions '.ts,.js,.json' ./node_modules/knex/bin/cli.js migrate:latest --knexfile  ./database/connections/pg_knexfile.js"
+    "comm-start": "babel-node server.js"
   },
   "resolutions": {
     "babel-core": "7.0.0-bridge.0"
@@ -50,6 +47,8 @@
     "moment": "^2.23.0",
     "moment-range": "^4.0.2",
     "pg": "^7.7.1",
+    "react": "^16.8.6",
+    "react-dom": "^16.8.6",
     "socket.io": "^2.2.0",
     "superagent": "^4.1.0",
     "uuid": "^3.3.2"

@@ -1,6 +1,6 @@
 import MessageTypes from '../helpers/enums/queue-message-types';
-import { sendEmail } from '../services/communication';
+import { sendEmailHandler } from '../services/communication';
 
 export const handleQueueMapping = { 
-  [MessageTypes.SEND_EMAIL]: sendEmail,
+  [MessageTypes.SEND_EMAIL]: sendEmailHandler,
 };

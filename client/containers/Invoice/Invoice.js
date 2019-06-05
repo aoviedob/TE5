@@ -3,7 +3,7 @@ import { observer, inject } from 'mobx-react';
 import moment from 'moment';
 import './Invoice.css';
 
-@inject('ticketCategory', 'event', 'customer', 'eventOrganizer')
+@inject('ticketCategory', 'event', 'customer', 'eventOrganizer', 'comm')
 @observer
 export default class Invoice extends Component {
 
@@ -21,22 +21,23 @@ export default class Invoice extends Component {
     const { name: eventOrganizerName } = await this.props.eventOrganizer.getOrganizer(eventOrganizerId);
     const { fullname: customerName, email: customerEmail } = await this.props.customer.getCustomerById(externalCustomerId);
 
-    this.setState({ 
-      invoice: { 
-        id: invoiceId,
-        startDate,
-        endDate,
-        eventName,
-        coverImageUrl,
-        createdAt, 
-        eventOrganizerName,
-        categoryName,
-        categoryPrice,
-        customerName,
-        customerEmail,
-        finalPrice
-      },
-    }, () => {
+    const invoice = { 
+      id: invoiceId,
+      startDate,
+      endDate,
+      eventName,
+      coverImageUrl,
+      createdAt, 
+      eventOrganizerName,
+      categoryName,
+      categoryPrice,
+      customerName,
+      customerEmail,
+      finalPrice
+    };
+    this.props.comm.sendEmail({ email: customerEmail, template: 'INVOICE_CONFIRMATION' , data: invoice });
+
+    this.setState({ invoice }, () => {
       if(!this.props.showPrint) return;
       
       window.print();
