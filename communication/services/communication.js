@@ -2,6 +2,8 @@ import { connectToQueue } from '../workers/queue';
 import { queue } from '../config';
 import { renderToString } from "react-dom/server"
 import { Invoice } from '../templates/Invoice';
+import { ConfirmRegistration } from '../templates/ConfirmRegistration';
+import { ResetPassword } from '../templates/ResetPassword';
 import { validatePreconditions } from '../helpers/validator';
 import QueueMessageTypes from '../helpers/enums/queue-message-types';
 import bunyan from 'bunyan';
@@ -21,8 +23,8 @@ const Templates = {
 };
 
 const templateMapping = {
-  [Templates.CONFIRM_REGISTRATION]: data => {},
-  [Templates.FORGOT_PASSWORD]: data => {},
+  [Templates.CONFIRM_REGISTRATION]: data => renderToString(<ConfirmRegistration {...data } />),
+  [Templates.FORGOT_PASSWORD]: data => renderToString(<ResetPassword {...data } />),
   [Templates.INVOICE_CONFIRMATION]: data => renderToString(<Invoice {...data } />),
 };
 
