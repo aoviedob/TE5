@@ -5,7 +5,7 @@ import config from '../config';
 class Comm {
 
   @action async sendEmail (data) {
-    await makePost(`${config.commServiceDomain}/api/sendEmail`, data));
+    await makePost(`${config.commServiceDomain}/api/sendEmail`, data);
   }
 
 };

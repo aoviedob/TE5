@@ -198,7 +198,8 @@ export const processTransaction = async(dbContext, body) => {
     });
   }
 
-  const {id: orderId } = await getOrderByStatus(dbContext, { status: DalTypes.OrderStatus.PENDING, customerId });
+  const [pendingOrder] = await getOrdersByStatus(dbContext, { status: DalTypes.OrderStatus.PENDING, customerId });
+  const { id: orderId } = pendingOrder;
   await updateOrder({}, { dbContext, orderId, order: { status: DalTypes.OrderStatus.PROCESSED }, skipUpdateAmount: true });
 
   return await notify({
