@@ -18,3 +18,7 @@ payment/.yarn-cache/
 payment/yarn-error.log
 payment/node_modules/
 payment/logs/
+communication/.yarn-cache/
+communication/yarn-error.log
+communication/node_modules/
+communication/logs/

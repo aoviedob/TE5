@@ -16,7 +16,6 @@ export default class PaymentDialog extends Component {
     if (!isPaid) return;
     await this.props.ticket.confirmTickets();
     $('.close').click();
-    this.props.history.push('/invoices');
   }
 
   async componentDidUpdate(prevProps) {

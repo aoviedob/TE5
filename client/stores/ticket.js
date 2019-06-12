@@ -24,7 +24,8 @@ class Ticket {
   }
 
   @action addTicket(ticket) {
-    this.tickets.push(ticket);
+    const ticketsArray = [ ...this.tickets, ticket];
+    this.tickets = ticketsArray;
     sessionStorage.setItem('tickets', JSON.stringify(this.tickets));
   }
 

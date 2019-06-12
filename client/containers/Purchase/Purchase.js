@@ -30,7 +30,7 @@ export default class Purchase extends Component {
     if (!externalProductCategoryId) return;
     await this.props.order.updateOrderLine({ ...orderLine, externalProductCategoryId, quantity });
   };
-  
+  z
   onQuantityChange = async(e, orderLine) => {
     const quantity = e.target.value;
     const { quantity: currentQuantity } = orderLine;

@@ -24,6 +24,7 @@ const handleSocketMsgMapping = stores => ({
       if (userId === stores.auth.userId) {
         console.log('entraHOla', tickets);
         tickets.forEach(ticket => stores.ticket.addTicket(ticket));
+        window.location.href ='/invoices';
       }
     },
   },

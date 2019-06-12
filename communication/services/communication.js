@@ -1,5 +1,6 @@
 import { connectToQueue } from '../workers/queue';
 import { queue } from '../config';
+import React from 'react';
 import { renderToString } from "react-dom/server"
 import { Invoice } from '../templates/Invoice';
 import { ConfirmRegistration } from '../templates/ConfirmRegistration';
@@ -31,7 +32,7 @@ const templateMapping = {
 export const sendEmailHandler = msg => {
   const { email, template, data } = msg;
   const templateBuilder = templateMapping[template];
-  if(!templateHandler) {
+  if(!templateBuilder) {
   	logger.error(msg, 'TEMPLATE_DOES_NOT_EXIST');
   	throw new Error('TEMPLATE_DOES_NOT_EXIST');
   }
