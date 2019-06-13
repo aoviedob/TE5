@@ -51,12 +51,12 @@ export default class Header extends Component {
 			            <a className="nav-link" href="#" data-toggle="dropdown">
 			              <i className="material-icons">account_circle</i>
 			            </a>
-			             <ul style={{ maxWidth: 300 }}className="dropdown-menu dropdown-menu-right mt-2">
+			             <ul style={{ maxWidth: 300 }}className="dropdown-menu dropdown-menu-right mt-2" style={{ marginRight: 'auto', right: 15 }}>
 	                       <li className="px-3 py-2">
 	                       	  {!auth.isAuthenticated &&
 	                           [<LoginForm wide={true} history={history}/>,
 	                           <div className="form-group text-center">
-	                             <small><a href="#" data-toggle="modal" data-target="#modalPassword">Forgot password?</a></small>
+	                             <small><a href="/forgotPassword">Forgot password?</a></small>
 	                            </div>,
 	                         	<div className="form-group text-center">
 	                              <small><a href="/register">Register</a></small>

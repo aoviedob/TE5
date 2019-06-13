@@ -36,12 +36,6 @@ export default class Home extends Component {
   };
   
   buyTicket = async event => {
-
-    if (!this.props.auth.isAuthenticated) {
-      this.props.auth.setRedirectionUrl('/purchase');
-      return this.props.history.push('/register');
-    }
-    
     const dbEvent = await this.props.event.getEvent(event.id);
     const categories = await this.props.ticketCategory.getCategoriesByEvent(event.id);
     if (!categories.length) {
@@ -50,6 +44,12 @@ export default class Home extends Component {
     }
 
     this.props.order.setNewOrderLine(dbEvent, categories[0]);
+
+    if (!this.props.auth.isAuthenticated) {
+      this.props.auth.setRedirectionUrl('/purchase');
+      return this.props.history.push('/register');
+    }
+
     return this.props.history.push('/purchase');
   };
 

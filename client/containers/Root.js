@@ -10,6 +10,7 @@ import CustomerDashboard from './CustomerDashboard/CustomerDashboard';
 import { inject } from 'mobx-react';
 import { startListening } from '../socket-listener';
 import InvoicesHolder from './Invoice/InvoicesHolder';
+import ForgotPassword from './ForgotPassword/ForgotPassword';
 
 @inject('auth')
 class Root extends Component {
@@ -31,12 +32,13 @@ class Root extends Component {
             <Switch>
               <Route exact path='/' component={Home} />
               <Route exact path='/eventDetails/:eventId' component={EventDetails} />
-              <Route exact path='/register' component={CustomerRegister} />
+              <Route exact path='/register' render={({history}) => <CustomerRegister history={history} />} />
               <Route exact path='/login' component={Login} />
               <Route exact path='/ticketCategoryManagement' render={() => this.handleAuthorization('/ticketCategoryManagement', TicketCategoryManagement)} />
               <Route exact path='/purchase' render={({history}) => this.handleAuthorization('/purchase', Purchase, history)} />
               <Route exact path='/customerDashboard' render={({ history }) => this.handleAuthorization('/customerDashboard', CustomerDashboard, history)} />
               <Route exact path='/invoices' render={() => this.handleAuthorization('/invoices', InvoicesHolder)} />
+              <Route exact path='/forgotPassword' render={({history}) => <ForgotPassword history={history} />} />
             </Switch>
           </div>
         </BrowserRouter>

@@ -20,9 +20,7 @@ const handleSocketMsgMapping = stores => ({
     },
     [SocketTypes.TICKET_RELEASED]: ({ ticketCategoryId }) => stores.ticketCategory.getCategory(ticketCategoryId),
     [SocketTypes.TICKET_CONFIRMED]:({ tickets, userId })=> { 
-      console.log('userIdHOla', userId);
       if (userId === stores.auth.userId) {
-        console.log('entraHOla', tickets);
         tickets.forEach(ticket => stores.ticket.addTicket(ticket));
         window.location.href ='/invoices';
       }

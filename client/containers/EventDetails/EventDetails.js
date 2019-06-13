@@ -56,14 +56,15 @@ export default class EventDetails extends Component {
   }
 
   onBuyClicked = async category => {
+    const { eventId } = this.state;
+    const event = await this.props.event.getEvent(eventId);
+    this.props.order.setNewOrderLine(event, category);
+
     if (!this.props.auth.isAuthenticated) {
       this.props.auth.setRedirectionUrl('/purchase');
       return this.props.history.push('/register');
     }
 
-    const { eventId } = this.state;
-    const event = await this.props.event.getEvent(eventId);
-    this.props.order.setNewOrderLine(event, category);
     return this.props.history.push('/purchase');
   }
 
