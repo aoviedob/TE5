@@ -18,6 +18,7 @@ export default class UserApi {
     app.post('/api/login', this.login);
     app.get('/api/authenticate', this.authenticate);
     app.post('/api/external/login', this.externalLogin);
+    app.post('/api/forgotPassword', this.validateForgotPasswordUser);
   }
 
   @RequiredRole([PredefinedRole.ADMIN])
@@ -44,9 +45,7 @@ export default class UserApi {
   @RequiredRole([PredefinedRole.ADMIN, PredefinedRole.EXTERNAL])
   async createUser(req) {
     const { body } = req;
-    const t = await userService.createUser(POSTGRES_CONTEXT, body);
-    console.log('createdUser', t);
-    return t;
+    return await userService.createUser(POSTGRES_CONTEXT, body);
   }
 
   @RequiredRole([PredefinedRole.ADMIN])
@@ -72,4 +71,10 @@ export default class UserApi {
   }
 
   authenticate(req) { return userService.authenticate(req); }
+
+  @RequiredRole([PredefinedRole.SYSTEM])
+  async validateForgotPasswordUser(req) {
+    const { body = {} } = req;
+    return await userService.validateForgotPasswordUser(POSTGRES_CONTEXT, body.email);
+  }
 }

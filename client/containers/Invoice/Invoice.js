@@ -35,7 +35,8 @@ export default class Invoice extends Component {
       customerEmail,
       finalPrice
     };
-    this.props.comm.sendEmail({ email: customerEmail, template: 'INVOICE_CONFIRMATION' , data: { invoice } });
+    
+    await this.props.comm.sendEmail({ email: customerEmail, template: 'INVOICE_CONFIRMATION' , data: { invoice } });
 
     this.setState({ invoice }, () => {
       if(!this.props.showPrint) return;

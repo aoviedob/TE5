@@ -8,7 +8,7 @@ class Communication {
     app.post('/api/sendEmail', authenticate, this.sendEmail);
   }
 
-  @RequiredRole([PredefinedRole.CUSTOMER])
+  @RequiredRole([PredefinedRole.CUSTOMER, PredefinedRole.SYSTEM])
   async sendEmail(req) {
   	const { body } = req;
   	console.log('bodyHola', body);

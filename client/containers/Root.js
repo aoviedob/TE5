@@ -11,6 +11,7 @@ import { inject } from 'mobx-react';
 import { startListening } from '../socket-listener';
 import InvoicesHolder from './Invoice/InvoicesHolder';
 import ForgotPassword from './ForgotPassword/ForgotPassword';
+import ResetPassword from './ResetPassword/ResetPassword';
 
 @inject('auth')
 class Root extends Component {
@@ -39,6 +40,7 @@ class Root extends Component {
               <Route exact path='/customerDashboard' render={({ history }) => this.handleAuthorization('/customerDashboard', CustomerDashboard, history)} />
               <Route exact path='/invoices' render={() => this.handleAuthorization('/invoices', InvoicesHolder)} />
               <Route exact path='/forgotPassword' render={({history}) => <ForgotPassword history={history} />} />
+              <Route exact path='/resetPassword' render={({history}) => <ResetPassword history={history} />} />
             </Switch>
           </div>
         </BrowserRouter>

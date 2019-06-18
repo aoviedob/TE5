@@ -71,6 +71,11 @@ class Auth {
     this.fullname = null;
     window.location.href = '/';
   }
+
+  @action async validateForgotPassword(body) {
+   return (await makePost(`${config.authServiceDomain}/api/forgotPassword`, body, true)) || {};
+  }
+
 };
 
 

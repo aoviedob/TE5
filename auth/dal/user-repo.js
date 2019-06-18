@@ -54,6 +54,28 @@ export const getUserByEmail = async (dbContext, email) => {
   });
 };
 
+export const getExtendedUserByEmail = async (dbContext, email) => { 
+  const result = await (new UnitOfWork(dbContext).dbConnection.raw(`
+    SELECT 
+      json_agg(u.*) AS user,
+      json_agg(r.*) AS role,
+      json_agg(t.*) AS "userType"
+    FROM :schema:.:userTable: u
+    INNER JOIN :schema:.:roleByUserTable: rbu ON rbu.user_id = u.id
+    INNER JOIN :schema:.:roleTable: r ON r.id = rbu.role_id
+    INNER JOIN :schema:.:userTypeTable: t ON t.id = u.user_type_id
+    WHERE email = :email
+  `, { schema, userTable: USER_TABLE, roleByUserTable: ROLE_BY_USER_TABLE, roleTable: ROLE_TABLE, userTypeTable: USER_TYPE_TABLE, email }));
+
+  if (!result.rows) return {};
+
+  const row = result.rows[0];
+  if (!row.user) return {};
+
+  return { user: row.user[0], role: row.role[0], userType: row.userType[0] };
+};
+
+
 export const getUsersByEmail = async (dbContext, email) => { 
   const unitOfWork = new UnitOfWork(dbContext);
   return await unitOfWork.getAllWhere(schema, { 

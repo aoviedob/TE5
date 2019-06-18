@@ -192,3 +192,14 @@ export const authenticate = req => {
     throw error;
   }
 };
+
+export const validateForgotPasswordUser = async (dbContext, email) => {
+  const { user, role, userType } = await userRepo.getExtendedUserByEmail(dbContext, email);
+  if (!user) {
+    const error = new Error('INVALID_USER');
+    error.status = 404;
+    throw error;
+  }
+
+  return { token: createToken({ user: sanitizeUser(user), role: mapRepoEntity(role), userType: mapRepoEntity(userType) }), fullname: user.fullname };
+}
