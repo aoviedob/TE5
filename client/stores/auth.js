@@ -7,6 +7,7 @@ class Auth {
   @observable email;
   @observable userId;
   @observable redirectionUrl;
+  @observable temporalToken;;
 
   constructor() {
     this.token = sessionStorage.getItem('token') || null;
@@ -16,16 +17,19 @@ class Auth {
   };
 
   @computed get isAuthenticated () {
-    return !!this.token;
+    return !this.temporalToken && !!this.token;
   }
 
   @action setRedirectionUrl(url) {
     this.redirectionUrl = url;
   }
 
-  @action hydrate (token, { email, fullname, userId }) {
+  @action hydrate (token, { email, fullname, userId } = {}, temporalToken) {
+    this.temporalToken = temporalToken;
     this.token = token;
-    sessionStorage.setItem('token', token);
+    if(!temporalToken) {
+      sessionStorage.setItem('token', token);
+    }
     if (email) {
       this.email = email;
       sessionStorage.setItem('email', email);
@@ -76,8 +80,11 @@ class Auth {
    return (await makePost(`${config.authServiceDomain}/api/forgotPassword`, body, true)) || {};
   }
 
-};
+  @action async resetPassword(body){
+    return (await makePost(`${config.authServiceDomain}/api/resetPassword`, body)) || {}; 
+  }
 
+};
 
 export const auth = new Auth();
 

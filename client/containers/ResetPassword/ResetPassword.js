@@ -13,7 +13,7 @@ export default class ResetPassword extends Component {
   }
 
   async componentWillMount() {
-    if (this.props.auth.isAuthenticated) {
+    if (!this.props.auth.temporalToken) {
       this.props.history.push('/');
     }
   }
@@ -28,13 +28,17 @@ export default class ResetPassword extends Component {
   	if (password !== confirmPassword) {
       return this.setState({ unmatchingPasswords: true });
     }
-  	await this.props.auth.resetPassword({ password });
 
+    if (password.length < 6) {
+      return this.setState({ weakPassword: true });
+    }
+  	await this.props.auth.resetPassword({ password });
+  	return this.setState({ passwordWasReset: true });
   	//await this.props.comm.sendEmail({ email: email, template: 'FORGOT_PASSWORD' , data: { fullname, resetLink: `${host}/resetPassword`  } });
   };
 
   render() {
-  	const { password, confirmPassword, unmatchingPasswords } = this.state;
+  	const { password, confirmPassword, unmatchingPasswords, weakPassword, passwordWasReset } = this.state;
 	return <Container>
     		    <div className="row">
     		       <Header></Header>
@@ -46,10 +50,10 @@ export default class ResetPassword extends Component {
 				                <div className="text-center">
 				                  <h3><i className="fa fa-lock fa-4x"></i></h3>
 				                  <h2 className="text-center">Reset Password</h2>
-				                  <p>You can reset your password here.</p>
-				                  <div className="panel-body">
+				                      <p>{ !passwordWasReset ? 'You can reset your password here.' : 'You reset your password successfully' }</p>
+				                  {!passwordWasReset && <div className="panel-body">
 				    
-				                    <form id="register-form" role="form" autocomplete="off" className="form" method="post">
+				                    <form id="register-form" role="form" autoComplete="off" className="form" method="post">
 				    
 				                      <div className="form-group">
 				                        <div className="input-group">
@@ -60,16 +64,15 @@ export default class ResetPassword extends Component {
 				                          <span className="input-group-addon"><i className="glyphicon glyphicon-envelope color-blue"></i></span>
 				                          <input value={confirmPassword} onChange={event => this.handleInputChanged(event, 'confirmPassword')} name="confirmPassword" placeholder="Confirm Password" className="form-control"  type="password"/>
 				                        </div>
-				                        {unmatchingPasswords && <label className="label label-danger"> Passwords must match </label>}
+				                        {!weakPassword && unmatchingPasswords && <label className="label label-danger"> Passwords must match </label>}
+				                        {weakPassword && <label className="label label-danger"> The field must be between 6 and 25.</label>}
 				                      </div>
 				                      <div className="form-group">
 				                        <input name="recover-submit" className="btn btn-lg btn-primary btn-block" value="Reset Password" onClick={() => this.onSubmit()}/>
 				                      </div>
-				                      
-				                      <input type="hidden" className="hide" name="token" id="token" value=""/> 
 				                    </form>
 				    
-				                  </div>
+				                  </div>}
 				                </div>
 				              </div>
 				            </div>

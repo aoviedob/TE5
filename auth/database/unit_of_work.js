@@ -91,27 +91,28 @@ export default class UnitOfWork {
     entity.updated_at = now;
   };
 
-  formatSetValues = (columns, entity) => 
+  formatSetValues = (columns, entity, encryptPassword) => 
     columns.reduce((acc, column) => { 
   	  const value = entity[column];
   	  if (value == null) return acc;
   	  
-  	  const valueStatement = this.dbConnection.raw(`${column} = :${column}`, { [column]: value } ).toString();
+      const bindingName = encryptPassword && column === 'password' ? `MD5(:${column})` : `:${column}`;
+  	  const valueStatement = this.dbConnection.raw(`${column} = ${bindingName}`, { [column]: value } ).toString();
   	  acc.push(valueStatement);
   	  return acc;
   	}, []).join(',');
 
-  _update = (schema, { tableName, columns, entity, where }) =>
+  _update = (schema, { tableName, columns, entity, where, encryptPassword }) =>
   	this.dbConnection.raw(`
   	  UPDATE :schema:.:tableName: 
-  	  	SET ${this.formatSetValues(columns, entity)}
+  	  	SET ${this.formatSetValues(columns, entity, encryptPassword)}
   	  WHERE ${where}
   	`, { schema, tableName });
 
-  update = async (schema, { tableName, columns = [], entity, where, trx }) => {
+  update = async (schema, { tableName, columns = [], entity, where, encryptPassword, trx }) => {
     this.addAuditValues(entity);
     return await this.executeTransaction({ 
-      func: () => this._update(schema, { tableName, columns, entity, where }),
+      func: () => this._update(schema, { tableName, columns, entity, where, encryptPassword }),
       trx
     });
   };

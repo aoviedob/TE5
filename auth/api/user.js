@@ -19,6 +19,7 @@ export default class UserApi {
     app.get('/api/authenticate', this.authenticate);
     app.post('/api/external/login', this.externalLogin);
     app.post('/api/forgotPassword', this.validateForgotPasswordUser);
+    app.post('/api/resetPassword', this.resetPassword);
   }
 
   @RequiredRole([PredefinedRole.ADMIN])
@@ -76,5 +77,11 @@ export default class UserApi {
   async validateForgotPasswordUser(req) {
     const { body = {} } = req;
     return await userService.validateForgotPasswordUser(POSTGRES_CONTEXT, body.email);
+  }
+
+  @RequiredRole([PredefinedRole.CUSTOMER])
+  async resetPassword(req) {
+    const { body = {}, tokenBody } = req;
+    return await userService.resetPassword(POSTGRES_CONTEXT, { tokenBody, password: body.password });
   }
 }

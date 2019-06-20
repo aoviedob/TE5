@@ -91,7 +91,8 @@ export const updateUser = async (dbContext, userId, user) => {
   	tableName: USER_TABLE, 
   	columns: USER_TABLE_COLUMNS,
   	entity: user,
-  	where: unitOfWork.dbConnection.raw('id = :userId', { userId })
+  	where: unitOfWork.dbConnection.raw('id = :userId', { userId }),
+    encryptPassword: true,
   });
 };
 

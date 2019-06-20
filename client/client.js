@@ -18,7 +18,7 @@ new Promise(async (resolve) => {
   if (!token) {
     await stores.auth.systemLogin(token);
   } else {
-    stores.auth.hydrate(token);
+    stores.auth.hydrate(token, {}, true);
   }
 
   startListening(stores);

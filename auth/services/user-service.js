@@ -202,4 +202,11 @@ export const validateForgotPasswordUser = async (dbContext, email) => {
   }
 
   return { token: createToken({ user: sanitizeUser(user), role: mapRepoEntity(role), userType: mapRepoEntity(userType) }), fullname: user.fullname };
-}
+};
+
+export const resetPassword = async(dbContext, { tokenBody, password }) => {
+  validatePreconditions(['user', 'password'], { password, ...tokenBody});
+  const { id } = tokenBody.user;
+  console.log('password', password);
+  await userRepo.updateUser(dbContext, id, { password: createHash(password) });
+};

@@ -33,7 +33,7 @@ export default class ForgotPassword extends Component {
     const slashes = location.protocol.concat("//");
     const host = slashes.concat(location.hostname);
 
-  	await this.props.comm.sendEmail({ email: email, template: 'FORGOT_PASSWORD' , data: { fullname, resetLink: `${host}/resetPassword?token=${token}`  } });
+  	await this.props.comm.sendEmail({ email: email, template: 'FORGOT_PASSWORD' , data: { fullname, resetLink: `${host}:${location.port}/resetPassword?token=${token}`  } });
   	return this.setState({ emailSent: true });
   };
 

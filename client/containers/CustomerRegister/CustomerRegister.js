@@ -7,7 +7,7 @@ import dvr from 'mobx-react-form/lib/validators/DVR';
 import MobxReactForm from 'mobx-react-form';
 import validatorjs from 'validatorjs';
 
-@inject('customer')
+@inject('customer', 'comm')
 @observer
 export default class CustomerRegister extends Component {
   initForm = props => {
@@ -78,16 +78,17 @@ export default class CustomerRegister extends Component {
     const hooks = {
       async onSuccess(form) {
         if (!isProfile) {
-          console.log('hola');
           const { password, confirmPassword } = form.values();
           if (password !== confirmPassword) {
             return ctx.setState({unmatchingPasswords: true});
           }
 
-          const result = await props.customer.registerCustomer(form.values());
+          const values = form.values();
+          const result = await props.customer.registerCustomer(values);
           if (result.error && result.error.status === 409 ) {
              return ctx.setState({userAlreadyExists: true});
           }
+          await ctx.props.comm.sendEmail({ email: values.email, template: 'CONFIRM_REGISTRATION' , data: { fullname: values.fullname } });
           return ctx.props.history.push(`/login`);
         }
 
