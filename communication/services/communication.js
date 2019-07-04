@@ -8,7 +8,18 @@ import { ResetPassword } from '../templates/ResetPassword';
 import { validatePreconditions } from '../helpers/validator';
 import QueueMessageTypes from '../helpers/enums/queue-message-types';
 import bunyan from 'bunyan';
+import nodemailer from 'nodemailer';
 const logger = bunyan.createLogger({ name: 'CommunicationService'});
+ 
+const transporter = nodemailer.createTransport({
+  host: 'smtp.googlemail.com',
+  port: 465,
+  secure: true, 
+  auth: {
+    user: 'te5.andreso@gmail.com',
+    pass: 'te5@ndres0'
+  }
+});
 
 export const sendQueueMessage = async params => {
   const { channel } = await connectToQueue();
@@ -39,6 +50,20 @@ export const sendEmailHandler = msg => {
 
   const templateResult = templateBuilder(data);
   console.log('template', templateResult);
+
+  const mailOptions = {
+    from: '"TE5"',
+    to: email,
+    subject: template,
+    html: templateResult
+  };
+ 
+  transporter.sendMail(mailOptions, (error, info) => {
+    if (error) {
+      return console.log(error);
+    }
+    console.log('Message sent: %s', info.messageId);
+  });
 
 };
 
