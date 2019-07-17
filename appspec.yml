@@ -9,6 +9,4 @@ hooks:
     - location: start.sh
       timeout: 100000
       runas: root
-  ApplicationStop:
-    - location: stop.sh
-      timeout: 100000
+
