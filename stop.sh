@@ -1,4 +1,4 @@
-docker stop auth
+docker stop auth || true
 docker stop customer
 docker stop event
 docker stop ticket
