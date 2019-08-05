@@ -4,11 +4,9 @@ auth/node_modules/
 auth/logs/
 customer/.yarn-cache/
 customer/yarn-error.log
-customer/node_modules/
 customer/logs/
 event/.yarn-cache/
 event/yarn-error.log
-event/node_modules/
 event/logs/
 ticket/.yarn-cache/
 ticket/yarn-error.log
@@ -16,9 +14,7 @@ ticket/node_modules/
 ticket/logs/
 payment/.yarn-cache/
 payment/yarn-error.log
-payment/node_modules/
 payment/logs/
 communication/.yarn-cache/
 communication/yarn-error.log
-communication/node_modules/
 communication/logs/
