@@ -19,7 +19,7 @@ curl -sS https://dl.yarnpkg.com/debian/pubkey.gpg | sudo apt-key add -
 echo "deb https://dl.yarnpkg.com/debian/ stable main" | sudo tee /etc/apt/sources.list.d/yarn.list
 sudo apt-get update && sudo apt-get install yarn
 
-docker exec -it postgres psql -h localhost -p 5432 -U postgres -c "ALTER USER postgres WITH PASSWORD 'mb|33_<C<kl&A*df.c8%*';"
+docker exec -i postgres psql -h localhost -p 5432 -U postgres -c "ALTER USER postgres WITH PASSWORD 'mb|33_<C<kl&A*df.c8%*';"
 
 ./auth/start.sh;
 ./customer/start.sh;
