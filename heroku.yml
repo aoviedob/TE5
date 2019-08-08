@@ -1,0 +1,3 @@
+release:
+  command:
+    - ./start.sh
