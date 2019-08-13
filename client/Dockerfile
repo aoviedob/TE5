@@ -6,5 +6,5 @@ COPY . .
 RUN yarn cache clean
 RUN yarn install
 
-EXPOSE 5112
+EXPOSE 80
 CMD ["npm", "run", "client-start"]
