@@ -31,8 +31,8 @@ app.use(expressLogger({
   }]
 }));
 
-app.listen(5112, () => {
-  logger.info('Client Server started successfully on port 5112');
+app.listen(80, () => {
+  logger.info('Client Server started successfully on port 80');
 });
 
 const isDeveloping = process.env.NODE_ENV !== 'production';
