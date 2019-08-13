@@ -16,7 +16,6 @@ else
 fi
 
 sleep 30
-
 docker exec -i postgres psql -h localhost -p 5432 -U postgres -c "ALTER USER postgres WITH PASSWORD 'mb|33_<C<kl&A*df.c8%*';"
 
 ./auth/start.sh;
