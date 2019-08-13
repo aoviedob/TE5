@@ -15,7 +15,6 @@ else
   docker run -d --name postgres -p 5432:5432 --net="host" -v pgdb:/data postgres:9.6
 fi
 
-sudo apt-get install npm
 sleep 30
 docker exec -i postgres psql -h localhost -p 5432 -U postgres -c "ALTER USER postgres WITH PASSWORD 'mb|33_<C<kl&A*df.c8%*';"
 
