@@ -4,11 +4,12 @@
 # https://aka.ms/yaml
 
 trigger:
-- master
-
+  branches:
+    include:
+    - master
+  paths:
+    include:
+    - '*'
 pool:
   vmImage: 'ubuntu-latest'
 
-steps:
-- script: cp -R /. /
-  displayName: 'Run a one-line script'
