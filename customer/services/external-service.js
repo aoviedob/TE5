@@ -26,7 +26,7 @@ export const createUser = async customer => {
       .set('Authorization', `Bearer ${token}`)
       .accept('application/json')
       .send({ ...customer, isCustomer: true });
-      console.log('bodyHola', result.body);
+      console.log('bodyHola', result);
       return result.body.id;
    } catch(error) {
      throw error;
