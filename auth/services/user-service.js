@@ -79,7 +79,10 @@ export const createUser = async (dbContext, user = {}) => {
   }
 
   const userId = await userRepo.createUser(dbContext, { ...mapParams(userToSave), password: createHash(userToSave.password) });
-  return await getUserById(dbContext, userId);
+  console.log('userIdHola', userId);
+  const t = await getUserById(dbContext, userId);
+  console.log('tHola', t);
+  return t;
 };
 
 export const deleteUser = async (dbContext, userId) => {
