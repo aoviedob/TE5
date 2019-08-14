@@ -110,27 +110,24 @@ export const deleteUser = async (dbContext, userId) => {
 
 export const createUser = async (dbContext, user) => {
   const unitOfWork = new UnitOfWork(dbContext);
-  return await (new Promise((resolve, reject) => { 
-    return unitOfWork.dbConnection.transaction(async trx => {
+
+
       const result = await unitOfWork.create(schema, { 
         tableName: USER_TABLE, 
         columns: USER_TABLE_COLUMNS,
         entity: user,
         encryptPassword: true,
-        trx,
       });
-
+      console.log('resultHOla', result);
       const { id: userId } = result[0];
       await unitOfWork.create(schema, { 
         tableName: ROLE_BY_USER_TABLE, 
         columns: ROLE_BY_USER_TABLE_COLUMNS,
         entity: { role_id: user.role_id, user_id: userId  },
-        trx,
       });
-      resolve(userId);
-    });
-  }));
-}
+
+  return userId;
+};
 
 export const login = async (dbContext, user) => {
   const result = await (new UnitOfWork(dbContext).dbConnection.raw(`

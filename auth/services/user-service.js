@@ -36,7 +36,9 @@ export const getUsers = async dbContext => {
 
 export const getUserById = async (dbContext, userId) => {
   validatePreconditions(['dbContext', 'userId'], {dbContext, userId});
-  return sanitizeUser(await userRepo.getUserById(dbContext, userId));
+  const t = await userRepo.getUserById(dbContext, userId);
+  console.log('getUserByIdHOla', t);
+  return sanitizeUser(t);
 };
 
 export const getUserByEmail = async (dbContext, email) => { 
