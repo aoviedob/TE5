@@ -16,6 +16,6 @@ module.exports = {
     algorithmEncode: 'base64',
     algorithmCharset: 'utf8',
   },
-  domain: getEnvVariable('PAYMENT_SERVICE_DOMAIN', 'http://localhost:4550'),
+  domain: getEnvVariable('PAYMENT_SERVICE_DOMAIN', 'http://te5.centralus.cloudapp.azure.com:4550'),
   formUrl: getEnvVariable('PAYMENT_FORM_URL', '/?'),
 };
