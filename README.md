@@ -1,4 +1,4 @@
-# TE5 - Tickets and Events System
+# TE5 - Tickets and Events System - Testing CD
 
 This project is about a System to manage events, the Event's Organizers could create different types of events and tickets that the customers can buy.
 
